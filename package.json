@@ -11,5 +11,8 @@
   "dependencies": {
     "async": "^2.0.0-rc.6",
     "pg": "^4.5.5"
+  },
+  "devDependencies": {
+    "jasmine-node": "^1.14.5"
   }
 }
