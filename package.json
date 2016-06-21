@@ -10,9 +10,9 @@
   "license": "ISC",
   "dependencies": {
     "async": "^2.0.0-rc.6",
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3",
     "pg": "^4.5.5"
   },
-  "devDependencies": {
-    "jasmine-node": "^1.14.5"
-  }
+  "devDependencies": {}
 }

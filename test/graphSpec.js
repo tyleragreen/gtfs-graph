@@ -1,9 +1,10 @@
 'use strict';
 
 var Graph = require('../lib/graph.js');
+var expect = require('chai').expect;
 
 describe('The graph', function() {
-  it('should be successfully created from a list of edges', function(done) {
+  it('should be successfully created from a list of edges', function() {
     var numNodes = 5;
     var edgeList = [
         [ 1, 2], [ 2, 4]
@@ -16,7 +17,6 @@ describe('The graph', function() {
         [ 0, 0, 0, 0, 0 ],
       ];
     var graph = new Graph(edgeList, numNodes);
-    expect(graph.toGraph()).toEqual(expectedGraph);
-    done();
+    expect(graph.getArray()).to.deep.equal(expectedGraph);
   });
 });
