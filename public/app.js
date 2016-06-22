@@ -16,6 +16,37 @@ $(function() {
     console.log(edge);
   });
   
+  map.on('load', function(){
+    socket.emit('send stops');
+  });
+  
+  socket.on('stops', function(stops) {
+    map.addSource('stop', {
+      type: 'geojson',
+      data: {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: [
+            [stops[0][0], stops[0][1]],
+            [0,0]
+            ]
+        }
+      }
+    });
+    console.log(stops[0]);
+    map.addLayer({
+      id: 'stop',
+      type: 'line',
+      source: 'stop',
+      paint: {
+        'line-color': '#ff0000',
+        'line-width': 8
+      }
+    });
+  });
+  
   $('#btn-run').on('click', function() {
     socket.emit('start dfs', 'Back atcha!');
   })
