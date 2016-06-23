@@ -18,34 +18,41 @@ $(function() {
   
   map.on('load', function(){
     socket.emit('send stops');
+    console.log('map1', map);
   });
   
   socket.on('stops', function(stops) {
-    map.addSource('stop', {
-      type: 'geojson',
-      data: {
-        type: 'Feature',
-        properties: {},
-        geometry: {
-          type: 'LineString',
-          coordinates: [
-            [stops[0][0], stops[0][1]],
-            [0,0]
-            ]
-        }
-      }
-    });
-    console.log(stops[0]);
-    map.addLayer({
-      id: 'stop',
-      type: 'line',
-      source: 'stop',
-      paint: {
-        'line-color': '#ff0000',
-        'line-width': 8
-      }
-    });
+    for (var stop_index in stops) {
+      addStop(stops[stop_index]);
+    }
   });
+  
+  var addStop = function(stop) {
+    var stopId = "stop_" + stop.stop_id;
+    map.addSource(stopId, {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": [{
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [stop.stop_lon, stop.stop_lat],
+          },
+          "properties": {}
+        }]
+      }
+    });
+    
+    map.addLayer({
+        "id": stopId,
+        "type": "symbol",
+        "source": stopId,
+        "layout": {
+            "icon-image": "marker-11"
+        }
+    });
+  };
   
   $('#btn-run').on('click', function() {
     socket.emit('start dfs', 'Back atcha!');
