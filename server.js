@@ -21,6 +21,7 @@ router.use(bodyParser.urlencoded({ extended: true })); // for parsing applicatio
 // Initialize a list of connections to this server
 var graph;
 var stops;
+var stops_geojson = []; 
 var connectionString = 'postgres://thebusrider:3ll3board!@mta-gtfs.cotldmpxktwb.us-west-2.rds.amazonaws.com:5432/mta_gtfs';
 
 // Set up Express to fetch the client from a subdirectory
@@ -34,7 +35,22 @@ server.listen(process.env.PORT || 3000, process.env.IP || "0.0.0.0", function() 
   console.log("Initializing graph");
   createGraph(function(new_stops, new_graph) {
     stops = new_stops;
+   
+    for (var stop_index in stops) {
+      stops_geojson.push({
+        'type': 'Feature',
+        'geometry': {
+          'type': 'Point',
+          'coordinates': [stops[stop_index].stop_lon, stops[stop_index].stop_lat]
+        }
+      });
+    }
+    stops_geojson = {
+      'type': 'FeatureCollection',
+      'features': stops_geojson
+    };
     graph = new_graph;
+    console.log('Graph initialized');
   });
 });
 
@@ -43,7 +59,7 @@ io.on('connection', function (socket) {
   socket.emit('new edge', 'Hello World!');
   
   socket.on('send stops', function() {
-    socket.emit('stops', stops);
+    socket.emit('stops', stops_geojson);
   });
   
   socket.on('start dfs', function(data) {

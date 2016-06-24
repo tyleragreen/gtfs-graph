@@ -22,35 +22,22 @@ $(function() {
   });
   
   socket.on('stops', function(stops) {
-    for (var stop_index in stops) {
-      addStop(stops[stop_index]);
-    }
+    addStop(stops);
   });
   
-  var addStop = function(stop) {
-    var stopId = "stop_" + stop.stop_id;
-    map.addSource(stopId, {
+  var addStop = function(stops_geojson) {
+    map.addSource('stops', {
       "type": "geojson",
-      "data": {
-        "type": "FeatureCollection",
-        "features": [{
-          "type": "Feature",
-          "geometry": {
-            "type": "Point",
-            "coordinates": [stop.stop_lon, stop.stop_lat],
-          },
-          "properties": {}
-        }]
-      }
+      "data": stops_geojson
     });
     
     map.addLayer({
-        "id": stopId,
-        "type": "symbol",
-        "source": stopId,
-        "layout": {
-            "icon-image": "marker-11"
-        }
+      "id": 'stops',
+      "type": "symbol",
+      "source": 'stops',
+      "layout": {
+        "icon-image": "marker-11"
+      }
     });
   };
   
