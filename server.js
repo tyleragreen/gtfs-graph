@@ -9,6 +9,8 @@ var bodyParser = require('body-parser');
 var socketio = require('socket.io');
 var createGraph = require('./lib/createGraph.js');
 var pg = require('pg');
+var socketMsg = require('./public/constants.js');
+var async = require('async');
 
 var router = express();
 
@@ -22,16 +24,11 @@ router.use(bodyParser.urlencoded({ extended: true })); // for parsing applicatio
 var graph;
 var stops;
 var stops_geojson = []; 
-var connectionString = 'postgres://thebusrider:3ll3board!@mta-gtfs.cotldmpxktwb.us-west-2.rds.amazonaws.com:5432/mta_gtfs';
 
 // Set up Express to fetch the client from a subdirectory
 router.use(express.static(path.resolve(__dirname, 'public')));
 
-// Start the http server
-server.listen(process.env.PORT || 3000, process.env.IP || "0.0.0.0", function() {
-  var addr = server.address();
-  console.log("Server listening at", addr.address + ":" + addr.port);
-  
+function loadGraph(callback) {
   console.log("Initializing graph");
   createGraph(function(new_stops, new_graph) {
     stops = new_stops;
@@ -51,21 +48,36 @@ server.listen(process.env.PORT || 3000, process.env.IP || "0.0.0.0", function() 
     };
     graph = new_graph;
     console.log('Graph initialized');
+    callback();
   });
-});
+};
 
-// Save incoming connections and fetch the initial data
-io.on('connection', function (socket) {
-  socket.emit('new edge', 'Hello World!');
-  
-  socket.on('send stops', function() {
-    socket.emit('stops', stops_geojson);
+var startServer = function (callback) {
+  console.log("Starting server");
+  // Start the http server
+  server.listen(process.env.PORT || 3000, process.env.IP || "0.0.0.0", function() {
+    var addr = server.address();
+    console.log("Server listening at", addr.address + ":" + addr.port);
   });
   
-  socket.on('start dfs', function(data) {
-    console.log(data);
-    setInterval(function() {
-      socket.emit('new edge', graph);
-    }, 1000);
+  // Save incoming connections and fetch the initial data
+  io.on('connection', function (socket) {
+    socket.emit('new edge', 'Hello World!');
+    
+    socket.on(socketMsg.sendStops, function() {
+      socket.emit('stops', stops_geojson);
+    });
+    
+    socket.on('start dfs', function(data) {
+      console.log(data);
+      setInterval(function() {
+        socket.emit('new edge', graph);
+      }, 1000);
+    });
   });
-});
+};
+
+async.series([
+  function(callback) { loadGraph(callback) },
+  function(callback) { startServer(callback) }
+  ]);
