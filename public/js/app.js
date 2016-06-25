@@ -18,8 +18,7 @@ $(function() {
   });
   
   socket.on(socketMsg.sendEdges, function(edges) {
-    //map.addEdges(edges);
-    console.log(edges);
+    map.addEdges(edges);
   });
   
   $('#btn-run').on('click', function() {

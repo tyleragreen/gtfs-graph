@@ -45,8 +45,9 @@ Map.prototype.addEdges = function(edges) {
     type: 'line',
     source: 'edges',
     paint: {
-      'line-width': 4,
-      'line-color': '#ffffff'
+      'line-width': 2,
+      'line-color': '#ffffff',
+      'line-opacity': 0.7
     }
   });
 };

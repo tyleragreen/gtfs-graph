@@ -54,22 +54,25 @@ function loadGraph(callback) {
 
 var startServer = function (callback) {
   console.log("Starting server");
-  // Start the http server
+  
   server.listen(process.env.PORT || 3000, process.env.IP || "0.0.0.0", function() {
     var addr = server.address();
     console.log("Server listening at", addr.address + ":" + addr.port);
   });
   
-  // Save incoming connections and fetch the initial data
   io.on('connection', function (socket) {
-    socket.emit(socketMsg.log, 'Connected to server!');
+    socket.emit(socketMsg.log, 'Connected to the server!');
     
     socket.on(socketMsg.requestStops, function() {
       socket.emit(socketMsg.sendStops, stops_geojson);
     });
     
     socket.on(socketMsg.requestEdges, function() {
-      socket.emit(socketMsg.sendEdges, 'this is the edges');
+      socket.emit(socketMsg.sendEdges, graph.edgesAsGeoJson(stops));
+    });
+    
+    socket.on('error', function(err) {
+      throw err;
     });
     
     socket.on('start dfs', function(data) {
@@ -82,6 +85,6 @@ var startServer = function (callback) {
 };
 
 async.series([
-  function(callback) { loadGraph(callback) },
-  function(callback) { startServer(callback) }
+  loadGraph,
+  startServer
   ]);

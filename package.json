@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "mocha",
-    "build-js": "browserify public/js/app.js -o public/js/bundle.js"
+    "build-js": "browserify public/js/app.js -o public/js/bundle.js",
+    "start": "npm run build-js && node server.js"
   },
   "repository": {
     "type": "git",
