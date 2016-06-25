@@ -4,7 +4,8 @@
   "description": "Graph algorithms for transit schedules",
   "main": "server.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "build-js": "browserify public/js/app.js -o public/js/bundle.js"
   },
   "repository": {
     "type": "git",

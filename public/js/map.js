@@ -20,19 +20,35 @@ var Map = function(onLoad) {
 };
 
 Map.prototype.addStops = function(stopsGeoJson) {
-    map.addSource('stops', {
-      "type": "geojson",
-      "data": stopsGeoJson
-    });
-    
-    map.addLayer({
-      "id": 'stops',
-      "type": "symbol",
-      "source": 'stops',
-      "layout": {
-        "icon-image": "marker-11"
-      }
-    });
+  map.addSource('stops', {
+    "type": "geojson",
+    "data": stopsGeoJson
+  });
+  
+  map.addLayer({
+    "id": 'stops',
+    "type": "symbol",
+    "source": 'stops',
+    "layout": {
+      "icon-image": "marker-11"
+    }
+  });
+};
+
+Map.prototype.addEdges = function(edges) {
+  map.addSource('edges', {
+    type: 'geojson',
+    data: edges
+  });
+  map.addLayer({
+    id: 'edges',
+    type: 'line',
+    source: 'edges',
+    paint: {
+      'line-width': 4,
+      'line-color': '#ffffff'
+    }
+  });
 };
 
 module.exports = Map;

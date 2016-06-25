@@ -62,10 +62,14 @@ var startServer = function (callback) {
   
   // Save incoming connections and fetch the initial data
   io.on('connection', function (socket) {
-    socket.emit('new edge', 'Hello World!');
+    socket.emit(socketMsg.log, 'Connected to server!');
     
-    socket.on(socketMsg.sendStops, function() {
-      socket.emit('stops', stops_geojson);
+    socket.on(socketMsg.requestStops, function() {
+      socket.emit(socketMsg.sendStops, stops_geojson);
+    });
+    
+    socket.on(socketMsg.requestEdges, function() {
+      socket.emit(socketMsg.sendEdges, 'this is the edges');
     });
     
     socket.on('start dfs', function(data) {

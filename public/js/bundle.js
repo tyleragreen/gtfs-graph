@@ -6,15 +6,21 @@ $(function() {
   var socket = io();
   
   var map = new Map(function() {
-    socket.emit(socketMsg.sendStops);
+    socket.emit(socketMsg.requestStops);
+    socket.emit(socketMsg.requestEdges);
   });
   
-  socket.on('new edge', function(edge) {
-    console.log(edge);
+  socket.on(socketMsg.log, function(msg) {
+    console.log(msg);
   });
   
-  socket.on('stops', function(stopsGeoJson) {
+  socket.on(socketMsg.sendStops, function(stopsGeoJson) {
     map.addStops(stopsGeoJson);
+  });
+  
+  socket.on(socketMsg.sendEdges, function(edges) {
+    //map.addEdges(edges);
+    console.log(edges);
   });
   
   $('#btn-run').on('click', function() {
@@ -24,7 +30,11 @@ $(function() {
 
 },{"./constants.js":2,"./map.js":3}],2:[function(require,module,exports){
 const socketMsg = {
-  sendStops: 'send stops'
+  log: 'log',
+  requestStops: 'request stops',
+  sendStops: 'send stops',
+  requestEdges: 'request edges',
+  sendEdges: 'send edges'
 };
 
 Object.freeze(socketMsg);
@@ -32,7 +42,7 @@ Object.freeze(socketMsg);
 module.exports = socketMsg;
 },{}],3:[function(require,module,exports){
 var Map = function(onLoad) {
-    var latitude   = 40.72;
+  var latitude   = 40.72;
   var longitude  = -74.0;
   var zoom_level = 10;
   mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JlZW50IiwiYSI6ImNpazBqdWFsOTM5Nnh2M2x6dWZ2dnB3aHkifQ.97-pFPD8lQf02B6edag1rA';
@@ -53,19 +63,35 @@ var Map = function(onLoad) {
 };
 
 Map.prototype.addStops = function(stopsGeoJson) {
-    map.addSource('stops', {
-      "type": "geojson",
-      "data": stopsGeoJson
-    });
-    
-    map.addLayer({
-      "id": 'stops',
-      "type": "symbol",
-      "source": 'stops',
-      "layout": {
-        "icon-image": "marker-11"
-      }
-    });
+  map.addSource('stops', {
+    "type": "geojson",
+    "data": stopsGeoJson
+  });
+  
+  map.addLayer({
+    "id": 'stops',
+    "type": "symbol",
+    "source": 'stops',
+    "layout": {
+      "icon-image": "marker-11"
+    }
+  });
+};
+
+Map.prototype.addEdges = function(edges) {
+  map.addSource('edges', {
+    type: 'geojson',
+    data: edges
+  });
+  map.addLayer({
+    id: 'edges',
+    type: 'line',
+    source: 'edges',
+    paint: {
+      'line-width': 4,
+      'line-color': '#ffffff'
+    }
+  });
 };
 
 module.exports = Map;
