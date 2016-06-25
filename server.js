@@ -9,7 +9,7 @@ var bodyParser = require('body-parser');
 var socketio = require('socket.io');
 var createGraph = require('./lib/createGraph.js');
 var pg = require('pg');
-var socketMsg = require('./public/constants.js');
+var socketMsg = require('./public/js/constants.js');
 var async = require('async');
 
 var router = express();
