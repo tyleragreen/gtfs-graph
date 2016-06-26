@@ -22,6 +22,6 @@ $(function() {
   });
   
   $('#btn-run').on('click', function() {
-    socket.emit('start dfs', 'Back atcha!');
+    socket.emit(socketMsg.startDfs, 'Back atcha!');
   })
 });

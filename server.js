@@ -75,8 +75,12 @@ var startServer = function (callback) {
       throw err;
     });
     
-    socket.on('start dfs', function(data) {
-      console.log(data);
+    socket.on(socketMsg.startDfs, function(data) {
+      console.log(socketMsg.startDfs);
+      graph.dfs(0);
+      /*graph.on('visit node', function() {
+        eventQueue.push();
+      })*/
       setInterval(function() {
         socket.emit('new edge', graph);
       }, 1000);
