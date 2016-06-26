@@ -47,6 +47,11 @@ function loadGraph(callback) {
       'features': stops_geojson
     };
     graph = new_graph;
+    
+    graph.on('visit', function() {
+      console.log('CAUGHT EVENT');
+    //eventQueue.push();
+    });
     console.log('Graph initialized');
     callback();
   });
@@ -78,9 +83,6 @@ var startServer = function (callback) {
     socket.on(socketMsg.startDfs, function(data) {
       console.log(socketMsg.startDfs);
       graph.dfs(0);
-      /*graph.on('visit node', function() {
-        eventQueue.push();
-      })*/
       setInterval(function() {
         socket.emit('new edge', graph);
       }, 1000);
