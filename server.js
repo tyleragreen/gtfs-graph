@@ -8,9 +8,11 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var socketio = require('socket.io');
 var createGraph = require('./lib/createGraph.js');
-var pg = require('pg');
 var socketMsg = require('./public/js/constants.js');
+var graphMsg = require('./lib/graphConstants.js');
 var async = require('async');
+
+var EventQueue = require('./lib/eventQueue.js');
 
 var router = express();
 
@@ -23,7 +25,8 @@ router.use(bodyParser.urlencoded({ extended: true })); // for parsing applicatio
 // Initialize a list of connections to this server
 var graph;
 var stops;
-var stops_geojson = []; 
+var stops_geojson = [];
+var eventQueue;// = new EventQueue();
 
 // Set up Express to fetch the client from a subdirectory
 router.use(express.static(path.resolve(__dirname, 'public')));
@@ -48,9 +51,8 @@ function loadGraph(callback) {
     };
     graph = new_graph;
     
-    graph.on('visit', function() {
-      console.log('CAUGHT EVENT');
-    //eventQueue.push();
+    graph.on(graphMsg.visit, function(edge) {
+      eventQueue.push(edge);
     });
     console.log('Graph initialized');
     callback();
@@ -67,6 +69,9 @@ var startServer = function (callback) {
   
   io.on('connection', function (socket) {
     socket.emit(socketMsg.log, 'Connected to the server!');
+    eventQueue = new EventQueue(function () {
+      socket.emit(socketMsg.log, 'over the wire');
+    });
     
     socket.on(socketMsg.requestStops, function() {
       socket.emit(socketMsg.sendStops, stops_geojson);
@@ -83,9 +88,6 @@ var startServer = function (callback) {
     socket.on(socketMsg.startDfs, function(data) {
       console.log(socketMsg.startDfs);
       graph.dfs(0);
-      setInterval(function() {
-        socket.emit('new edge', graph);
-      }, 1000);
     });
   });
 };
