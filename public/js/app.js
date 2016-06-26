@@ -21,6 +21,17 @@ $(function() {
     map.addEdges(edges);
   });
   
+  socket.on(socketMsg.event, function(event) {
+    console.log(event);
+    if (event.type === socketMsg.visitNode) {
+      map.visitEdge(event.data);
+    } else if (event.type === socketMsg.leaveNode) {
+      map.leaveEdge(event.data);
+    } else {
+      throw 'bad event type';
+    }
+  });
+  
   $('#btn-run').on('click', function() {
     socket.emit(socketMsg.startDfs, 'Back atcha!');
   })

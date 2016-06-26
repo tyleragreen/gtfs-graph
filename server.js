@@ -52,7 +52,18 @@ function loadGraph(callback) {
     graph = new_graph;
     
     graph.on(graphMsg.visit, function(edge) {
-      eventQueue.push(edge);
+      event = { 
+        type: socketMsg.visitNode,
+        data: edge
+      };
+      eventQueue.push(event);
+    });
+    graph.on(graphMsg.leave, function(edge) {
+      event = { 
+        type: socketMsg.leaveNode,
+        data: edge
+      };
+      eventQueue.push(event);
     });
     console.log('Graph initialized');
     callback();
@@ -69,8 +80,8 @@ var startServer = function (callback) {
   
   io.on('connection', function (socket) {
     socket.emit(socketMsg.log, 'Connected to the server!');
-    eventQueue = new EventQueue(function () {
-      socket.emit(socketMsg.log, 'over the wire');
+    eventQueue = new EventQueue(50, function (queue) {
+      socket.emit(socketMsg.event, queue.shift());
     });
     
     socket.on(socketMsg.requestStops, function() {

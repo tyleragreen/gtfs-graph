@@ -17,6 +17,14 @@ var Map = function(onLoad) {
   map.on('load', function(){
     onLoad();
   });
+  visitedEdges = {
+    type: 'FeatureCollection',
+    features: []
+  };
+  leftEdges = {
+    type: 'FeatureCollection',
+    features: []
+  };
 };
 
 Map.prototype.addStops = function(stopsGeoJson) {
@@ -50,6 +58,63 @@ Map.prototype.addEdges = function(edges) {
       'line-opacity': 0.7
     }
   });
+  
+  // Create source and layer for visited edges to be populated later
+  map.addSource('visited edges', {
+    type: 'geojson',
+    data: visitedEdges,
+  });
+  map.addLayer({
+    id: 'visited edges',
+    type: 'line',
+    source: 'visited edges',
+    paint: {
+      'line-width': 3,
+      'line-color': '#ff0000'
+    }
+  });
+  // Create source and layer for visited edges to be populated later
+  map.addSource('left edges', {
+    type: 'geojson',
+    data: leftEdges,
+  });
+  map.addLayer({
+    id: 'left edges',
+    type: 'line',
+    source: 'left edges',
+    paint: {
+      'line-width': 3,
+      'line-color': '#0000ff'
+    }
+  });
+};
+
+Map.prototype.visitEdge = function(edge) {
+  visitedEdges.features.push({
+    type: 'Feature',
+    geometry: {
+      type: 'LineString',
+      coordinates: [
+          [ edge[0].stop_lon, edge[0].stop_lat ],
+          [ edge[1].stop_lon, edge[1].stop_lat ]
+        ]
+    }
+  });
+  map.getSource('visited edges').setData(visitedEdges);
+};
+
+Map.prototype.leaveEdge = function(edge) {
+  leftEdges.features.push({
+    type: 'Feature',
+    geometry: {
+      type: 'LineString',
+      coordinates: [
+          [ edge[0].stop_lon, edge[0].stop_lat ],
+          [ edge[1].stop_lon, edge[1].stop_lat ]
+        ]
+    }
+  });
+  map.getSource('left edges').setData(leftEdges);
 };
 
 module.exports = Map;

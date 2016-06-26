@@ -4,7 +4,10 @@ const socketMsg = {
   sendStops: 'send stops',
   requestEdges: 'request edges',
   sendEdges: 'send edges',
-  startDfs: 'start DFS'
+  startDfs: 'start DFS',
+  event: 'event',
+  visitNode: 'visit node',
+  leaveNode: 'leave node'
 };
 
 Object.freeze(socketMsg);
