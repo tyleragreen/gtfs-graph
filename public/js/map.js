@@ -84,7 +84,7 @@ Map.prototype.addEdges = function(edges) {
     source: 'left edges',
     paint: {
       'line-width': 3,
-      'line-color': '#0000ff'
+      'line-color': '#ffffff'
     }
   });
 };

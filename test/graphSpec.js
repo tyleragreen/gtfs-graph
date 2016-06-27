@@ -18,6 +18,7 @@ describe('The graph', function() {
       ];
     var graph = new Graph(edgeList, numNodes);
     graph.dfs(2);
+    
     expect(graph.getArray()).to.deep.equal(expectedGraph);
   });
 });
