@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha",
     "build-js": "browserify public/js/app.js -o public/js/bundle.js",
-    "start": "npm run build-js && node server.js"
+    "start": "npm run build-js && node index.js"
   },
   "repository": {
     "type": "git",
