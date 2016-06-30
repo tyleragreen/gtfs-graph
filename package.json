@@ -4,7 +4,7 @@
   "description": "Graph algorithms for transit schedules",
   "main": "server.js",
   "scripts": {
-    "test": "mocha",
+    "test": "mocha --timeout 30000",
     "build-js": "browserify public/js/app.js -o public/js/bundle.js",
     "start": "npm run build-js && node index.js"
   },

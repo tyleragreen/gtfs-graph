@@ -13,8 +13,8 @@ $(function() {
     console.log(msg);
   });
   
-  socket.on(socketMsg.sendStops, function(stopsGeoJson) {
-    map.addStops(stopsGeoJson);
+  socket.on(socketMsg.sendStops, function(stops) {
+    map.addStops(stops);
   });
   
   socket.on(socketMsg.sendEdges, function(edges) {

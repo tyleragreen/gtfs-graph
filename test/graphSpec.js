@@ -1,6 +1,7 @@
 'use strict';
 
-var Graph = require('../lib/graph.js');
+var Graph = require('../lib/graph.js').Graph;
+var dfs = require('../lib/traversals.js').dfs;
 var expect = require('chai').expect;
 
 describe('The graph', function() {
@@ -17,7 +18,7 @@ describe('The graph', function() {
         [ 0, 0, 0, 0, 0 ],
       ];
     var graph = new Graph(edgeList, numNodes);
-    graph.dfs(2);
+    dfs(graph, null, 2);
     
     expect(graph.getArray()).to.deep.equal(expectedGraph);
   });
