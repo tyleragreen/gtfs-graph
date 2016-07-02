@@ -33,6 +33,8 @@ $(function() {
   });
   
   $('#btn-run').on('click', function() {
-    socket.emit(socketMsg.startDfs, 'Back atcha!');
+    map.clear();
+    socket.emit(socketMsg.startDfs, map.selectedStop);
+    console.log('selected stop', map.selectedStop);
   })
 });

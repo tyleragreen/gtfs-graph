@@ -12,6 +12,7 @@ var Map = function(onLoad) {
   });
   
   this.visitedPopups = [];
+  this.selectedStop = 0;
   
   this.map.addControl(new mapboxgl.Navigation({
     'position': 'top-left'
@@ -28,6 +29,20 @@ var Map = function(onLoad) {
     type: 'FeatureCollection',
     features: []
   };
+};
+
+Map.prototype.clear = function() {
+  this.visitedEdges = {
+    type: 'FeatureCollection',
+    features: []
+  };
+  this.map.getSource('visited edges').setData(this.visitedEdges);
+  
+  this.leftEdges = {
+    type: 'FeatureCollection',
+    features: []
+  };
+  this.map.getSource('left edges').setData(this.leftEdges);
 };
 
 Map.prototype.addStops = function(stops) {
@@ -47,12 +62,11 @@ Map.prototype.addStops = function(stops) {
   var self = this;
   
   var popup = new mapboxgl.Popup({
-  closeButton: false,
-  closeOnClick: false
+    closeButton: false,
+    closeOnClick: false
   });
   this.map.on('mousemove', function(e) {
     var features = self.map.queryRenderedFeatures(e.point, { layers: ['stops'] });
-    // Change the cursor style as a UI indicator.
     self.map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
     
     if (!features.length) {
@@ -62,8 +76,20 @@ Map.prototype.addStops = function(stops) {
     
     var feature = features[0];
     popup.setLngLat(feature.geometry.coordinates)
-      .setHTML(feature.properties.id)
+      .setHTML(feature.properties.name)
       .addTo(self.map); 
+  });
+  this.map.on('click', function(e) {
+    var features = self.map.queryRenderedFeatures(e.point, { layers: ['stops'] });
+    
+    if (!features.length) {
+      return;
+    }
+    
+    var feature = features[0];
+    
+    $('#sel-stop').html(feature.properties.name);
+    self.selectedStop = feature.properties.id;
   });
 };
 
@@ -126,19 +152,20 @@ Map.prototype.visitEdge = function(edge) {
     }
   });
   this.map.getSource('visited edges').setData(this.visitedEdges);
-  var newPopup = new mapboxgl.Popup({
-    closeButton: false,
-    closeOnClick: false
-  });
-  newPopup.setLngLat([edge[0].stop_lon, edge[0].stop_lat])
-      .setHTML('Visiting!')
-      .addTo(this.map);
-  this.visitedPopups.push(newPopup);
-  var self = this;
-  setTimeout(function() {
-    var popupToRemove = self.visitedPopups.shift();
-    popupToRemove.remove();
-  }, 30)
+  
+  //var newPopup = new mapboxgl.Popup({
+  //  closeButton: false,
+  //  closeOnClick: false
+  //});
+  //newPopup.setLngLat([edge[0].stop_lon, edge[0].stop_lat])
+  //    .setHTML('Visiting!')
+  //    .addTo(this.map);
+  //this.visitedPopups.push(newPopup);
+  //var self = this;
+  //setTimeout(function() {
+  //  var popupToRemove = self.visitedPopups.shift();
+  //  popupToRemove.remove();
+  //}, 30);
 };
 
 Map.prototype.leaveEdge = function(edge) {

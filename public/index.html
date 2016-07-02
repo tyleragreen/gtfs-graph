@@ -4,6 +4,9 @@
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.20.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.20.0/mapbox-gl.css' rel='stylesheet' />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
+    
+    <!-- Google Fonts -->
+    <link href='https://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
       
     <style>
       body {
@@ -18,16 +21,23 @@
         bottom: 0;
         width: 100%;
       }
-      #btn-run {
+      #controlMenu {
         position: absolute;
+        width: 100px;
         top: 10;
         right: 10;
+        background: white;
+        padding: 10px;
+        border-radius: 5px;
       }
     </style>
   </head>
   <body>
     <div id='map'></div>
-    <button id='btn-run'>Run!</button>
+    <div id='controlMenu'>
+      <div id='sel-stop'></div>
+      <button id='btn-run'>Run!</button>
+    </div>
   </body>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
