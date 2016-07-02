@@ -11,6 +11,8 @@ var Map = function(onLoad) {
       zoom: zoom_level
   });
   
+  this.visitedPopups = [];
+  
   this.map.addControl(new mapboxgl.Navigation({
     'position': 'top-left'
   }));
@@ -41,6 +43,27 @@ Map.prototype.addStops = function(stops) {
     "layout": {
       "icon-image": "marker-11"
     }
+  });
+  var self = this;
+  
+  var popup = new mapboxgl.Popup({
+  closeButton: false,
+  closeOnClick: false
+  });
+  this.map.on('mousemove', function(e) {
+    var features = self.map.queryRenderedFeatures(e.point, { layers: ['stops'] });
+    // Change the cursor style as a UI indicator.
+    self.map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
+    
+    if (!features.length) {
+      popup.remove();
+      return;
+    }
+    
+    var feature = features[0];
+    popup.setLngLat(feature.geometry.coordinates)
+      .setHTML(feature.properties.id)
+      .addTo(self.map); 
   });
 };
 
@@ -86,7 +109,7 @@ Map.prototype.addEdges = function(edges) {
     source: 'left edges',
     paint: {
       'line-width': 3,
-      'line-color': '#ffffff'
+      'line-color': '#0000ff'
     }
   });
 };
@@ -103,6 +126,19 @@ Map.prototype.visitEdge = function(edge) {
     }
   });
   this.map.getSource('visited edges').setData(this.visitedEdges);
+  var newPopup = new mapboxgl.Popup({
+    closeButton: false,
+    closeOnClick: false
+  });
+  newPopup.setLngLat([edge[0].stop_lon, edge[0].stop_lat])
+      .setHTML('Visiting!')
+      .addTo(this.map);
+  this.visitedPopups.push(newPopup);
+  var self = this;
+  setTimeout(function() {
+    var popupToRemove = self.visitedPopups.shift();
+    popupToRemove.remove();
+  }, 30)
 };
 
 Map.prototype.leaveEdge = function(edge) {
