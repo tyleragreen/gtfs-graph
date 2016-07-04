@@ -65,7 +65,7 @@ describe('The server', function() {
     var seenEvent = false;
     
     socket.on('connect', function(){
-      socket.emit(socketMsg.startDfs, 'Back atcha!');
+      socket.emit(socketMsg.startDfs, 0);
       socket.on(socketMsg.event, function(event) {
         if (!seenEvent) {
           expect(event.type).to.equal(socketMsg.visitNode);

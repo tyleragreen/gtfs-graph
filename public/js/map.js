@@ -12,7 +12,7 @@ var Map = function(onLoad) {
   });
   
   this.visitedPopups = [];
-  this.selectedStop = 0;
+  this.selectedStop = 24;
   
   this.map.addControl(new mapboxgl.Navigation({
     'position': 'top-left'
