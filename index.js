@@ -6,11 +6,12 @@
 var createGraph = require('./lib/createGraph.js');
 var server = require('./lib/server.js');
 var async = require('async');
+var logger = require('./lib/logger');
 
 function loadGraph(callback) {
-  console.log("Initializing graph");
+  logger.info("Initializing graph");
   createGraph(function(graph) {
-    console.log('Graph initialized');
+    logger.info('Graph initialized');
     callback(null, graph);
   });
 }

@@ -3,6 +3,8 @@
 var expect = require('chai').expect;
 var assert = require('chai').assert;
 
+process.env.NODE_ENV = 'test';
+
 var server = require('../lib/server.js');
 var http = require('http');
 var io = require('socket.io-client');
@@ -10,7 +12,7 @@ var socketMsg = require('../public/js/constants.js');
 var createGraph = require('../lib/createGraph.js');
 var async = require('async');
 
-var socketURL = 'http://gtfs-realtime-tgreen8091.c9users.io';
+var socketURL = 'http://' + process.env.IP + ':' + process.env.PORT;
 var options = {
   transports: ['websocket'],
   'force new connection': true
@@ -19,9 +21,7 @@ var options = {
 describe('The server', function() {
   before(function (done) {
     function loadGraph(callback) {
-      console.log("Initializing graph");
       createGraph(function(graph) {
-        console.log('Graph initialized');
         callback(null, graph);
       });
     }

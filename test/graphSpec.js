@@ -1,5 +1,7 @@
 'use strict';
 
+process.env.NODE_ENV = 'test';
+
 var Graph = require('../lib/graph.js').Graph;
 var dfs = require('../lib/traversals.js').dfs;
 var expect = require('chai').expect;
