@@ -12,7 +12,6 @@ var Map = function(onLoad) {
   });
   
   this.visitedPopups = [];
-  this.selectedStop = 24;
   
   this.map.addControl(new mapboxgl.Navigation({
     'position': 'top-left'
@@ -60,6 +59,9 @@ Map.prototype.addStops = function(stops) {
     }
   });
   var self = this;
+  
+  $('#sel-stop').html(stops.features[24].properties.name);
+  self.selectedStop = stops.features[24].properties.id;
   
   var popup = new mapboxgl.Popup({
     closeButton: false,
