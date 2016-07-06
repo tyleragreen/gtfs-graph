@@ -2,7 +2,9 @@
   "name": "gtfs-graph",
   "version": "0.0.1",
   "description": "Graph algorithms for transit schedules",
-  "main": "server.js",
+  "engines": {
+    "node": "4.4.0"
+  },
   "scripts": {
     "test": "mocha --timeout 30000",
     "build-js": "browserify public/js/app.js -o public/js/bundle.js",
