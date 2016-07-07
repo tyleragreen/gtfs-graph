@@ -12,7 +12,12 @@ var socketMsg = require('../public/js/constants.js');
 var createGraph = require('../lib/createGraph.js');
 var async = require('async');
 
-var socketURL = 'http://' + process.env.IP + ':' + process.env.PORT;
+var socketURL = 'http://' + (process.env.IP || '0.0.0.0') + ':' + (process.env.PORT || 3000);
+var http_options = {
+  host: (process.env.IP || '0.0.0.0'),
+  pathname: '/',
+  port: (process.env.PORT || 3000)
+};
 var options = {
   transports: ['websocket'],
   'force new connection': true
@@ -46,7 +51,7 @@ describe('The server', function() {
   });
 
   it('should return 200', function (done) {
-    http.get(socketURL, function (res) {
+    http.get(http_options, function (res) {
       expect(res.statusCode).to.equal(200);
       done();
     });
