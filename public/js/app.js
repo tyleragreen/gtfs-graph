@@ -34,7 +34,7 @@ $(function() {
   
   $('#btn-run').on('click', function() {
     map.clear();
-    socket.emit(socketMsg.startDfs, map.selectedStop);
-    console.log('selected stop', map.selectedStop);
+    var msg = 'start ' + $('#type').val();
+    socket.emit(msg, map.selectedStop);
   })
 });
