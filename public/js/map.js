@@ -61,7 +61,7 @@ Map.prototype.addStops = function(stops) {
   var self = this;
   
   $('#sel-stop').html(stops.features[24].properties.name);
-  self.selectedStop = stops.features[24].properties.id;
+  self.selectedStop = parseInt(stops.features[24].properties.id);
   
   var popup = new mapboxgl.Popup({
     closeButton: false,
@@ -91,7 +91,7 @@ Map.prototype.addStops = function(stops) {
     var feature = features[0];
     
     $('#sel-stop').html(feature.properties.name);
-    self.selectedStop = feature.properties.id;
+    self.selectedStop = parseInt(feature.properties.id);
   });
 };
 
