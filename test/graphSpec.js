@@ -5,10 +5,8 @@ process.env.NODE_ENV = 'test';
 var Graph = require('../lib/graph.js').Graph;
 var TransitGraph = require('../lib/graph.js').TransitGraph;
 var traversals = require('../lib/traversals.js');
-var socketMsg = require('../public/js/constants.js');
 
 var expect = require('chai').expect;
-var assert = require('chai').assert;
 
 describe('The graph', function() {
   before(function() {
