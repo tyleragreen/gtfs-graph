@@ -1,3 +1,5 @@
+'use strict';
+
 var Map = function(onLoad) {
   var latitude   = 40.72;
   var longitude  = -74.0;
@@ -96,9 +98,13 @@ Map.prototype.addStops = function(stops) {
 };
 
 Map.prototype.addEdges = function(edges) {
+  let routeEdges = edges.features.filter(feature => feature.properties.edgeType == 'transfer');
   this.map.addSource('edges', {
     type: 'geojson',
-    data: edges
+    data: {
+      'type': 'FeatureCollection',
+      'features': routeEdges
+    }
   });
   this.map.addLayer({
     id: 'edges',
