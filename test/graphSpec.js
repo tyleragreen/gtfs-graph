@@ -59,6 +59,10 @@ describe('The graph', function() {
     expect(leftEdges.length).to.equal(0);
     expect(leftEdges).to.deep.equal([]);
   });
+  
+  it('can be ranked with Page Rank', function() {
+    traversals.pageRank(this.graph);
+  });
 });
 
 describe('A transit graph', function() {

@@ -6,6 +6,7 @@ const socketMsg = {
   sendEdges: 'send edges',
   startDfs: 'start dfs',
   startBfs: 'start bfs',
+  startPR: 'start pr',
   event: 'event',
   visitNode: 'visit node',
   leaveNode: 'leave node'
