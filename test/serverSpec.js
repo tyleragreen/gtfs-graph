@@ -87,6 +87,7 @@ describe('The server', function() {
       socket.emit(socketMsg.requestStops);
       socket.on(socketMsg.sendStops, function(stops) {
         expect(stops.type).to.equal('FeatureCollection');
+        expect(stops.features.length).to.be.above(0);
         done();
       });
     });
@@ -98,6 +99,7 @@ describe('The server', function() {
       socket.emit(socketMsg.requestEdges);
       socket.on(socketMsg.sendEdges, function(edges) {
         expect(edges.type).to.equal('FeatureCollection');
+        expect(edges.features.length).to.be.above(0);
         done();
       });
     });

@@ -77,7 +77,7 @@ Map.prototype.addStops = function(stops) {
       popup.remove();
       return;
     }
-    
+  
     var feature = features[0];
     popup.setLngLat(feature.geometry.coordinates)
       .setHTML(feature.properties.name)
@@ -98,54 +98,35 @@ Map.prototype.addStops = function(stops) {
 };
 
 Map.prototype.addEdges = function(edges) {
-  let routeEdges = edges.features.filter(feature => feature.properties.edgeType == 'transfer');
-  this.map.addSource('edges', {
-    type: 'geojson',
-    data: {
-      'type': 'FeatureCollection',
-      'features': routeEdges
-    }
-  });
-  this.map.addLayer({
-    id: 'edges',
-    type: 'line',
-    source: 'edges',
-    paint: {
-      'line-width': 2,
-      'line-color': '#ffffff',
-      'line-opacity': 0.7
-    }
-  });
+  let createLayer = function(map, id, data, color, width, opacity) {
+    map.addSource(id, {
+      type: 'geojson',
+      data: {
+        'type': 'FeatureCollection',
+        'features': data
+      }
+    });
+    map.addLayer({
+      id: id,
+      type: 'line',
+      source: id,
+      paint: {
+        'line-width': width,
+        'line-color': color,
+        'line-opacity': opacity
+      }
+    });
+  };
+    
+  let transferEdges = edges.features.filter(feature => feature.properties.edgeType == 'transfer');
+  let routeEdges = edges.features.filter(feature => feature.properties.edgeType == 'route');
+  createLayer(this.map, 'transfers', transferEdges, '#708090', 2, 0.7);
+  createLayer(this.map, 'routes', routeEdges, '#ffffff', 2, 0.7);
   
   // Create source and layer for visited edges to be populated later
-  this.map.addSource('visited edges', {
-    type: 'geojson',
-    data: this.visitedEdges,
-  });
-  this.map.addLayer({
-    id: 'visited edges',
-    type: 'line',
-    source: 'visited edges',
-    paint: {
-      'line-width': 3,
-      'line-color': '#ff0000'
-    }
-  });
-  
+  createLayer(this.map, 'visited edges', this.visitedEdges, '#ff0000', 3, 1.0);
   // Create source and layer for visited edges to be populated later
-  this.map.addSource('left edges', {
-    type: 'geojson',
-    data: this.leftEdges,
-  });
-  this.map.addLayer({
-    id: 'left edges',
-    type: 'line',
-    source: 'left edges',
-    paint: {
-      'line-width': 3,
-      'line-color': '#0000ff'
-    }
-  });
+  createLayer(this.map, 'left edges', this.leftEdges, '#0000ff', 3, 1.0);
 };
 
 Map.prototype.visitEdge = function(edge) {
