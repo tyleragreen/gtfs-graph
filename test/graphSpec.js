@@ -23,7 +23,7 @@ describe('The graph', function() {
         [0,1,1,0],
       ];
     this.graph = new Graph(edgeList, numNodes);
-  })
+  });
   
   it('should be successfully created from a list of edges', function() {
     expect(this.graph.getArray()).to.deep.equal(this.expectedGraph);
