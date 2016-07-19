@@ -52,21 +52,25 @@ describe('The graph', function() {
     expect(graphTraverser.leftEdges).to.deep.equal([]);
   });
   
-  it('can be ranked with Page Rank', function() {
-    traversals.pageRank(this.graph);
-  });
 });
 
 describe('A transit graph', function() {
   before(function() {
-    var numNodes = 5;
-    var edgeList = [
+    let numNodes = 5;
+    let edgeList = [
       { type: 'route', edge: [1,0] },
       { type: 'transfer', edge: [2,1] },
       { type: 'route', edge: [4,1] },
       { type: 'route', edge: [3,2] },
       { type: 'route', edge: [4,3] },
       ];
+    let stops = [
+      { stop_name: 'A' },
+      { stop_name: 'B' },
+      { stop_name: 'C' },
+      { stop_name: 'D' },
+      { stop_name: 'E' }
+    ];
     this.expectedGraph = [
       [],
       [1],
@@ -80,11 +84,18 @@ describe('A transit graph', function() {
       [0,1],
       [1,1,1],
     ];
-    this.graph = new TransitGraph(edgeList, numNodes);
+    this.graph = new TransitGraph(edgeList, numNodes, stops);
   });
   
-  it('works', function() {
+  it('can be created', function() {
     expect(this.graph.getArray()).to.deep.equal(this.expectedGraph);
-    expect(this.graph.superGraph).to.deep.equal(this.expectedSuperGraph);
+  });
+  
+  it('can have its transfer nodes merged', function() {
+    expect(this.graph.mergeTransferNodes()).to.deep.equal(this.expectedSuperGraph);
+  });
+  
+  it('can be ranked with Page Rank', function() {
+    traversals.pageRank(this.graph);
   });
 });
