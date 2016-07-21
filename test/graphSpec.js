@@ -2,14 +2,14 @@
 
 process.env.NODE_ENV = 'test';
 
-var Graph = require('../lib/graph.js').Graph;
 var TransitGraph = require('../lib/graph.js').TransitGraph;
+var mergeTransferNodes = require('../lib/graph.js').mergeTransferNodes;
 var BasicTraverser = require('../lib/graphTraverser.js').BasicTraverser;
 var traversals = require('../lib/traversals.js');
 
 var expect = require('chai').expect;
 
-describe('The graph', function() {
+/*describe('The graph', function() {
   before(function() {
     let numNodes = 5;
     let edgeList = [
@@ -22,7 +22,7 @@ describe('The graph', function() {
         [0,0,0],
         [0,1,1,0],
       ];
-    this.graph = new Graph(edgeList, numNodes);
+    this.graph = new TransitGraph({edgeList: edgeList, numNodes: numNodes });
   });
   
   it('should be successfully created from a list of edges', function() {
@@ -52,7 +52,7 @@ describe('The graph', function() {
     expect(graphTraverser.leftEdges).to.deep.equal([]);
   });
   
-});
+});*/
 
 describe('A transit graph', function() {
   before(function() {
@@ -71,31 +71,67 @@ describe('A transit graph', function() {
       { stop_name: 'D' },
       { stop_name: 'E' }
     ];
+    let route = { type: 'route' };
+    let transfer = { type: 'transfer' };
     this.expectedGraph = [
       [],
-      [1],
-      [0,1],
-      [0,0,1],
-      [0,1,0,1]
+      [route],
+      [0,transfer],
+      [0,0,route],
+      [0,route,0,route]
     ];
     this.expectedSuperGraph = [
       [],
       [0],
-      [0,1],
-      [1,1,1],
+      [0,route],
+      [route,route,route],
     ];
     this.graph = new TransitGraph(edgeList, numNodes, stops);
   });
   
   it('can be created', function() {
-    expect(this.graph.getArray()).to.deep.equal(this.expectedGraph);
+    expect(this.graph.G).to.deep.equal(this.expectedGraph);
   });
   
   it('can have its transfer nodes merged', function() {
-    expect(this.graph.mergeTransferNodes()).to.deep.equal(this.expectedSuperGraph);
+ //   expect(mergeTransferNodes(this.graph).G).to.deep.equal(this.expectedSuperGraph);
+  });
+  
+  it('can be merged twice', function() {
+    let numNodes = 5;
+    let edgeList = [
+      { type: 'route', edge: [1,0] },
+      { type: 'transfer', edge: [2,1] },
+      { type: 'route', edge: [4,1] },
+      { type: 'transfer', edge: [3,2] },
+      { type: 'route', edge: [4,3] },
+      ];
+    let stops = [
+      { stop_name: 'A' },
+      { stop_name: 'B' },
+      { stop_name: 'C' },
+      { stop_name: 'D' },
+      { stop_name: 'E' }
+    ];
+    let route = { type: 'route' };
+    let transfer = { type: 'transfer' };
+    this.expectedGraph = [
+      [],
+      [route],
+      [0,transfer],
+      [0,0,transfer],
+      [0,route,0,route]
+    ];
+    this.expectedSuperGraph = [
+      [],
+      [0],
+      [route,route],
+    ];
+    this.graph = new TransitGraph(edgeList, numNodes, stops);
+    expect(mergeTransferNodes(this.graph).G).to.deep.equal(this.expectedSuperGraph);
   });
   
   it('can be ranked with Page Rank', function() {
-    traversals.pageRank(this.graph);
+    //traversals.pageRank(this.graph);
   });
 });
