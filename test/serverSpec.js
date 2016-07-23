@@ -77,7 +77,7 @@ describe('The server', function() {
           done();
         }
         seenEvent = true;
-      })
+      });
     });
   });
   

@@ -24,6 +24,7 @@
     "browserify": "^13.0.1",
     "express": "^4.14.0",
     "pg": "^4.5.5",
+    "require-guard": "^1.0.1",
     "socket.io": "^1.4.6",
     "socket.io-client": "^1.4.8",
     "winston": "^2.2.0"
