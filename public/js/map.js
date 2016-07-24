@@ -99,6 +99,8 @@ Map.prototype.addStops = function(stops) {
 
 Map.prototype.addEdges = function(edges) {
   let createLayer = function(map, id, data, color, width, opacity) {
+    if (map.getSource(id) !== undefined) { map.removeSource(id); }
+    if (map.getLayer(id) !== undefined) { map.removeLayer(id); }
     map.addSource(id, {
       type: 'geojson',
       data: {
