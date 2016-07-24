@@ -4,6 +4,7 @@ const socketMsg = {
   sendStops: 'send stops',
   requestEdges: 'request edges',
   sendEdges: 'send edges',
+  sendPR: 'send page rank',
   startDfs: 'start dfs',
   startBfs: 'start bfs',
   startPR: 'start pr',

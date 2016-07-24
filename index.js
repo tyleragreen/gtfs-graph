@@ -10,14 +10,14 @@ var logger = require('./lib/logger');
 
 function loadGraph(callback) {
   logger.info("Initializing graph");
-  createGraph(function(graph) {
+  createGraph(function(graph, mergedGraph) {
     logger.info('Graph initialized');
-    callback(null, graph);
+    callback(null, graph, mergedGraph);
   });
 }
 
-function startServer(graph, callback) {
-  server.listen(graph);
+function startServer(graph, mergedGraph, callback) {
+  server.listen(graph, mergedGraph);
 }
 
 async.waterfall([
