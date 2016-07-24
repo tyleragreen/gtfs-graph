@@ -21,6 +21,6 @@ function startServer(graph, mergedGraph, callback) {
 }
 
 async.waterfall([
-  function(callback) { loadGraph(callback) },
-  function(graph, callback) { startServer(graph, callback) }
+  function(callback) { loadGraph(callback); },
+  function(graph, callback) { startServer(graph, callback); }
   ]);

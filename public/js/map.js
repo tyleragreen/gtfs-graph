@@ -1,9 +1,9 @@
 'use strict';
 
 var Map = function(onLoad) {
-  var latitude   = 40.72;
-  var longitude  = -74.0;
-  var zoom_level = 10;
+  var latitude   = 40.75;
+  var longitude  = -73.96;
+  var zoom_level = 13;
   mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JlZW50IiwiYSI6ImNpazBqdWFsOTM5Nnh2M2x6dWZ2dnB3aHkifQ.97-pFPD8lQf02B6edag1rA';
   
   this.map = new mapboxgl.Map({
@@ -44,6 +44,36 @@ Map.prototype.clear = function() {
     features: []
   };
   this.map.getSource('left edges').setData(this.leftEdges);
+};
+
+Map.prototype.addPageRank = function(ranks) {
+  this.map.addSource("ranks", {
+    type: "geojson",
+    data: ranks
+  });
+  var layers = [
+    [0, 'rgba(0,255,0,0.5)', 70],
+    [0.05, 'rgba(255,165,0,0.5)', 80],
+    [0.1, 'rgba(255,0,0,0.8)', 90]
+  ];
+  var thatMap = this.map;
+  layers.forEach(function (layer, i) {
+    thatMap.addLayer({
+      "id": "cluster-" + i,
+      "type": "circle",
+      "source": 'ranks',
+      "paint": {
+        "circle-color": layer[1],
+        "circle-radius": layer[2],
+        "circle-blur": 1
+      },
+      "filter": i === layers.length - 1 ?
+        [">=", "rank", layer[0]] :
+        ["all",
+          [">=", "rank", layer[0]],
+          ["<", "rank", layers[i + 1][0]]]
+    });
+  });
 };
 
 Map.prototype.addStops = function(stops) {

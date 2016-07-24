@@ -21,6 +21,10 @@ $(function() {
     map.addEdges(edges);
   });
   
+  socket.on(socketMsg.sendPR, function(ranks) {
+    map.addPageRank(ranks);
+  });
+  
   socket.on(socketMsg.event, function(event) {
     console.log(event);
     if (event.type === socketMsg.visitNode) {
