@@ -1,5 +1,8 @@
 'use strict';
 
+const DEFAULT_START = 24; // Times Square / 42nd Street
+const UNINCLUDED_ROUTES = ["6X","7X","GS","SI","FS"];
+
 var Map = function(onLoad) {
   var latitude   = 40.75;
   var longitude  = -73.96;
@@ -30,6 +33,8 @@ var Map = function(onLoad) {
     type: 'FeatureCollection',
     features: []
   };
+  
+//  $('#type').on('ch')
 };
 
 Map.prototype.clear = function() {
@@ -92,8 +97,8 @@ Map.prototype.addStops = function(stops) {
   });
   var self = this;
   
-  $('#sel-stop').html(stops.features[24].properties.name);
-  self.selectedStop = parseInt(stops.features[24].properties.id);
+  $('#sel-stop').html(stops.features[DEFAULT_START].properties.name);
+  self.selectedStop = parseInt(stops.features[DEFAULT_START].properties.id);
   
   var popup = new mapboxgl.Popup({
     closeButton: false,
@@ -103,22 +108,29 @@ Map.prototype.addStops = function(stops) {
     var features = self.map.queryRenderedFeatures(e.point, { layers: ['stops'] });
     self.map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
     
-    if (!features.length) {
-      popup.remove();
-      return;
-    }
+    if (!features.length) { popup.remove(); return; }
   
     var feature = features[0];
+    var html = feature.properties.name + ' ';
+    feature.properties.routes.split(",").forEach(function(route,i) {
+      // Only include an image if it isn't one of the routes we don't have images for
+      // This could be updated to check for the presence of that file, but this
+      // sounds like an unnecessary network bottleneck.
+      if (UNINCLUDED_ROUTES.indexOf(route) === -1) {
+        html += '<img src="icons/' + route.toLowerCase() + '.png" /> ';
+      } else {
+        html += '(' + route + ') ';
+      }
+    });
+    
+    // Set the popup location and text
     popup.setLngLat(feature.geometry.coordinates)
-      .setHTML(feature.properties.name)
+      .setHTML(html)
       .addTo(self.map); 
   });
   this.map.on('click', function(e) {
     var features = self.map.queryRenderedFeatures(e.point, { layers: ['stops'] });
-    
-    if (!features.length) {
-      return;
-    }
+    if (!features.length) { return; }
     
     var feature = features[0];
     
@@ -155,9 +167,8 @@ Map.prototype.addEdges = function(edges) {
   createLayer(this.map, 'transfers', transferEdges, '#708090', 2, 0.7);
   createLayer(this.map, 'routes', routeEdges, '#ffffff', 2, 0.7);
   
-  // Create source and layer for visited edges to be populated later
+  // Create source and layer for visited (and left) edges to be populated later
   createLayer(this.map, 'visited edges', this.visitedEdges, '#ff0000', 3, 1.0);
-  // Create source and layer for visited edges to be populated later
   createLayer(this.map, 'left edges', this.leftEdges, '#0000ff', 3, 1.0);
 };
 

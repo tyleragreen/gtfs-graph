@@ -88,6 +88,7 @@ describe('The server', function() {
       socket.on(socketMsg.sendStops, function(stops) {
         expect(stops.type).to.equal('FeatureCollection');
         expect(stops.features.length).to.be.above(0);
+        expect(stops.features[0].properties.routes.length).to.be.above(0);
         done();
       });
     });
