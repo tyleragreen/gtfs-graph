@@ -21,9 +21,39 @@ var Map = function(onLoad) {
   this.map.addControl(new mapboxgl.Navigation({
     'position': 'top-left'
   }));
-    
+  
   this.map.on('load', function(){
     onLoad();
+  this.addSource("ranks", {
+    type: "geojson",
+    data: {
+      type: 'FeatureCollection',
+      features: []
+    }
+  });
+  var layers = [
+    [0, 'rgba(0,255,0,0.5)', 70],
+    [0.05, 'rgba(255,165,0,0.5)', 80],
+    [0.1, 'rgba(255,0,0,0.8)', 90]
+  ];
+  var thatMap = this;
+  layers.forEach(function (layer, i) {
+    thatMap.addLayer({
+      "id": "cluster-" + i,
+      "type": "circle",
+      "source": 'ranks',
+      "paint": {
+        "circle-color": layer[1],
+        "circle-radius": layer[2],
+        "circle-blur": 1
+      },
+      "filter": i === layers.length - 1 ?
+        [">=", "rank", layer[0]] :
+        ["all",
+          [">=", "rank", layer[0]],
+          ["<", "rank", layers[i + 1][0]]]
+    });
+  });
   });
   this.visitedEdges = {
     type: 'FeatureCollection',
@@ -33,6 +63,7 @@ var Map = function(onLoad) {
     type: 'FeatureCollection',
     features: []
   };
+  
   
 //  $('#type').on('ch')
 };
@@ -52,33 +83,7 @@ Map.prototype.clear = function() {
 };
 
 Map.prototype.addPageRank = function(ranks) {
-  this.map.addSource("ranks", {
-    type: "geojson",
-    data: ranks
-  });
-  var layers = [
-    [0, 'rgba(0,255,0,0.5)', 70],
-    [0.05, 'rgba(255,165,0,0.5)', 80],
-    [0.1, 'rgba(255,0,0,0.8)', 90]
-  ];
-  var thatMap = this.map;
-  layers.forEach(function (layer, i) {
-    thatMap.addLayer({
-      "id": "cluster-" + i,
-      "type": "circle",
-      "source": 'ranks',
-      "paint": {
-        "circle-color": layer[1],
-        "circle-radius": layer[2],
-        "circle-blur": 1
-      },
-      "filter": i === layers.length - 1 ?
-        [">=", "rank", layer[0]] :
-        ["all",
-          [">=", "rank", layer[0]],
-          ["<", "rank", layers[i + 1][0]]]
-    });
-  });
+  this.map.getSource('ranks').setData(ranks);
 };
 
 Map.prototype.addStops = function(stops) {
