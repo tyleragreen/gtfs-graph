@@ -1,7 +1,7 @@
 'use strict';
 
 const DEFAULT_START = 24; // Times Square / 42nd Street
-const UNINCLUDED_ROUTES = ["SI","FS"];
+const UNINCLUDED_ROUTES = ["SI"];
 
 var Map = function(onLoad) {
   var latitude   = 40.75;
