@@ -1,7 +1,7 @@
 'use strict';
 
 const DEFAULT_START = 24; // Times Square / 42nd Street
-const UNINCLUDED_ROUTES = ["6X","7X","GS","SI","FS"];
+const UNINCLUDED_ROUTES = ["SI","FS"];
 
 var Map = function(onLoad) {
   var latitude   = 40.75;
@@ -24,36 +24,36 @@ var Map = function(onLoad) {
   
   this.map.on('load', function(){
     onLoad();
-  this.addSource("ranks", {
-    type: "geojson",
-    data: {
-      type: 'FeatureCollection',
-      features: []
-    }
-  });
-  var layers = [
-    [0, 'rgba(0,255,0,0.5)', 70],
-    [0.05, 'rgba(255,165,0,0.5)', 80],
-    [0.1, 'rgba(255,0,0,0.8)', 90]
-  ];
-  var thatMap = this;
-  layers.forEach(function (layer, i) {
-    thatMap.addLayer({
-      "id": "cluster-" + i,
-      "type": "circle",
-      "source": 'ranks',
-      "paint": {
-        "circle-color": layer[1],
-        "circle-radius": layer[2],
-        "circle-blur": 1
-      },
-      "filter": i === layers.length - 1 ?
-        [">=", "rank", layer[0]] :
-        ["all",
-          [">=", "rank", layer[0]],
-          ["<", "rank", layers[i + 1][0]]]
+    this.addSource("ranks", {
+      type: "geojson",
+      data: {
+        type: 'FeatureCollection',
+        features: []
+      }
     });
-  });
+    var layers = [
+      [0, 'rgba(0,255,0,0.5)', 70],
+      [0.05, 'rgba(255,165,0,0.5)', 80],
+      [0.1, 'rgba(255,0,0,0.8)', 90]
+    ];
+    var thatMap = this;
+    layers.forEach(function (layer, i) {
+      thatMap.addLayer({
+        "id": "cluster-" + i,
+        "type": "circle",
+        "source": 'ranks',
+        "paint": {
+          "circle-color": layer[1],
+          "circle-radius": layer[2],
+          "circle-blur": 1
+        },
+        "filter": i === layers.length - 1 ?
+          [">=", "rank", layer[0]] :
+          ["all",
+            [">=", "rank", layer[0]],
+            ["<", "rank", layers[i + 1][0]]]
+      });
+    });
   });
   this.visitedEdges = {
     type: 'FeatureCollection',
@@ -63,9 +63,6 @@ var Map = function(onLoad) {
     type: 'FeatureCollection',
     features: []
   };
-  
-  
-//  $('#type').on('ch')
 };
 
 Map.prototype.clear = function() {
@@ -117,7 +114,7 @@ Map.prototype.addStops = function(stops) {
   
     var feature = features[0];
     var html = feature.properties.name + ' ';
-    feature.properties.routes.split(",").forEach(function(route,i) {
+    feature.properties.routes.split(",").forEach(function(route,index) {
       // Only include an image if it isn't one of the routes we don't have images for
       // This could be updated to check for the presence of that file, but this
       // sounds like an unnecessary network bottleneck.
