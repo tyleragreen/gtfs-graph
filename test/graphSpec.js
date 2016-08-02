@@ -8,29 +8,6 @@ var traversals = require('../lib/traversals.js');
 
 var expect = require('chai').expect;
 
-/*describe('The graph', function() {
-  before(function() {
-    let numNodes = 5;
-    let edgeList = [
-        [1,2], [2,4], [1,4]
-      ];
-    this.expectedGraph = [
-        [],
-        [0],
-        [0,1],
-        [0,0,0],
-        [0,1,1,0],
-      ];
-    this.graph = new TransitGraph({edgeList: edgeList, numNodes: numNodes });
-  });
-  
-  it('should be successfully created from a list of edges', function() {
-    expect(this.graph.getArray()).to.deep.equal(this.expectedGraph);
-  });
-  
-  
-});*/
-
 describe('A transit graph', function() {
   before(function() {
     let numNodes = 5;
@@ -42,11 +19,11 @@ describe('A transit graph', function() {
       { type: 'route', edge: [4,3] },
       ];
     let stops = [
-      { stop_name: 'A' },
-      { stop_name: 'B' },
-      { stop_name: 'C' },
-      { stop_name: 'D' },
-      { stop_name: 'E' }
+      { name: 'A', routes: ['1'] },
+      { name: 'B', routes: ['1','2'] },
+      { name: 'C', routes: ['3'] },
+      { name: 'D', routes: ['3','2'] },
+      { name: 'E', routes: ['3'] }
     ];
     let route = { type: 'route' };
     let transfer = { type: 'transfer' };
@@ -111,11 +88,11 @@ describe('A transit graph', function() {
       { type: 'route', edge: [4,3] },
       ];
     let stops = [
-      { stop_name: 'A' },
-      { stop_name: 'B' },
-      { stop_name: 'C' },
-      { stop_name: 'D' },
-      { stop_name: 'E' }
+      { name: 'A', routes: ['1'] },
+      { name: 'B', routes: ['1','2'] },
+      { name: 'C', routes: ['3'] },
+      { name: 'D', routes: ['3','2'] },
+      { name: 'E', routes: ['3'] }
     ];
     let route = { type: 'route' };
     let transfer = { type: 'transfer' };
