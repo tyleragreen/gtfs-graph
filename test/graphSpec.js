@@ -19,12 +19,12 @@ describe('A transit graph', function() {
       { type: 'route', edge: [3,2] },
       { type: 'route', edge: [4,3] },
       ];
-    let stops = [
-      { name: 'A', routes: ['1'] },
-      { name: 'B', routes: ['1','2'] },
-      { name: 'C', routes: ['3'] },
-      { name: 'D', routes: ['3','2'] },
-      { name: 'E', routes: ['3'] }
+    this.stops = [
+      new Stop(0,'A',0,0,['1']),
+      new Stop(1,'B',0,0,['1','2']),
+      new Stop(2,'C',0,0,['3']),
+      new Stop(3,'D',0,0,['3','2']),
+      new Stop(4,'E',0,0,['3'])
     ];
     let route = { type: 'route' };
     let transfer = { type: 'transfer' };
@@ -41,7 +41,7 @@ describe('A transit graph', function() {
       [0,route],
       [route,route,route],
     ];
-    this.graph = new TransitGraph(edgeList, numNodes, stops);
+    this.graph = new TransitGraph(edgeList, numNodes, this.stops);
   });
   
   it('can be created', function() {
@@ -88,13 +88,6 @@ describe('A transit graph', function() {
       { type: 'transfer', edge: [3,2] },
       { type: 'route', edge: [4,3] },
       ];
-    let stops = [
-      new Stop(0,'A',0,0,['1']),
-      new Stop(1,'B',0,0,['1','2']),
-      new Stop(2,'C',0,0,['3']),
-      new Stop(3,'D',0,0,['3','2']),
-      new Stop(4,'E',0,0,['3'])
-    ];
     let route = { type: 'route' };
     let transfer = { type: 'transfer' };
     this.expectedGraph = [
@@ -109,7 +102,7 @@ describe('A transit graph', function() {
       [0],
       [route,route],
     ];
-    this.graph = new TransitGraph(edgeList, numNodes, stops);
+    this.graph = new TransitGraph(edgeList, numNodes, this.stops);
     expect(traversals.mergeTransferNodes(this.graph).G).to.deep.equal(this.expectedSuperGraph);
   });
   

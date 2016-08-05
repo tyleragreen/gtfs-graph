@@ -26,4 +26,19 @@ describe('A stop', function() {
     expect(newStop.longitude).to.equal(62.5);
     expect(newStop.routes).to.deep.equal(['1','2','3']);
   });
+  
+  it('avoids appending a non-unique name', function() {
+    let stopThree = new Stop(2,'Stop One',0,0,['1']);
+    let newStop = this.stopOne.mergeWith(stopThree);
+    
+    expect(newStop.name).to.equal(stopThree.name);
+  });
+  
+  it('avoids appending a non-unique name when there are at least three', function() {
+    let stopThree = new Stop(2,'Stop One',0,0,['1']);
+    let newStopOne = this.stopOne.mergeWith(this.stopTwo);
+    let newStopTwo = newStopOne.mergeWith(stopThree);
+    
+    expect(newStopTwo.name).to.equal(newStopOne.name);
+  });
 });
