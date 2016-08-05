@@ -2,6 +2,7 @@
 logs
 *.log
 npm-debug.log*
+pageRank.csv
 
 # Bundled js
 public/js/bundle.js

@@ -3,6 +3,7 @@
 process.env.NODE_ENV = 'test';
 
 var TransitGraph = require('../lib/graph.js');
+var Stop = require('../lib/stop.js');
 var BasicTraverser = require('../lib/graphTraverser.js').BasicTraverser;
 var traversals = require('../lib/traversals.js');
 
@@ -88,11 +89,11 @@ describe('A transit graph', function() {
       { type: 'route', edge: [4,3] },
       ];
     let stops = [
-      { name: 'A', routes: ['1'] },
-      { name: 'B', routes: ['1','2'] },
-      { name: 'C', routes: ['3'] },
-      { name: 'D', routes: ['3','2'] },
-      { name: 'E', routes: ['3'] }
+      new Stop(0,'A',0,0,['1']),
+      new Stop(1,'B',0,0,['1','2']),
+      new Stop(2,'C',0,0,['3']),
+      new Stop(3,'D',0,0,['3','2']),
+      new Stop(4,'E',0,0,['3'])
     ];
     let route = { type: 'route' };
     let transfer = { type: 'transfer' };
@@ -114,5 +115,9 @@ describe('A transit graph', function() {
   
   it('can be ranked with Page Rank', function() {
     traversals.pageRank(this.graph);
+  });
+  
+  it('can be traversed with Dijkstra\'s algorithm', function() {
+    
   });
 });
