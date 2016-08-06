@@ -40,5 +40,34 @@ $(function() {
     map.clear();
     var msg = 'start ' + $('#type').val();
     socket.emit(msg, map.selectedStop);
-  })
+  });
+  
+  $('#origin').on('input', function() {
+    $('#suggestions').empty();
+    if ($('#origin').val().length > 0) {
+      $('#suggestions').show();
+      let stops = map.getStops($('#origin').val());
+      
+      if (stops.length > 0) {
+        stops.forEach(function(stop) {
+          let listItem = '<li id="'+stop.name+'">';
+          stop.routes.forEach(function(route) {
+            listItem += '<img src="icons/' + route.toLowerCase() + '.png" />';
+          });
+          listItem += stop.name + '</li>';
+          $("#suggestions").append(listItem);
+        });
+    
+        $('#suggestions li').click(function() {
+          $('#origin').val(this.id);
+          $('#suggestions').hide();
+        });
+      } else {
+        $('#suggestions').append("<li>No stops found!</li>");
+      }
+    } else {
+      $('#suggestions').hide();
+    }
+    console.log('clicked');
+  });
 });

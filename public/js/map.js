@@ -83,6 +83,18 @@ Map.prototype.addPageRank = function(ranks) {
   this.map.getSource('ranks').setData(ranks);
 };
 
+Map.prototype.getStops = function(query) {
+  return this.stops.features.map((feature) => { return { name: feature.properties.name, routes: feature.properties.routes }; })
+    .filter(stop => stop.name.toLowerCase().indexOf(query.toLowerCase()) !== -1)
+    .sort((a,b) => {
+      if (a.name < b.name)
+        return -1;
+      if (a.name > b.name)
+        return 1;
+      return 0; })
+    .slice(0,10);
+};
+
 Map.prototype.addStops = function(stops) {
   this.map.addSource('stops', {
     "type": "geojson",
@@ -139,6 +151,7 @@ Map.prototype.addStops = function(stops) {
     $('#sel-stop').html(feature.properties.name);
     self.selectedStop = parseInt(feature.properties.id);
   });
+  this.stops = stops;
 };
 
 Map.prototype.addEdges = function(edges) {
