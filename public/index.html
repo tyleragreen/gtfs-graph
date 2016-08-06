@@ -3,6 +3,8 @@
     <title>Graphs in Transit</title>
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.20.0/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.20.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://npmcdn.com/react@15.3.0/dist/react.js"></script>
+    <script src="https://npmcdn.com/react-dom@15.3.0/dist/react-dom.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
     
     <!-- Google Fonts -->
@@ -11,22 +13,7 @@
   </head>
   <body>
     <div id='map'></div>
-    <div id='controlMenu'>
-      <div>Traversal Type: 
-        <select id="type">
-          <option value="dfs">Depth-First Search</option>
-          <option value="bfs">Breadth-First Search</option>
-          <option value="pr">Page Rank</option>
-        </select>
-      </div>
-      <div>
-        <input type="text" id="origin" />
-        <ul id="suggestions">
-        </ul>
-      </div>
-      <!--<div>Selected Stop: <div id='sel-stop'></div></div>-->
-      <button id='btn-run'>Run!</button>
-    </div>
+    <div id='content'></div>
   </body>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>

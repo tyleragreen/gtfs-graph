@@ -1,73 +1,112 @@
-$(function() {
-  const socketMsg = require('./constants.js');
-  var Map = require('./map.js');
-  
-  var socket = io();
-  
-  var map = new Map(function() {
-    socket.emit(socketMsg.requestStops);
-    socket.emit(socketMsg.requestEdges);
-  });
-  
-  socket.on(socketMsg.log, function(msg) {
-    console.log(msg);
-  });
-  
-  socket.on(socketMsg.sendStops, function(stops) {
-    map.addStops(stops);
-  });
-  
-  socket.on(socketMsg.sendEdges, function(edges) {
-    map.addEdges(edges);
-  });
-  
-  socket.on(socketMsg.sendPR, function(ranks) {
-    map.addPageRank(ranks);
-  });
-  
-  socket.on(socketMsg.event, function(event) {
-    console.log(event);
-    if (event.type === socketMsg.visitNode) {
-      map.visitEdge(event.data);
-    } else if (event.type === socketMsg.leaveNode) {
-      map.leaveEdge(event.data);
-    } else {
-      throw 'bad event type';
-    }
-  });
-  
-  $('#btn-run').on('click', function() {
-    map.clear();
-    var msg = 'start ' + $('#type').val();
-    socket.emit(msg, map.selectedStop);
-  });
-  
-  $('#origin').on('input', function() {
-    $('#suggestions').empty();
-    if ($('#origin').val().length > 0) {
-      $('#suggestions').show();
-      let stops = map.getStops($('#origin').val());
-      
-      if (stops.length > 0) {
-        stops.forEach(function(stop) {
-          let listItem = '<li id="'+stop.name+'">';
-          stop.routes.forEach(function(route) {
-            listItem += '<img src="icons/' + route.toLowerCase() + '.png" />';
-          });
-          listItem += stop.name + '</li>';
-          $("#suggestions").append(listItem);
-        });
-    
-        $('#suggestions li').click(function() {
-          $('#origin').val(this.id);
-          $('#suggestions').hide();
-        });
-      } else {
-        $('#suggestions').append("<li>No stops found!</li>");
-      }
-    } else {
-      $('#suggestions').hide();
-    }
-    console.log('clicked');
-  });
+const socketMsg = require('./constants.js');
+var Map = require('./map.js');
+
+var socket = io();
+
+var map = new Map(function() {
+  socket.emit(socketMsg.requestStops);
+  socket.emit(socketMsg.requestEdges);
 });
+
+socket.on(socketMsg.log, function(msg) {
+  console.log(msg);
+});
+
+socket.on(socketMsg.sendStops, function(stops) {
+  map.addStops(stops);
+});
+
+socket.on(socketMsg.sendEdges, function(edges) {
+  map.addEdges(edges);
+});
+
+socket.on(socketMsg.sendPR, function(ranks) {
+  map.addPageRank(ranks);
+});
+
+socket.on(socketMsg.event, function(event) {
+  console.log(event);
+  if (event.type === socketMsg.visitNode) {
+    map.visitEdge(event.data);
+  } else if (event.type === socketMsg.leaveNode) {
+    map.leaveEdge(event.data);
+  } else {
+    throw 'bad event type';
+  }
+});
+
+var Menu = React.createClass({
+  getInitialState: function() {
+    return { mode: '' };
+  },
+  runMode: function() {
+    console.log('menu says hello');
+    var msg = 'start ' + $('#type').val();
+    this.props.socket.emit(msg, map.selectedStop);
+  },
+  changeMode: function(mode) {
+    this.setState({ mode: mode });
+  },
+  render: function() {
+    return (
+      <div id="controlMenu">
+        <ModeSelector onModeChange={this.changeMode} />
+        <StopSelector />
+        <StartButton onRun={this.runMode} />
+      </div>
+    );
+  }
+});
+
+var StopSelector = React.createClass({
+  render: function() {
+    return (
+      <div>
+      <input type="text" id="origin" />
+      <ul id="suggestions">
+      </ul>
+      </div>
+    );
+  }
+});
+
+var StartButton = React.createClass({
+  handleSubmit: function() {
+    this.props.onRun();
+  },
+  render: function() {
+    return (
+      <button id='btn-run' onClick={this.handleSubmit}>Run!</button>
+    );
+  }
+});
+
+var ModeSelector = React.createClass({
+  getInitialState: function() {
+    return { selectValue: 'dfs' };
+  },
+  handleChange: function(e) {
+    this.setState({ selectValue: e.target.value });
+    this.props.onModeChange(e.target.value);
+  },
+  render: function() {
+    return (
+      <div>Traversal Type: 
+      <select 
+        id="type"
+        value={this.state.selectValue}
+        onChange={this.handleChange}
+      >
+        <option value="dfs">Depth-First Search</option>
+        <option value="bfs">Breadth-First Search</option>
+        <option value="pr">Page Rank</option>
+      </select>
+      </div>
+    );
+  }
+});
+
+ReactDOM.render(
+  <Menu socket={socket} />,
+  document.getElementById('content')
+);
