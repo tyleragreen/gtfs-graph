@@ -1,5 +1,7 @@
 'use strict';
 
+import MapboxGl from "mapbox-gl";
+
 const DEFAULT_START = 24; // Times Square / 42nd Street
 const UNINCLUDED_ROUTES = ["SI"];
 
@@ -7,9 +9,9 @@ var Map = function(onLoad) {
   var latitude   = 40.75;
   var longitude  = -73.96;
   var zoom_level = 13;
-  mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JlZW50IiwiYSI6ImNpazBqdWFsOTM5Nnh2M2x6dWZ2dnB3aHkifQ.97-pFPD8lQf02B6edag1rA';
+  MapboxGl.accessToken = 'pk.eyJ1IjoiZ3JlZW50IiwiYSI6ImNpazBqdWFsOTM5Nnh2M2x6dWZ2dnB3aHkifQ.97-pFPD8lQf02B6edag1rA';
   
-  this.map = new mapboxgl.Map({
+  this.map = new MapboxGl.Map({
       container: 'map',
       style: 'mapbox://styles/mapbox/dark-v9',
       center: [longitude, latitude],
@@ -18,7 +20,7 @@ var Map = function(onLoad) {
   
   this.visitedPopups = [];
   
-  this.map.addControl(new mapboxgl.Navigation({
+  this.map.addControl(new MapboxGl.Navigation({
     'position': 'top-left'
   }));
   
@@ -114,7 +116,7 @@ Map.prototype.addStops = function(stops) {
   $('#sel-stop').html(stops.features[DEFAULT_START].properties.name);
   self.selectedStop = parseInt(stops.features[DEFAULT_START].properties.id);
   
-  var popup = new mapboxgl.Popup({
+  var popup = new MapboxGl.Popup({
     closeButton: false,
     closeOnClick: false
   });
