@@ -5,6 +5,13 @@ import MapboxGl from "mapbox-gl";
 const DEFAULT_START = 24; // Times Square / 42nd Street
 const UNINCLUDED_ROUTES = ["SI"];
 
+// Hack to preload images
+var images = ['1','2','3','4','5','6','6x','7','7x','a','b','c','d','e','f','fs','g','gs','j','l','m','n','q','r','si','z'];
+images.forEach(function(img) {
+  var image = new Image();
+  image.src = 'icons/' + img + '.png';
+});
+
 var Map = function(onLoad) {
   var latitude   = 40.75;
   var longitude  = -73.96;
