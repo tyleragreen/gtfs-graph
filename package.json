@@ -26,6 +26,8 @@
     "express": "^4.14.0",
     "mapbox-gl": "^0.21.0",
     "pg": "^4.5.5",
+    "react": "^15.3.0",
+    "react-dom": "^15.3.0",
     "socket.io": "^1.4.6",
     "socket.io-client": "^1.4.8",
     "winston": "^2.2.0"

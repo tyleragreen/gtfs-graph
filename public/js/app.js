@@ -1,3 +1,5 @@
+import React from 'react';
+import DOM from 'react-dom';
 const socketMsg = require('./constants.js');
 var Map = require('./map.js');
 
@@ -59,10 +61,15 @@ var Menu = React.createClass({
 });
 
 var StopSelector = React.createClass({
+  handleChange: function(e) {
+    console.log('key press');
+  },
   render: function() {
     return (
       <div>
-      <input type="text" id="origin" />
+      <input type="text" id="origin"
+        onChange={this.handleChange}
+      />
       <ul id="suggestions">
       </ul>
       </div>
@@ -106,7 +113,7 @@ var ModeSelector = React.createClass({
   }
 });
 
-ReactDOM.render(
+DOM.render(
   <Menu socket={socket} />,
   document.getElementById('content')
 );
