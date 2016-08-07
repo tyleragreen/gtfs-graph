@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import DOM from 'react-dom';
 import IO from 'socket.io-client';
 
+var onClickOutside = require('react-onclickoutside');
 const socketMsg = require('./constants.js');
 var Map = require('./map.js');
 
@@ -60,7 +61,13 @@ var Menu = React.createClass({
   }
 });
 
-var StopSelector = React.createClass({
+var StopSelector = onClickOutside(React.createClass({
+  handleClickOutside: function() {
+    console.log('outside click');
+    this.setState({
+      stops: []
+    });
+  },
   getInitialState: function() {
     return {
       searchValue: '',
@@ -92,6 +99,7 @@ var StopSelector = React.createClass({
         id="origin"
         value={this.state.searchValue}
         onChange={this.handleChange}
+        onClick={this.handleChange}
       />
       <SearchSuggestionList
         data={this.state.stops}
@@ -100,7 +108,7 @@ var StopSelector = React.createClass({
       </div>
     );
   }
-});
+}));
 
 var SearchSuggestionList = React.createClass({
   handleItemClick: function(itemId) {
