@@ -29,7 +29,6 @@ socket.on(socketMsg.sendPR, function(ranks) {
 });
 
 socket.on(socketMsg.event, function(event) {
-  console.log(event);
   if (event.type === socketMsg.visitNode) {
     map.visitEdge(event.data);
   } else if (event.type === socketMsg.leaveNode) {
@@ -41,7 +40,7 @@ socket.on(socketMsg.event, function(event) {
 
 var Menu = React.createClass({
   getInitialState: function() {
-    return { mode: '' };
+    return { mode: 'dfs' };
   },
   runMode: function() {
     var msg = 'start ' + this.state.mode;
@@ -68,6 +67,15 @@ var StopSelector = React.createClass({
       stops: []
     };
   },
+  handleSuggestionClick: function(itemId) {
+    var selectedStop = this.state.stops.filter(stop => stop.id === itemId);
+    if (selectedStop.length !== 1) { throw 'bad stop selected'; }
+    this.setState({
+      selectedStop: selectedStop[0],
+      searchValue: selectedStop[0].name,
+      stops: []
+    });
+  },
   handleChange: function(e) {
     this.setState({ searchValue: e.target.value });
     if (e.target.value.length > 0) {
@@ -85,20 +93,34 @@ var StopSelector = React.createClass({
         value={this.state.searchValue}
         onChange={this.handleChange}
       />
-      <SearchSuggestionList data={this.state.stops} />
+      <SearchSuggestionList
+        data={this.state.stops}
+        onItemClick={this.handleSuggestionClick}
+      />
       </div>
     );
   }
 });
 
 var SearchSuggestionList = React.createClass({
+  handleItemClick: function(itemId) {
+    console.log('search sugg list', itemId);
+    this.props.onItemClick(itemId);
+  },
   render: function() {
     var list;
     
     if (this.props.data.length > 0) {
+      var self = this;
       var suggestions = this.props.data.map(function (stop) {
         return (
-          <SearchSuggestion key={stop.id} name={stop.name} routes={stop.routes} />
+          <SearchSuggestion
+           key={stop.id}
+           id={stop.id}
+           name={stop.name}
+           routes={stop.routes}
+           onItemClick={self.handleItemClick}
+          />
         );
       });
       list = (<ul id="suggestions">{suggestions}</ul>);
@@ -113,6 +135,10 @@ var SearchSuggestionList = React.createClass({
 });
 
 var SearchSuggestion = React.createClass({
+  handleClick: function() {
+    console.log('search sugg', this.props.id);
+    this.props.onItemClick(this.props.id);
+  },
   render: function() {
     var routes = this.props.routes.map(function(route) {
       return (
@@ -121,7 +147,11 @@ var SearchSuggestion = React.createClass({
     });
     
     return (
-      <li>{routes}{this.props.name}</li>
+      <li
+        onClick={this.handleClick}
+      >
+      {routes}{this.props.name}
+      </li>
     );
   }
 });

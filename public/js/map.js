@@ -202,19 +202,20 @@ Map.prototype.addEdges = function(edges) {
 };
 
 Map.prototype.visitEdge = function(edge) {
+  console.log('edge',edge);
   this.visitedEdges.features.push({
     type: 'Feature',
     geometry: {
       type: 'LineString',
       coordinates: [
-          [ edge[0].stop_lon, edge[0].stop_lat ],
-          [ edge[1].stop_lon, edge[1].stop_lat ]
+          [ edge[0].longitude, edge[0].latitude ],
+          [ edge[1].longitude, edge[1].latitude ]
         ]
     }
   });
   this.map.getSource('visited edges').setData(this.visitedEdges);
   
-  //var newPopup = new mapboxgl.Popup({
+  //var newPopup = new MapboxGl.Popup({
   //  closeButton: false,
   //  closeOnClick: false
   //});
@@ -235,8 +236,8 @@ Map.prototype.leaveEdge = function(edge) {
     geometry: {
       type: 'LineString',
       coordinates: [
-          [ edge[0].stop_lon, edge[0].stop_lat ],
-          [ edge[1].stop_lon, edge[1].stop_lat ]
+          [ edge[0].longitude, edge[0].latitude ],
+          [ edge[1].longitude, edge[1].latitude ]
         ]
     }
   });
