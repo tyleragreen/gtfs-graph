@@ -20,7 +20,6 @@ body {
   border-radius: 5px;
 }
 #suggestions {
-  display: none;
   position: absolute;
   border-radius: 3px;
   width: 100%;

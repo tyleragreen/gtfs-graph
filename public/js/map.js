@@ -93,7 +93,12 @@ Map.prototype.addPageRank = function(ranks) {
 };
 
 Map.prototype.getStops = function(query) {
-  return this.stops.features.map((feature) => { return { name: feature.properties.name, routes: feature.properties.routes }; })
+  return this.stops.features.map((feature) => {
+    return { 
+      name: feature.properties.name,
+      routes: feature.properties.routes,
+      id: feature.properties.id
+    }; })
     .filter(stop => stop.name.toLowerCase().indexOf(query.toLowerCase()) !== -1)
     .sort((a,b) => {
       if (a.name < b.name)

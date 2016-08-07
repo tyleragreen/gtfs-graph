@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { Component } from 'react';
 import DOM from 'react-dom';
+import IO from 'socket.io-client';
+
 const socketMsg = require('./constants.js');
 var Map = require('./map.js');
 
-var socket = io();
+var socket = IO();
 
 var map = new Map(function() {
   socket.emit(socketMsg.requestStops);
@@ -42,8 +44,7 @@ var Menu = React.createClass({
     return { mode: '' };
   },
   runMode: function() {
-    console.log('menu says hello');
-    var msg = 'start ' + $('#type').val();
+    var msg = 'start ' + this.state.mode;
     this.props.socket.emit(msg, map.selectedStop);
   },
   changeMode: function(mode) {
@@ -61,18 +62,75 @@ var Menu = React.createClass({
 });
 
 var StopSelector = React.createClass({
+  getInitialState: function() {
+    return {
+      searchValue: '',
+      stops: []
+    };
+  },
   handleChange: function(e) {
-    console.log('key press');
+    this.setState({ searchValue: e.target.value });
+    if (e.target.value.length > 0) {
+      this.setState({ stops: map.getStops(e.target.value) });
+    } else {
+      this.setState({ stops: [] });
+    }
   },
   render: function() {
     return (
       <div>
-      <input type="text" id="origin"
+      <input
+        type="text"
+        id="origin"
+        value={this.state.searchValue}
         onChange={this.handleChange}
       />
-      <ul id="suggestions">
-      </ul>
+      <SearchSuggestionList data={this.state.stops} />
       </div>
+    );
+  }
+});
+
+var SearchSuggestionList = React.createClass({
+  render: function() {
+    var list;
+    
+    if (this.props.data.length > 0) {
+      var suggestions = this.props.data.map(function (stop) {
+        return (
+          <SearchSuggestion key={stop.id} name={stop.name} routes={stop.routes} />
+        );
+      });
+      list = (<ul id="suggestions">{suggestions}</ul>);
+    }
+    
+    return (
+      <div>
+        {list}
+      </div>
+    );
+  }
+});
+
+var SearchSuggestion = React.createClass({
+  render: function() {
+    var routes = this.props.routes.map(function(route) {
+      return (
+        <Icon key={route} id={route.toLowerCase()} />
+      );
+    });
+    
+    return (
+      <li>{routes}{this.props.name}</li>
+    );
+  }
+});
+
+var Icon = React.createClass({
+  render: function() {
+    var filename = 'icons/' + this.props.id + '.png';
+    return (
+      <img src={filename} />
     );
   }
 });
