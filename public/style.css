@@ -12,7 +12,7 @@ body {
 }
 #controlMenu {
   position: absolute;
-  width: 200px;
+  width: 300px;
   top: 10;
   right: 10;
   background: white;
@@ -21,14 +21,27 @@ body {
 }
 #suggestions {
   position: absolute;
-  border-radius: 3px;
-  width: 100%;
+  border-radius: 5px;
+  width: 94%;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   background: rgba(255, 255, 255, 0.9);
   padding: 2px 0;
   font-size: 90%;
   overflow: auto;
 }
+#suggestions li {
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 5px;
+}
 #suggestions li:hover {
-  background: grey;
+  background: #337ab7;
+  border-color: #2e6da4;
+  color: white;
+}
+.input-field {
+  width: 100%;
+}
+.btn-container {
+  padding-top: 10px;
 }
