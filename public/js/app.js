@@ -42,13 +42,10 @@ const UNINCLUDED_ROUTES = ["SI"];
 
 var App = React.createClass({
   componentDidMount: function() {
-    console.log('app component did mount');
-    console.log('trying refs', this.refs);
     var socket = IO();
     var that = this;
     
     socket.on(socketMsg.sendStops, function(stops) {
-      console.log('trying refs inside', that.refs);
       that.refs.map.addStops(stops);
     });
     
@@ -57,7 +54,6 @@ var App = React.createClass({
     });
     
     socket.on(socketMsg.event, function(event) {
-      console.log('received event', event);
       if (event.type === socketMsg.visitNode) {
         that.refs.map.visitEdge(event.data);
       } else if (event.type === socketMsg.leaveNode) {
@@ -78,7 +74,6 @@ var App = React.createClass({
   },
   handleRun: function(mode, origin, destination) {
     var msg = 'start ' + mode;
-    console.log('running '+mode+' from '+origin);
     this.state.socket.emit(msg, origin, destination);
   },
   render: function() {
@@ -278,7 +273,6 @@ var Map = React.createClass({
     createLayer(this.state.map, 'left edges', this.state.leftEdges, '#0000ff', 3, 1.0);
   },
   visitEdge: function(edge) {
-    console.log(edge);
     this.state.visitedEdges.features.push({
       type: 'Feature',
       geometry: {
@@ -305,7 +299,6 @@ var Map = React.createClass({
     this.state.map.getSource('left edges').setData(this.state.leftEdges);
   },
   render: function() {
-    console.log('props in render', this.props);
     return (
       <div id='map'></div>
     );
@@ -331,8 +324,6 @@ var Menu = React.createClass({
   },
   handleEndpointSet: function(inputField, stop) {
     this.state[inputField] = stop;
-    console.log('stop', stop);
-    console.log('we know the value of '+inputField+' is '+stop.name);
   },
   render: function() {
     var selectors;
@@ -405,10 +396,9 @@ var StopSelector = onClickOutside(React.createClass({
     }
   },
   handleTokenClick: function(e) {
-    console.log('token click');
     this.setState({
       selectedStop: undefined,
-      searchValue: undefined,
+      searchValue: "",
       stops: []
     });
   },
@@ -426,9 +416,9 @@ var StopSelector = onClickOutside(React.createClass({
       <div className="input-label">{this.props.label}:&nbsp;</div>
       <div className="input-wrapper">
       <input
-        type="text"
+        type="search"
         id="origin"
-        className="input-field"
+        className="input-field form-control"
         value={this.state.searchValue}
         onChange={this.handleChange}
         onClick={this.handleChange}
@@ -446,8 +436,15 @@ var StopSelector = onClickOutside(React.createClass({
 
 var SearchToken = React.createClass({
   render: function() {
+    var routes = this.props.stop.routes.map(function(route) {
+      return (
+        <Icon key={route} id={route.toLowerCase()} />
+      );
+    });
     return (
-      <div className="input-token" onClick={this.props.onClick}>{this.props.stop.name}<div className="input-token-close">&times;</div></div>
+      <div className="input-token">{routes}&nbsp;&nbsp;{this.props.stop.name}
+        <div className="input-token-close" onClick={this.props.onClick}>&times;</div>
+      </div>
     );
   }
 });
@@ -539,6 +536,7 @@ var ModeSelector = React.createClass({
       <div>Traversal Type:&nbsp; 
       <select 
         id="type"
+        className="form-control"
         value={this.state.selectValue}
         onChange={this.handleChange}
       >
