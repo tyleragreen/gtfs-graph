@@ -13,6 +13,7 @@ var App = React.createClass({
     var that = this;
     
     socket.on(socketMsg.sendStops, function(stops) {
+      that.setState({ stops: stops });
       that.refs.map.addStops(stops);
     });
     
@@ -36,20 +37,39 @@ var App = React.createClass({
     this.state.socket.emit(socketMsg.requestStops);
     this.state.socket.emit(socketMsg.requestEdges);
   },
-  handleAutocomplete: function(query) {
-    return this.refs.map.getStops(query);
+  handleAutocomplete: function(query,numToReturn=10) {
+    return this.state.stops.filter(stop => stop.name.toLowerCase().indexOf(query.toLowerCase()) !== -1)
+      .sort((a,b) => {
+        if (a.name < b.name)
+          return -1;
+        if (a.name > b.name)
+          return 1;
+        return 0; })
+      .slice(0,numToReturn);
   },
   handleRun: function(mode, origin, destination) {
     var msg = 'start ' + mode;
     this.state.socket.emit(msg, origin, destination);
+    this.refs.map.clearTrace();
+  },
+  handleStopClick: function(stopId) {
+    this.refs.menu.setOriginFromClick(this._lookupStop(stopId));
+  },
+  _lookupStop: function(stopId) {
+    return this.state.stops[this.state.stops.map(stop => stop.id).indexOf(stopId)];
   },
   render: function() {
     return (
       <div>
-        <Map onMapLoad={this.handleMapLoad} ref='map' />
+        <Map
+          onMapLoad={this.handleMapLoad}
+          onStopClick={this.handleStopClick}
+          ref='map'
+        />
         <Menu
           onAutocomplete={this.handleAutocomplete}
           onRun={this.handleRun}
+          ref='menu'
         />
       </div>
     );
@@ -69,6 +89,18 @@ var Map = React.createClass({
         features: []
       }
     };
+  },
+  clearTrace: function() {
+    this.setState({
+      visitedEdges: {
+        type: 'FeatureCollection',
+        features: []
+      },
+      leftEdges: {
+        type: 'FeatureCollection',
+        features: []
+      }
+    });
   },
   componentDidMount: function() {
     
@@ -135,28 +167,37 @@ var Map = React.createClass({
       image.src = 'icons/' + img + '.png';
     });
   },
-  getStops: function(query) {
-    return this.state.stops.features.map((feature) => {
-      return { 
-        name: feature.properties.name,
-        routes: feature.properties.routes,
-        id: feature.properties.id
-      }; })
-      .filter(stop => stop.name.toLowerCase().indexOf(query.toLowerCase()) !== -1)
-      .sort((a,b) => {
-        if (a.name < b.name)
-          return -1;
-        if (a.name > b.name)
-          return 1;
-        return 0; })
-      .slice(0,10);
+  _getStopsAsGeoJson: function(stops) {
+    var stopsGeoJson = [];
+    
+    for (var stopIndex in stops) {
+      let feature = {
+        'type': 'Feature',
+        'properties': {
+          'id': stops[stopIndex].id,
+          'name': stops[stopIndex].name,
+          'routes': stops[stopIndex].routes
+        },
+        'geometry': {
+          'type': 'Point',
+          'coordinates': [stops[stopIndex].longitude, stops[stopIndex].latitude]
+        }
+      };
+      stopsGeoJson.push(feature);
+    }
+    stopsGeoJson = {
+      'type': 'FeatureCollection',
+      'features': stopsGeoJson
+    };
+    
+    return stopsGeoJson;
   },
   addStops: function(stops) {
-    this.setState({ stops: stops });
+    var stopGeoJson = this._getStopsAsGeoJson(stops);
     
     this.state.map.addSource('stops', {
       "type": "geojson",
-      "data": stops
+      "data": stopGeoJson
     });
     
     this.state.map.addLayer({
@@ -168,9 +209,6 @@ var Map = React.createClass({
       }
     });
     var self = this;
-    
-    //$('#sel-stop').html(stops.features[DEFAULT_START].properties.name);
-    //self.selectedStop = parseInt(stops.features[DEFAULT_START].properties.id);
     
     var popup = new MapboxGl.Popup({
       closeButton: false,
@@ -198,14 +236,15 @@ var Map = React.createClass({
         .setHTML(html)
         .addTo(self.state.map); 
     });
-    //this.state.map.on('click', function(e) {
-    //  var features = self.state.map.queryRenderedFeatures(e.point, { layers: ['stops'] });
-    //  if (!features.length) { return; }
-    //  
-    //  var feature = features[0];
-    //  
-    //  self.selectedStop = parseInt(feature.properties.id);
-    //});
+    this.state.map.on('click', function(e) {
+      var features = self.state.map.queryRenderedFeatures(e.point, { layers: ['stops'] });
+      if (!features.length) { return; }
+      
+      var feature = features[0];
+      
+      let selectedStopId = feature.properties.id;
+      self.props.onStopClick(selectedStopId);
+    });
   },
   addEdges: function(edges) {
     let createLayer = function(map, id, data, color, width, opacity) {
@@ -276,12 +315,16 @@ var Menu = React.createClass({
   getInitialState: function() {
     return {
       mode: 'dfs',
-      origin: '',
-      destination: ''
+      origin: undefined,
+      destination: undefined
     };
   },
   handleRun: function() {
-    this.props.onRun(this.state.mode, this.state.origin.id, this.state.destination.id);
+    var destinationId = '';
+    if (typeof this.state.destination !== "undefined") {
+      destinationId = this.state.destination.id;
+    }
+    this.props.onRun(this.state.mode, this.state.origin.id, destinationId);
   },
   changeMode: function(mode) {
     this.setState({ mode: mode });
@@ -292,6 +335,10 @@ var Menu = React.createClass({
   handleEndpointSet: function(inputField, stop) {
     this.state[inputField] = stop;
   },
+  setOriginFromClick: function(stop) {
+    this.refs.origin.getInstance().setSelectedStop(stop);
+    this.state['origin'] = stop;
+  },
   render: function() {
     var selectors;
     if (this.state.mode == 'dij') {
@@ -300,19 +347,26 @@ var Menu = React.createClass({
         <StopSelector
           onAutocomplete={this.handleAutocomplete}
           onEndpointSet={this.handleEndpointSet}
-          label={'Origin'}
+          label='Origin'
+          ref='origin'
         />
         <StopSelector
           onAutocomplete={this.handleAutocomplete}
           onEndpointSet={this.handleEndpointSet}
-          label={'Destination'}
+          label='Destination'
+          ref='destinaton'
         />
         </div>
       );
     } else {
       selectors = (
         <div>
-        <StopSelector onAutocomplete={this.handleAutocomplete} onEndpointSet={this.handleEndpointSet} label={'Origin'} />
+        <StopSelector
+          onAutocomplete={this.handleAutocomplete}
+          onEndpointSet={this.handleEndpointSet}
+          label='Origin'
+          ref='origin'
+        />
         </div>
       );
     }
@@ -338,6 +392,9 @@ var StopSelector = onClickOutside(React.createClass({
       stops: [],
       selectedStop: undefined
     };
+  },
+  setSelectedStop: function(selectedStop) {
+    this.setState({ selectedStop: selectedStop });
   },
   handleSuggestionClick: function(itemId) {
     let stopFilter = this.state.stops.filter(stop => stop.id === itemId);
