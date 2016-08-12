@@ -70,7 +70,7 @@ describe('The server', function() {
     var seenEvent = false;
     
     socket.on('connect', function(){
-      socket.emit(socketMsg.startDfs, 0);
+      socket.emit(socketMsg.startDfs, 'R20');
       socket.on(socketMsg.event, function(event) {
         if (!seenEvent) {
           expect(event.type).to.equal(socketMsg.visitNode);
@@ -86,9 +86,7 @@ describe('The server', function() {
     socket.on('connect', function(){
       socket.emit(socketMsg.requestStops);
       socket.on(socketMsg.sendStops, function(stops) {
-        expect(stops.type).to.equal('FeatureCollection');
-        expect(stops.features.length).to.be.above(0);
-        expect(stops.features[0].properties.routes.length).to.be.above(0);
+        expect(stops.length).to.be.above(0);
         done();
       });
     });

@@ -28,6 +28,7 @@ body {
   padding: 2px 0;
   font-size: 90%;
   overflow: auto;
+  z-index: 1;
 }
 #suggestions li {
   padding: 3px;
@@ -63,8 +64,7 @@ input[type="search"]:disabled {
   padding: 0 3px;
 }
 .input-token:hover {
-  background: white;
-  color: black;
+  background: #4993d2;
 }
 .input-token-close {
   float: right;

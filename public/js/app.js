@@ -579,7 +579,6 @@ var ModeSelector = React.createClass({
         <option value="dij">Shortest Path Search</option>
         <option value="dfs">Depth-First Search</option>
         <option value="bfs">Breadth-First Search</option>
-        <option value="pr">Page Rank</option>
       </select>
       </div>
     );
@@ -587,7 +586,6 @@ var ModeSelector = React.createClass({
 });
 
 DOM.render(
-  //<Menu socket={socket} />,
   <App />,
   document.getElementById('content')
 );

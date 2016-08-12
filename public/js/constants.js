@@ -8,6 +8,7 @@ const socketMsg = {
   startDfs: 'start dfs',
   startBfs: 'start bfs',
   startPR: 'start pr',
+  startDijkstra: 'start dij',
   event: 'event',
   visitNode: 'visit node',
   leaveNode: 'leave node'
