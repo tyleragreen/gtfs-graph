@@ -45,6 +45,9 @@ body {
 .input-field {
   width: 100%;
 }
+input[type="search"]:disabled {
+  cursor: default;
+}
 .input-token {
   border:2px solid #2e6da4;
   background: #337ab7;
@@ -57,6 +60,7 @@ body {
   height: 75%;
   width: 97%;
   cursor: default;
+  padding: 0 3px;
 }
 .input-token:hover {
   background: white;

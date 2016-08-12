@@ -6,39 +6,6 @@ import MapboxGl from "mapbox-gl";
 var onClickOutside = require('react-onclickoutside');
 const socketMsg = require('./constants.js');
 const UNINCLUDED_ROUTES = ["SI"];
-//var Map = require('./map.js');
-
-
-//var map = new Map(function() {
-//  socket.emit(socketMsg.requestStops);
-//  socket.emit(socketMsg.requestEdges);
-//});
-
-//socket.on(socketMsg.log, function(msg) {
-//  console.log(msg);
-//});
-//
-//socket.on(socketMsg.sendStops, function(stops) {
-//  map.addStops(stops);
-//});
-//
-//socket.on(socketMsg.sendEdges, function(edges) {
-//  map.addEdges(edges);
-//});
-//
-//socket.on(socketMsg.sendPR, function(ranks) {
-//  map.addPageRank(ranks);
-//});
-//
-//socket.on(socketMsg.event, function(event) {
-//  if (event.type === socketMsg.visitNode) {
-//    map.visitEdge(event.data);
-//  } else if (event.type === socketMsg.leaveNode) {
-//    map.leaveEdge(event.data);
-//  } else {
-//    throw 'bad event type';
-//  }
-//});
 
 var App = React.createClass({
   componentDidMount: function() {
@@ -395,11 +362,21 @@ var StopSelector = onClickOutside(React.createClass({
       this.setState({ stops: [] });
     }
   },
-  handleTokenClick: function(e) {
+  handleTokenClose: function(e) {
+    // Prevent the token click event from firing
+    e.stopPropagation();
+    
     this.setState({
       selectedStop: undefined,
       searchValue: "",
       stops: []
+    });
+  },
+  handleTokenClick: function(e) {
+    var prevStopName = this.state.selectedStop.name;
+    this.setState({
+      selectedStop: undefined,
+      searchValue: prevStopName,
     });
   },
   render: function() {
@@ -407,7 +384,8 @@ var StopSelector = onClickOutside(React.createClass({
       var token = (
         <SearchToken
           stop={this.state.selectedStop}
-          onClick={this.handleTokenClick}
+          onTokenClose={this.handleTokenClose}
+          onTokenClick={this.handleTokenClick}
         />
       );
     }
@@ -422,6 +400,7 @@ var StopSelector = onClickOutside(React.createClass({
         value={this.state.searchValue}
         onChange={this.handleChange}
         onClick={this.handleChange}
+        disabled={typeof this.state.selectedStop !== "undefined"}
       />
       {token}
       </div>
@@ -442,8 +421,8 @@ var SearchToken = React.createClass({
       );
     });
     return (
-      <div className="input-token">{routes}&nbsp;&nbsp;{this.props.stop.name}
-        <div className="input-token-close" onClick={this.props.onClick}>&times;</div>
+      <div className="input-token" onClick={this.props.onTokenClick}>{routes}&nbsp;&nbsp;{this.props.stop.name}
+        <div className="input-token-close" onClick={this.props.onTokenClose}>&times;</div>
       </div>
     );
   }
