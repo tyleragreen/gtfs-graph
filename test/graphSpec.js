@@ -53,7 +53,7 @@ describe('A transit graph', function() {
   it('can be traversed by dfs search', function() {
     let startingNode = 1;
     let graphTraverser = new BasicTraverser();
-    traversals.dfs(this.graph, graphTraverser, startingNode);
+    traversals.dfs(this.graph, startingNode, graphTraverser);
     
     expect(graphTraverser.visitedEdges.length).to.equal(4);
     expect(graphTraverser.visitedEdges).to.deep.equal([[1,0],[1,2],[2,3],[3,4]]);
@@ -68,7 +68,7 @@ describe('A transit graph', function() {
     
     // Perform the assertions inside the callback, as the BFS
     // is an async function.
-    traversals.bfs(this.graph, graphTraverser, startingNode, function() {
+    traversals.bfs(this.graph, startingNode, graphTraverser, function() {
       expect(graphTraverser.visitedEdges.length).to.equal(4);
       expect(graphTraverser.visitedEdges).to.deep.equal([[1,0],[1,2],[1,4],[2,3]]);
       expect(graphTraverser.leftEdges.length).to.equal(0);
