@@ -1,5 +1,5 @@
 import React from 'react';
-import DOM from 'react-dom';
+import DOM, { render, unmountComponentAtNode } from 'react-dom';
 import IO from 'socket.io-client';
 import MapboxGl from "mapbox-gl";
 
@@ -55,6 +55,9 @@ var App = React.createClass({
   handleStopClick: function(stopId) {
     this.refs.menu.setOriginFromClick(this._lookupStop(stopId));
   },
+  handleStopHover: function(stopId) {
+    this.refs.map.setHoverStop(this._lookupStop(stopId));
+  },
   _lookupStop: function(stopId) {
     return this.state.stops[this.state.stops.map(stop => stop.id).indexOf(stopId)];
   },
@@ -64,6 +67,7 @@ var App = React.createClass({
         <Map
           onMapLoad={this.handleMapLoad}
           onStopClick={this.handleStopClick}
+          onStopHover={this.handleStopHover}
           ref='map'
         />
         <Menu
@@ -80,6 +84,8 @@ var Map = React.createClass({
   getInitialState: function() {
     return { 
       map: undefined,
+      popupLatitude: undefined,
+      popupLongitude: undefined,
       visitedEdges: {
         type: 'FeatureCollection',
         features: []
@@ -125,37 +131,6 @@ var Map = React.createClass({
     
     map.on('load', function() {
       that.props.onMapLoad();
-    //  this.addSource("ranks", {
-    //    type: "geojson",
-    //    data: {
-    //      type: 'FeatureCollection',
-    //      features: []
-    //    }
-    //  });
-    //  var layers = [
-    //    [0, 'rgba(0,255,0,0.5)', 70],
-    //    [0.05, 'rgba(255,165,0,0.5)', 80],
-    //    [0.1, 'rgba(255,0,0,0.8)', 90]
-    //  ];
-    //  var thatMap = this;
-    //  layers.forEach(function (layer, i) {
-    //    thatMap.addLayer({
-    //      "id": "cluster-" + i,
-    //      "type": "circle",
-    //      "source": 'ranks',
-    //      "paint": {
-    //        "circle-color": layer[1],
-    //        "circle-radius": layer[2],
-    //        "circle-blur": 1
-    //      },
-    //      "filter": i === layers.length - 1 ?
-    //        [">=", "rank", layer[0]] :
-    //        ["all",
-    //          [">=", "rank", layer[0]],
-    //          ["<", "rank", layers[i + 1][0]]]
-    //    });
-    //  });
-    //});
     });
     this.setState({ map: map });
   },
@@ -210,31 +185,18 @@ var Map = React.createClass({
     });
     var self = this;
     
-    var popup = new MapboxGl.Popup({
-      closeButton: false,
-      closeOnClick: false
-    });
     this.state.map.on('mousemove', function(e) {
       var features = self.state.map.queryRenderedFeatures(e.point, { layers: ['stops'] });
       self.state.map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
       
-      if (!features.length) { popup.remove(); return; }
+      if (!features.length) { 
+        self.setState({ hoveredStop: undefined });
+        return;
+      }
     
       var feature = features[0];
-      var html = feature.properties.name + ' ';
-      feature.properties.routes.split(",").forEach(function(route,index) {
-        // Only include an image if it isn't one of the routes we don't have images for
-        if (UNINCLUDED_ROUTES.indexOf(route) === -1) {
-          html += '<img src="icons/' + route.toLowerCase() + '.png" /> ';
-        } else {
-          html += '(' + route + ') ';
-        }
-      });
-      
-      // Set the popup location and text
-      popup.setLngLat(feature.geometry.coordinates)
-        .setHTML(html)
-        .addTo(self.state.map); 
+      let selectedStopId = feature.properties.id;
+      self.props.onStopHover(selectedStopId);
     });
     this.state.map.on('click', function(e) {
       var features = self.state.map.queryRenderedFeatures(e.point, { layers: ['stops'] });
@@ -245,6 +207,9 @@ var Map = React.createClass({
       let selectedStopId = feature.properties.id;
       self.props.onStopClick(selectedStopId);
     });
+  },
+  setHoverStop: function(hoveredStop) {
+    this.setState({ hoveredStop: hoveredStop });
   },
   addEdges: function(edges) {
     let createLayer = function(map, id, data, color, width, opacity) {
@@ -305,9 +270,56 @@ var Map = React.createClass({
     this.state.map.getSource('left edges').setData(this.state.leftEdges);
   },
   render: function() {
+    const { hoveredStop } = this.state;
     return (
-      <div id='map'></div>
+      <div id='map'>
+        { hoveredStop && (
+          <Popup
+            map={this.state.map}
+            longitude={hoveredStop.longitude}
+            latitude={hoveredStop.latitude}
+            ref={'popup'}
+            key={'popup'}
+          >
+            <div>
+              <div>{hoveredStop.name}</div>
+              <div><RouteList stop={hoveredStop} /></div>
+            </div>
+          </Popup>
+        )}
+      </div>
     );
+  }
+});
+
+var Popup = React.createClass({
+  getInitialState: function() {
+    this.div = document.createElement('div');
+    this.popup = new MapboxGl.Popup({
+      closeButton: false,
+      closeOnClick: false
+    });
+    return { popup: undefined };
+  },
+  componentDidMount: function() {
+    const { longitude, latitude, children, map } = this.props;
+    const { popup, div } = this;
+    
+    if (children) {
+      popup.setDOMContent(this.div);
+    }
+    popup.setLngLat([longitude, latitude]);
+    render(children, div, () => {
+      popup.addTo(map);
+    });
+    this.setState({ popup: popup });
+  },
+  componentWillUnmount: function() {
+    this.state.popup.remove();
+    unmountComponentAtNode(this.div);
+  },
+  render: function() {
+    return null;
   }
 });
 
@@ -472,13 +484,9 @@ var StopSelector = onClickOutside(React.createClass({
 
 var SearchToken = React.createClass({
   render: function() {
-    var routes = this.props.stop.routes.map(function(route) {
-      return (
-        <Icon key={route} id={route.toLowerCase()} />
-      );
-    });
     return (
-      <div className="input-token" onClick={this.props.onTokenClick}>{routes}&nbsp;&nbsp;{this.props.stop.name}
+      <div className="input-token" onClick={this.props.onTokenClick}>
+        <RouteList stop={this.props.stop} />&nbsp;&nbsp;{this.props.stop.name}
         <div className="input-token-close" onClick={this.props.onTokenClose}>&times;</div>
       </div>
     );
@@ -499,8 +507,7 @@ var SearchSuggestionList = React.createClass({
           <SearchSuggestion
            key={stop.id}
            id={stop.id}
-           name={stop.name}
-           routes={stop.routes}
+           stop={stop}
            onItemClick={self.handleItemClick}
           />
         );
@@ -521,18 +528,26 @@ var SearchSuggestion = React.createClass({
     this.props.onItemClick(this.props.id);
   },
   render: function() {
-    var routes = this.props.routes.map(function(route) {
+    return (
+      <li
+        onClick={this.handleClick}
+      >
+      <RouteList stop={this.props.stop} />&nbsp;&nbsp;{this.props.stop.name}
+      </li>
+    );
+  }
+});
+
+var RouteList = React.createClass({
+  render: function() {
+    var routes = this.props.stop.routes.map(function(route) {
       return (
         <Icon key={route} id={route.toLowerCase()} />
       );
     });
     
     return (
-      <li
-        onClick={this.handleClick}
-      >
-      {routes}&nbsp;&nbsp;{this.props.name}
-      </li>
+      <span>{routes}</span>
     );
   }
 });
