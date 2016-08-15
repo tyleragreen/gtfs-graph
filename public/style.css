@@ -10,14 +10,24 @@ body {
   bottom: 0;
   width: 100%;
 }
+.box {
+  background: white;
+  padding: 10px;
+  border-radius: 5px;
+}
 #controlMenu {
   position: absolute;
   width: 300px;
   top: 10;
   right: 10;
-  background: white;
-  padding: 10px;
-  border-radius: 5px;
+}
+#info-box {
+  position: absolute;
+  width: 300px;
+  bottom: 30;
+  right: 10;
+  overflow-y: scroll;
+  height: 200px;
 }
 #suggestions {
   position: absolute;
@@ -73,4 +83,11 @@ input[type="search"]:disabled {
 }
 .input-wrapper {
   position: relative;
+}
+.popup {
+  font-family: 'Lato', sans-serif;
+  text-align: center;
+}
+.popup .btn {
+  margin: 3px;
 }

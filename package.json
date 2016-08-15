@@ -27,6 +27,7 @@
     "mapbox-gl": "^0.21.0",
     "pg": "^4.5.5",
     "react": "^15.3.0",
+    "react-addons-update": "^15.3.0",
     "react-dom": "^15.3.0",
     "react-onclickoutside": "^5.3.3",
     "socket.io": "^1.4.6",
