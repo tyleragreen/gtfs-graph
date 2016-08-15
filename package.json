@@ -23,6 +23,7 @@
     "body-parser": "^1.15.2",
     "bower": "^1.7.9",
     "browserify": "^13.0.1",
+    "classnames": "^2.2.5",
     "express": "^4.14.0",
     "mapbox-gl": "^0.21.0",
     "pg": "^4.5.5",

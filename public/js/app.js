@@ -3,6 +3,7 @@ import DOM, { render, unmountComponentAtNode } from 'react-dom';
 import update from 'react-addons-update';
 import IO from 'socket.io-client';
 import MapboxGl from "mapbox-gl";
+import classNames from 'classnames';
 
 var onClickOutside = require('react-onclickoutside');
 const socketMsg = require('./constants.js');
@@ -99,7 +100,8 @@ var InfoBox = React.createClass({
     return { contents: [] };
   },
   addContents: function(newItem) {
-    this.setState({ contents: this.state.contents.concat([newItem]) });
+    //this.setState({ contents: this.state.contents.concat([newItem]) });
+    this.setState({ contents: update(this.state.contents, {$push: [newItem]}) });
   },
   render: function() {
     var contents = this.state.contents.map((item, index) => {
@@ -382,11 +384,26 @@ var Menu = React.createClass({
     };
   },
   handleRun: function() {
-    var destinationId = '';
-    if (typeof this.state.destination !== "undefined") {
-      destinationId = this.state.destination.id;
+    if (this.state.mode === socketMsg.dijkstra) {
+      let originInvalid = typeof this.state.origin === "undefined";
+      let destinationInvalid = typeof this.state.destination === "undefined";
+      
+      if (originInvalid) {
+        this.refs.origin.getInstance().markInvalid();
+      }
+      if (destinationInvalid) {
+        this.refs.destination.getInstance().markInvalid();
+      }
+      if (!originInvalid && !destinationInvalid) {
+        this.props.onRun(this.state.mode, this.state.origin.id, this.state.destination.id);
+      }
+    } else {
+      if (typeof this.state.origin === "undefined") {
+        this.refs.origin.getInstance().markInvalid();
+      } else {
+        this.props.onRun(this.state.mode, this.state.origin.id);
+      }
     }
-    this.props.onRun(this.state.mode, this.state.origin.id, destinationId);
   },
   handleStop: function() {
     this.props.onStop();
@@ -400,26 +417,31 @@ var Menu = React.createClass({
   handleEndpointSet: function(inputField, stop) {
     this.state[inputField] = stop;
   },
+  handleEndpointClear: function(inputField) {
+    this.state[inputField] = undefined;
+  },
   setOriginFromClick: function(stop) {
     this.refs.origin.getInstance().setSelectedStop(stop);
     this.state['origin'] = stop;
   },
   render: function() {
     var selectors;
-    if (this.state.mode == 'dij') {
+    if (this.state.mode === socketMsg.dijkstra) {
       selectors = (
         <div>
         <StopSelector
           onAutocomplete={this.handleAutocomplete}
           onEndpointSet={this.handleEndpointSet}
+          onEndpointClear={this.handleEndpointClear}
           label='Origin'
           ref='origin'
         />
         <StopSelector
           onAutocomplete={this.handleAutocomplete}
           onEndpointSet={this.handleEndpointSet}
+          onEndpointClear={this.handleEndpointClear}
           label='Destination'
-          ref='destinaton'
+          ref='destination'
         />
         </div>
       );
@@ -429,6 +451,7 @@ var Menu = React.createClass({
         <StopSelector
           onAutocomplete={this.handleAutocomplete}
           onEndpointSet={this.handleEndpointSet}
+          onEndpointClear={this.handleEndpointClear}
           label='Origin'
           ref='origin'
         />
@@ -456,8 +479,15 @@ var StopSelector = onClickOutside(React.createClass({
     return {
       searchValue: '',
       stops: [],
-      selectedStop: undefined
+      selectedStop: undefined,
+      valid: true
     };
+  },
+  markInvalid: function() {
+    this.setState({ valid: false });
+  },
+  markValid: function() {
+    this.setState({ valid: true });
   },
   setSelectedStop: function(selectedStop) {
     this.setState({ selectedStop: selectedStop });
@@ -478,7 +508,7 @@ var StopSelector = onClickOutside(React.createClass({
     this.props.onEndpointSet(this.props.label.toLowerCase(), stop);
   },
   handleChange: function(e) {
-    this.setState({ searchValue: e.target.value });
+    this.setState({ searchValue: e.target.value, valid: true });
     if (e.target.value.length > 0) {
       this.setState({ stops: this.props.onAutocomplete(e.target.value) });
     } else {
@@ -494,6 +524,7 @@ var StopSelector = onClickOutside(React.createClass({
       searchValue: "",
       stops: []
     });
+    this.props.onEndpointClear(this.props.label.toLowerCase());
   },
   handleTokenClick: function(e) {
     var prevStopName = this.state.selectedStop.name;
@@ -503,6 +534,16 @@ var StopSelector = onClickOutside(React.createClass({
     });
   },
   render: function() {
+    let inputFieldClasses = classNames({
+      'input-field': true,
+      'form-control': true,
+      'form-control-danger': !this.state.valid
+    });
+    let inputWrapperClasses = classNames({
+      'input-wrapper': true,
+      'form-group': true,
+      'has-danger': !this.state.valid
+    });
     if (typeof this.state.selectedStop !== "undefined") {
       var token = (
         <SearchToken
@@ -515,11 +556,11 @@ var StopSelector = onClickOutside(React.createClass({
     return (
       <div>
       <div className="input-label">{this.props.label}:&nbsp;</div>
-      <div className="input-wrapper">
+      <div className={inputWrapperClasses}>
       <input
         type="search"
         id="origin"
-        className="input-field form-control"
+        className={inputFieldClasses}
         value={this.state.searchValue}
         onChange={this.handleChange}
         onClick={this.handleChange}
@@ -642,9 +683,9 @@ var ModeSelector = React.createClass({
         value={this.state.selectValue}
         onChange={this.handleChange}
       >
-        <option value="dij">Shortest Path Search</option>
-        <option value="dfs">Depth-First Search</option>
-        <option value="bfs">Breadth-First Search</option>
+        <option value={socketMsg.dijkstra}>Shortest Path Search</option>
+        <option value={socketMsg.dfs}>Depth-First Search</option>
+        <option value={socketMsg.bfs}>Breadth-First Search</option>
       </select>
       </div>
     );

@@ -84,10 +84,14 @@ input[type="search"]:disabled {
 .input-wrapper {
   position: relative;
 }
+.mapboxgl-popup-content {
+  padding: 8px;
+}
 .popup {
   font-family: 'Lato', sans-serif;
+  font-size: 120%;
   text-align: center;
 }
 .popup .btn {
-  margin: 3px;
+  margin: 5px 3px;
 }
