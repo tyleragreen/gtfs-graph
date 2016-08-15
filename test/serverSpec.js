@@ -1,7 +1,6 @@
 'use strict';
 
 var expect = require('chai').expect;
-var assert = require('chai').assert;
 
 process.env.NODE_ENV = 'test';
 
@@ -11,6 +10,7 @@ var io = require('socket.io-client');
 var socketMsg = require('../public/js/constants.js');
 var createGraph = require('../lib/createGraph.js');
 var async = require('async');
+var Edge = require('../lib/edge.js');
 
 var socketURL = 'http://' + (process.env.IP || '0.0.0.0') + ':' + (process.env.PORT || 3000);
 var http_options = {
@@ -74,6 +74,7 @@ describe('The server', function() {
       socket.on(socketMsg.event, function(event) {
         if (!seenEvent) {
           expect(event.type).to.equal(socketMsg.visitNode);
+          expect(event.data).to.be.a.edge;
           done();
         }
         seenEvent = true;

@@ -15,7 +15,8 @@ const socketMsg = {
   clearQueue: 'clearQueue',
   event: 'event',
   visitNode: 'visit node',
-  leaveNode: 'leave node'
+  leaveNode: 'leave node',
+  summary: 'summary'
 };
 
 Object.freeze(socketMsg);

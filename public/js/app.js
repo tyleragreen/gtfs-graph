@@ -27,16 +27,20 @@ var App = React.createClass({
     this.refs.map.addEdges(edges);
   },
   _socketEventHandler: function(event) {
-      if (event.type === socketMsg.visitNode) {
-        this.refs.map.visitEdge(event.data);
-      } else if (event.type === socketMsg.leaveNode) {
-        this.refs.map.leaveEdge(event.data);
-      } else {
-        throw 'bad event type';
-      }
-      let infoLine = event.data[0].name + ' to ' + event.data[1].name;
-      this.refs.infoBox.addContents(infoLine);
-    },
+    var infoLine;
+    if (event.type === socketMsg.visitNode) {
+      this.refs.map.visitEdge(event.data);
+      infoLine = 'Visit ' + this.state.stops[event.data.origin].name + ' to ' + this.state.stops[event.data.destination].name;
+    } else if (event.type === socketMsg.leaveNode) {
+      this.refs.map.leaveEdge(event.data);
+      infoLine = 'Leave ' + this.state.stops[event.data.origin].name + ' to ' + this.state.stops[event.data.destination].name;
+    } else if (event.type === socketMsg.summary) {
+      infoLine = 'Length ' + event.data / 60;
+    } else {
+      throw 'bad event type';
+    }
+    this.refs.infoBox.addContents(infoLine);
+  },
   handleMapLoad: function() {
     this.state.socket.emit(socketMsg.requestStops);
     this.state.socket.emit(socketMsg.requestEdges);
@@ -286,8 +290,8 @@ var Map = React.createClass({
       geometry: {
         type: 'LineString',
         coordinates: [
-            [ edge[0].longitude, edge[0].latitude ],
-            [ edge[1].longitude, edge[1].latitude ]
+            [ edge.origin.longitude, edge.origin.latitude ],
+            [ edge.destination.longitude, edge.destination.latitude ]
           ]
       }
     });
@@ -299,8 +303,8 @@ var Map = React.createClass({
       geometry: {
         type: 'LineString',
         coordinates: [
-            [ edge[0].longitude, edge[0].latitude ],
-            [ edge[1].longitude, edge[1].latitude ]
+            [ edge.origin.longitude, edge.origin.latitude ],
+            [ edge.destination.longitude, edge.destination.latitude ]
           ]
       }
     });
