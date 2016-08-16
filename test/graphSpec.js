@@ -12,7 +12,7 @@ var expect = require('chai').expect;
 
 function edgesToArrays(edges) {
   return edges.map(edge => {
-    return [ edge.origin, edge.destination ];
+    return [ edge.origin.id, edge.destination.id ];
   });
 }
 

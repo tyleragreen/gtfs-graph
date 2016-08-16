@@ -67,13 +67,16 @@ var App = React.createClass({
   handleRun: function(mode, origin, destination) {
     var msg = 'start ' + mode;
     this.state.socket.emit(msg, origin, destination);
-    this.refs.map.clearTrace();
+    this._clearTrace();
     this.setState({ infoBoxContents: [] });
     this.refs.infoBox.addContents([]);
   },
+  _clearTrace: function() {
+    setTimeout(() => { this.refs.map.clearTrace()}, 80);
+  },
   handleStop: function() {
     this.state.socket.emit(socketMsg.clearQueue);
-    this.refs.map.clearTrace();
+    this._clearTrace();
   },
   handleOriginClick: function(stopId) {
     console.log('origin click', stopId);
@@ -152,16 +155,20 @@ var Map = React.createClass({
     };
   },
   clearTrace: function() {
+    let clearedVisited = {
+      type: 'FeatureCollection',
+      features: []
+    };
+    let clearedLeft = {
+      type: 'FeatureCollection',
+      features: []
+    };
     this.setState({
-      visitedEdges: {
-        type: 'FeatureCollection',
-        features: []
-      },
-      leftEdges: {
-        type: 'FeatureCollection',
-        features: []
-      }
+      visitedEdges: clearedVisited,
+      leftEdges: clearedLeft
     });
+    this.state.map.getSource('visited edges').setData(clearedVisited);
+    this.state.map.getSource('left edges').setData(clearedLeft);
   },
   componentDidMount: function() {
     
