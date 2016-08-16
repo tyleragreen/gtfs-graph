@@ -10,6 +10,11 @@ const socketMsg = require('./constants.js');
 const UNINCLUDED_ROUTES = ["SI"];
 
 var App = React.createClass({
+  getInitialState: function() {
+    return {
+      infoBoxContents: []
+    };
+  },
   componentDidMount: function() {
     var socket = IO();
     
@@ -27,19 +32,22 @@ var App = React.createClass({
     this.refs.map.addEdges(edges);
   },
   _socketEventHandler: function(event) {
-    var infoLine;
     if (event.type === socketMsg.visitNode) {
       this.refs.map.visitEdge(event.data);
-      infoLine = 'Visit ' + this.state.stops[event.data.origin].name + ' to ' + this.state.stops[event.data.destination].name;
+      let newLine = 'Visit ' + event.data.origin.name + ' to ' + event.data.destination.name;
+      this.setState({ infoBoxContents: update(this.state.infoBoxContents, {$push: [newLine]}) });
     } else if (event.type === socketMsg.leaveNode) {
       this.refs.map.leaveEdge(event.data);
-      infoLine = 'Leave ' + this.state.stops[event.data.origin].name + ' to ' + this.state.stops[event.data.destination].name;
+      let newLine = 'Leave ' + event.data.origin.name + ' to ' + event.data.destination.name;
+      this.setState({ infoBoxContents: update(this.state.infoBoxContents, {$push: [newLine]}) });
     } else if (event.type === socketMsg.summary) {
-      infoLine = 'Length ' + event.data / 60;
+      let newContents = this.state.infoBoxContents.slice();
+      newContents.unshift(event.data);
+      this.setState({ infoBoxContents: newContents });
+      this.refs.infoBox.addContents(newContents);
     } else {
       throw 'bad event type';
     }
-    this.refs.infoBox.addContents(infoLine);
   },
   handleMapLoad: function() {
     this.state.socket.emit(socketMsg.requestStops);
@@ -60,13 +68,20 @@ var App = React.createClass({
     var msg = 'start ' + mode;
     this.state.socket.emit(msg, origin, destination);
     this.refs.map.clearTrace();
+    this.setState({ infoBoxContents: [] });
+    this.refs.infoBox.addContents([]);
   },
   handleStop: function() {
     this.state.socket.emit(socketMsg.clearQueue);
     this.refs.map.clearTrace();
   },
-  handleStopClick: function(stopId) {
+  handleOriginClick: function(stopId) {
+    console.log('origin click', stopId);
     this.refs.menu.setOriginFromClick(this._lookupStop(stopId));
+  },
+  handleDestinationClick: function(stopId) {
+    console.log('dest click', stopId);
+    this.refs.menu.setDestinationFromClick(this._lookupStop(stopId));
   },
   handleStopHover: function(stopId) {
     this.refs.map.setHoverStop(this._lookupStop(stopId));
@@ -82,7 +97,8 @@ var App = React.createClass({
       <div>
         <Map
           onMapLoad={this.handleMapLoad}
-          onStopClick={this.handleStopClick}
+          onOriginClick={this.handleOriginClick}
+          onDestinationClick={this.handleDestinationClick}
           onStopHover={this.handleStopHover}
           getMode={this.getMode}
           ref='map'
@@ -103,9 +119,8 @@ var InfoBox = React.createClass({
   getInitialState: function() {
     return { contents: [] };
   },
-  addContents: function(newItem) {
-    //this.setState({ contents: this.state.contents.concat([newItem]) });
-    this.setState({ contents: update(this.state.contents, {$push: [newItem]}) });
+  addContents: function(contents) {
+    this.setState({ contents: contents });
   },
   render: function() {
     var contents = this.state.contents.map((item, index) => {
@@ -245,8 +260,10 @@ var Map = React.createClass({
       
       var feature = features[0];
       
-      self.setState({ mode: self.props.getMode() });
-      self.props.onStopClick(feature.properties.id);
+      if (self.props.getMode() !== socketMsg.dijkstra) {
+        self.setState({ mode: self.props.getMode() });
+        self.props.onOriginClick(feature.properties.id);
+      }
     });
   },
   setHoverStop: function(hoveredStop) {
@@ -339,7 +356,10 @@ var Map = React.createClass({
             <div className='popup'>
               <div>{hoveredStop.name}</div>
               <div><RouteList stop={hoveredStop} /></div>
-              <div><button className='btn btn-primary'>Origin</button><button className='btn btn-primary'>Destination</button></div>
+              <div>
+                <button className='btn btn-primary' onClick={this.props.onOriginClick.bind(null,hoveredStop.id)}>Origin</button>
+                <button className='btn btn-primary' onClick={this.props.onDestinationClick.bind(null,hoveredStop.id)}>Destination</button>
+              </div>
             </div>
           </Popup>
         )}
@@ -428,6 +448,10 @@ var Menu = React.createClass({
     this.refs.origin.getInstance().setSelectedStop(stop);
     this.state['origin'] = stop;
   },
+  setDestinationFromClick: function(stop) {
+    this.refs.destination.getInstance().setSelectedStop(stop);
+    this.state['destination'] = stop;
+  },
   render: function() {
     var selectors;
     if (this.state.mode === socketMsg.dijkstra) {
@@ -495,6 +519,7 @@ var StopSelector = onClickOutside(React.createClass({
   },
   setSelectedStop: function(selectedStop) {
     this.setState({ selectedStop: selectedStop });
+    this.setState({ valid: true });
   },
   handleSuggestionClick: function(itemId) {
     let stopFilter = this.state.stops.filter(stop => stop.id === itemId);
