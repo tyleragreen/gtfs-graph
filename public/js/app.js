@@ -89,6 +89,11 @@ var App = React.createClass({
   handleStopHover: function(stopId) {
     this.refs.map.setHoverStop(this._lookupStop(stopId));
   },
+  handleEndpointSet: function(inputField, stop) {
+    console.log('input field',inputField);
+    console.log('stop',stop);
+    this.refs.map.setEndpoint(inputField, stop);
+  },
   _lookupStop: function(stopId) {
     return this.state.stops[this.state.stops.map(stop => stop.id).indexOf(stopId)];
   },
@@ -108,6 +113,7 @@ var App = React.createClass({
         />
         <Menu
           onAutocomplete={this.handleAutocomplete}
+          onEndpointSet={this.handleEndpointSet}
           onRun={this.handleRun}
           onStop={this.handleStop}
           ref='menu'
@@ -276,6 +282,11 @@ var Map = React.createClass({
   setHoverStop: function(hoveredStop) {
     this.setState({ hoveredStop: hoveredStop });
   },
+  setEndpoint: function(inputField, stop) {
+    this.state[inputField] = undefined;
+    console.log('setting endpoint', stop);
+    setTimeout(() => { this.state[inputField] = stop },10);
+  },
   addEdges: function(edges) {
     let createLayer = function(map, id, data, color, width, opacity) {
       if (map.getSource(id) !== undefined) { map.removeSource(id); }
@@ -335,9 +346,39 @@ var Map = React.createClass({
     this.state.map.getSource('left edges').setData(this.state.leftEdges);
   },
   render: function() {
-    const { hoveredStop, mode } = this.state;
+    const { hoveredStop, mode, origin, destination } = this.state;
     return (
       <div id='map'>
+        { origin && (
+          <Popup
+            map={this.state.map}
+            longitude={origin.longitude}
+            latitude={origin.latitude}
+            ref={'origin'}
+            key={'origin'}
+          >
+            <div className='popup'>
+              <div><b>Origin</b></div>
+              <div>{origin.name}</div>
+              <div><RouteList stop={origin} /></div>
+            </div>
+          </Popup>
+        )}
+        { destination && (
+          <Popup
+            map={this.state.map}
+            longitude={destination.longitude}
+            latitude={destination.latitude}
+            ref={'destination'}
+            key={'destination'}
+          >
+            <div className='popup'>
+              <div><b>Destination</b></div>
+              <div>{destination.name}</div>
+              <div><RouteList stop={destination} /></div>
+            </div>
+          </Popup>
+        )}
         { hoveredStop && mode !== socketMsg.dijkstra && (
           <Popup
             map={this.state.map}
@@ -374,6 +415,36 @@ var Map = React.createClass({
     );
   }
 });
+
+/*var Marker = React.createClass({
+  getInitialState: function() {
+    return { popup: undefined };
+  },
+  componentDidMount: function() {
+    const { longitude, latitude, children, map } = this.props;
+    //const { popup, div } = this;
+    var marker;
+    
+    if (children) {
+      this.div = document.createElement('div');
+      this.div.className = 'marker';
+      marker = new MapboxGl.Marker(this.div);
+    }
+    
+    marker.setLngLat([longitude, latitude]);
+    render(children, this.div, () => {
+      marker.addTo(map);
+    });
+    this.setState({ marker: marker });
+  },
+  componentWillUnmount: function() {
+    this.state.marker.remove();
+    unmountComponentAtNode(this.div);
+  },
+  render: function() {
+    return null;
+  }
+});*/
 
 var Popup = React.createClass({
   getInitialState: function() {
@@ -447,17 +518,21 @@ var Menu = React.createClass({
   },
   handleEndpointSet: function(inputField, stop) {
     this.state[inputField] = stop;
+    this.props.onEndpointSet(inputField, stop);
   },
   handleEndpointClear: function(inputField) {
     this.state[inputField] = undefined;
+    this.props.onEndpointSet(inputField, undefined);
   },
   setOriginFromClick: function(stop) {
     this.refs.origin.getInstance().setSelectedStop(stop);
     this.state['origin'] = stop;
+    this.props.onEndpointSet('origin', stop);
   },
   setDestinationFromClick: function(stop) {
     this.refs.destination.getInstance().setSelectedStop(stop);
     this.state['destination'] = stop;
+    this.props.onEndpointSet('destination', stop);
   },
   render: function() {
     var selectors;
@@ -568,6 +643,7 @@ var StopSelector = onClickOutside(React.createClass({
       selectedStop: undefined,
       searchValue: prevStopName,
     });
+    this.props.onEndpointClear(this.props.label.toLowerCase());
   },
   render: function() {
     let inputFieldClasses = classNames({
