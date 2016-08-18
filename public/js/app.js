@@ -79,19 +79,15 @@ var App = React.createClass({
     this._clearTrace();
   },
   handleOriginClick: function(stopId) {
-    console.log('origin click', stopId);
     this.refs.menu.setOriginFromClick(this._lookupStop(stopId));
   },
   handleDestinationClick: function(stopId) {
-    console.log('dest click', stopId);
     this.refs.menu.setDestinationFromClick(this._lookupStop(stopId));
   },
   handleStopHover: function(stopId) {
     this.refs.map.setHoverStop(this._lookupStop(stopId));
   },
   handleEndpointSet: function(inputField, stop) {
-    console.log('input field',inputField);
-    console.log('stop',stop);
     this.refs.map.setEndpoint(inputField, stop);
   },
   _lookupStop: function(stopId) {
@@ -283,9 +279,15 @@ var Map = React.createClass({
     this.setState({ hoveredStop: hoveredStop });
   },
   setEndpoint: function(inputField, stop) {
-    this.state[inputField] = undefined;
-    console.log('setting endpoint', stop);
-    setTimeout(() => { this.state[inputField] = stop },10);
+    //var event = new MouseEvent('move', {
+    //  'view': window,
+    //  'bubbles': true,
+    //  'cancelable': true
+    //});
+    //var cb = document.getElementById('map');
+    //cb.dispatchEvent(event, true);
+    this.setState({ [inputField]: undefined });
+    this.setState({ [inputField]: stop });
   },
   addEdges: function(edges) {
     let createLayer = function(map, id, data, color, width, opacity) {
@@ -347,6 +349,7 @@ var Map = React.createClass({
   },
   render: function() {
     const { hoveredStop, mode, origin, destination } = this.state;
+    console.log('origin', origin);
     return (
       <div id='map'>
         { origin && (
@@ -379,7 +382,9 @@ var Map = React.createClass({
             </div>
           </Popup>
         )}
-        { hoveredStop && mode !== socketMsg.dijkstra && (
+        { hoveredStop && mode !== socketMsg.dijkstra && 
+          hoveredStop != origin && hoveredStop != destination &&
+          (
           <Popup
             map={this.state.map}
             longitude={hoveredStop.longitude}
@@ -393,7 +398,9 @@ var Map = React.createClass({
             </div>
           </Popup>
         )}
-        { hoveredStop && mode === socketMsg.dijkstra && (
+        { hoveredStop && mode === socketMsg.dijkstra && 
+          hoveredStop != origin && hoveredStop != destination &&
+          (
           <Popup
             map={this.state.map}
             longitude={hoveredStop.longitude}
@@ -415,36 +422,6 @@ var Map = React.createClass({
     );
   }
 });
-
-/*var Marker = React.createClass({
-  getInitialState: function() {
-    return { popup: undefined };
-  },
-  componentDidMount: function() {
-    const { longitude, latitude, children, map } = this.props;
-    //const { popup, div } = this;
-    var marker;
-    
-    if (children) {
-      this.div = document.createElement('div');
-      this.div.className = 'marker';
-      marker = new MapboxGl.Marker(this.div);
-    }
-    
-    marker.setLngLat([longitude, latitude]);
-    render(children, this.div, () => {
-      marker.addTo(map);
-    });
-    this.setState({ marker: marker });
-  },
-  componentWillUnmount: function() {
-    this.state.marker.remove();
-    unmountComponentAtNode(this.div);
-  },
-  render: function() {
-    return null;
-  }
-});*/
 
 var Popup = React.createClass({
   getInitialState: function() {

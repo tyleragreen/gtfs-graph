@@ -95,3 +95,6 @@ input[type="search"]:disabled {
 .popup .btn {
   margin: 5px 3px;
 }
+.form-group {
+  margin-bottom: 0;
+}
