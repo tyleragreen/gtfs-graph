@@ -45,13 +45,36 @@ var App = React.createClass({
       let newLine = 'Leave ' + event.data.origin.name + ' to ' + event.data.destination.name;
       this.setState({ infoBoxContents: update(this.state.infoBoxContents, {$push: [newLine]}) });
     } else if (event.type === socketMsg.summary) {
+      let summaryMsg = this._parseSummaryMessage(event.data);
       let newContents = this.state.infoBoxContents.slice();
-      newContents.unshift(event.data);
+      newContents.unshift(summaryMsg);
       this.setState({ infoBoxContents: newContents });
       this.refs.infoBox.addContents(newContents);
     } else {
       throw 'bad event type';
     }
+  },
+  _parseSummaryMessage: function(summary) {
+    var summaryMsg;
+    if (summary.hasOwnProperty('pathLength')) {
+      let hours = Math.floor(summary.pathLength / 3600);
+      let minutes = Math.floor((summary.pathLength % 3600) / 60);
+      summaryMsg = 'Duration: ';
+      if (hours === 1) {
+        summaryMsg += hours + ' hour, ' + minutes + ' minutes';
+      } else if (hours > 1) {
+        summaryMsg += hours + ' hours, ' + minutes + ' minutes';
+      } else if (hours === 0) {
+        summaryMsg += minutes + ' minutes';
+      } else {
+        throw 'bad data';
+      }
+    } else if (summary.hasOwnProperty('stationsVisited')) {
+      summaryMsg = 'Stations Visited: ' + event.data.stationsVisited;
+    } else {
+      throw 'bad summary message';
+    }
+    return summaryMsg;
   },
   handleMapLoad: function() {
     this.state.socket.emit(socketMsg.requestStops);

@@ -118,9 +118,9 @@ describe('A transit graph', function() {
     let end = 3;
     let traverser = new BasicTraverser();
     
-    traversals.dijkstra(this.graph,start,end, traverser);
+    traversals.dijkstra(this.graph,start,end,traverser);
     
-    expect(traverser.data).to.equal(4);
+    expect(traverser.results.pathLength).to.equal(4);
     expect(edgesToArrays(traverser.visitedEdges)).to.deep.equal([[1,2],[2,3]]);
   });
 });
