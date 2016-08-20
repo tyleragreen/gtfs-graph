@@ -12,7 +12,11 @@ const UNINCLUDED_ROUTES = ["SI"];
 var App = React.createClass({
   getInitialState: function() {
     return {
-      infoBoxContents: []
+      infoBoxContents: [],
+      mode: socketMsg.dijkstra,
+      origin: undefined,
+      destination: undefined,
+      hoverStop: undefined
     };
   },
   componentDidMount: function() {
@@ -78,40 +82,56 @@ var App = React.createClass({
     this.state.socket.emit(socketMsg.clearQueue);
     this._clearTrace();
   },
-  handleOriginClick: function(stopId) {
-    this.refs.menu.setOriginFromClick(this._lookupStop(stopId));
-  },
-  handleDestinationClick: function(stopId) {
-    this.refs.menu.setDestinationFromClick(this._lookupStop(stopId));
-  },
   handleStopHover: function(stopId) {
-    this.refs.map.setHoverStop(this._lookupStop(stopId));
+    if (typeof stopId === "undefined") {
+      this.setState({ hoverStop: undefined });
+    } else {
+      this.setState({ hoverStop: this._lookupStop(stopId) });
+    }
+  },
+  handleEndpointSetById: function(inputField, stopId) {
+    this.handleEndpointSet(inputField, this._lookupStop(stopId));
   },
   handleEndpointSet: function(inputField, stop) {
-    this.refs.map.setEndpoint(inputField, stop);
+    this.setState({ [inputField]: stop });
   },
   _lookupStop: function(stopId) {
     return this.state.stops[this.state.stops.map(stop => stop.id).indexOf(stopId)];
   },
-  getMode: function() {
-    return this.refs.menu.state.mode;
+  _handleZoomOut: function() {
+    this.refs.map.setZoom(9);
+  },
+  _handleZoomIn: function() {
+    this.refs.map.setZoom(13);
+  },
+  _handleModeChange: function(mode) {
+    this.setState({ mode: mode });
   },
   render: function() {
     return (
       <div>
         <Map
           onMapLoad={this.handleMapLoad}
-          onOriginClick={this.handleOriginClick}
-          onDestinationClick={this.handleDestinationClick}
           onStopHover={this.handleStopHover}
-          getMode={this.getMode}
+          onEndpointSet={this.handleEndpointSet}
+          onEndpointSetById={this.handleEndpointSetById}
+          hoverStop={this.state.hoverStop}
+          mode={this.state.mode}
+          origin={this.state.origin}
+          destination={this.state.destination}
           ref='map'
         />
         <Menu
           onAutocomplete={this.handleAutocomplete}
           onEndpointSet={this.handleEndpointSet}
+          onModeChange={this._handleModeChange}
           onRun={this.handleRun}
           onStop={this.handleStop}
+          zoomIn={this._handleZoomIn}
+          zoomOut={this._handleZoomOut}
+          mode={this.state.mode}
+          origin={this.state.origin}
+          destination={this.state.destination}
           ref='menu'
         />
         <InfoBox ref='infoBox' />
@@ -143,9 +163,7 @@ var Map = React.createClass({
   getInitialState: function() {
     return { 
       map: undefined,
-      popupLatitude: undefined,
-      popupLongitude: undefined,
-      mode: undefined,
+      zoomLevel: 13,
       visitedEdges: {
         type: 'FeatureCollection',
         features: []
@@ -178,7 +196,7 @@ var Map = React.createClass({
     
     const latitude   = 40.75;
     const longitude  = -73.96;
-    const zoom_level = 13;
+    const zoomLevel = this.state.zoomLevel;
     MapboxGl.accessToken = 'pk.eyJ1IjoiZ3JlZW50IiwiYSI6ImNpazBqdWFsOTM5Nnh2M2x6dWZ2dnB3aHkifQ.97-pFPD8lQf02B6edag1rA';
     var that = this;
     
@@ -186,7 +204,7 @@ var Map = React.createClass({
         container: 'map',
         style: 'mapbox://styles/mapbox/dark-v9',
         center: [longitude, latitude],
-        zoom: zoom_level
+        zoom: zoomLevel
     });
     
     map.addControl(new MapboxGl.Navigation({
@@ -205,6 +223,10 @@ var Map = React.createClass({
       var image = new Image();
       image.src = 'icons/' + img + '.png';
     });
+  },
+  setZoom: function(newZoomLevel) {
+    this.state.map.easeTo({ zoom: newZoomLevel });
+    this.setState({ zoomLevel: newZoomLevel });
   },
   _getStopsAsGeoJson: function(stops) {
     var stopsGeoJson = [];
@@ -253,14 +275,13 @@ var Map = React.createClass({
       var features = self.state.map.queryRenderedFeatures(e.point, { layers: ['stops'] });
       self.state.map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
       
-      if (!features.length) { 
-        self.setState({ hoveredStop: undefined });
+      if (!features.length) {
+        self.props.onStopHover(undefined);
         return;
       }
     
       var feature = features[0];
       
-      self.setState({ mode: self.props.getMode() });
       self.props.onStopHover(feature.properties.id);
     });
     this.state.map.on('click', function(e) {
@@ -269,25 +290,13 @@ var Map = React.createClass({
       
       var feature = features[0];
       
-      if (self.props.getMode() !== socketMsg.dijkstra) {
-        self.setState({ mode: self.props.getMode() });
-        self.props.onOriginClick(feature.properties.id);
+      if (self.props.mode !== socketMsg.dijkstra) {
+        self.props.onEndpointSetById('origin', feature.properties.id);
       }
     });
   },
-  setHoverStop: function(hoveredStop) {
-    this.setState({ hoveredStop: hoveredStop });
-  },
-  setEndpoint: function(inputField, stop) {
-    //var event = new MouseEvent('move', {
-    //  'view': window,
-    //  'bubbles': true,
-    //  'cancelable': true
-    //});
-    //var cb = document.getElementById('map');
-    //cb.dispatchEvent(event, true);
-    this.setState({ [inputField]: undefined });
-    this.setState({ [inputField]: stop });
+  onEndpointClick: function(inputField, stop) {
+    this.props.onEndpointSet(inputField, stop);
   },
   addEdges: function(edges) {
     let createLayer = function(map, id, data, color, width, opacity) {
@@ -348,8 +357,8 @@ var Map = React.createClass({
     this.state.map.getSource('left edges').setData(this.state.leftEdges);
   },
   render: function() {
-    const { hoveredStop, mode, origin, destination } = this.state;
-    console.log('origin', origin);
+    const { hoverStop, mode, origin, destination } = this.props;
+    
     return (
       <div id='map'>
         { origin && (
@@ -382,38 +391,38 @@ var Map = React.createClass({
             </div>
           </Popup>
         )}
-        { hoveredStop && mode !== socketMsg.dijkstra && 
-          hoveredStop != origin && hoveredStop != destination &&
+        { hoverStop && mode !== socketMsg.dijkstra && 
+          hoverStop != origin && hoverStop != destination &&
           (
           <Popup
             map={this.state.map}
-            longitude={hoveredStop.longitude}
-            latitude={hoveredStop.latitude}
+            longitude={hoverStop.longitude}
+            latitude={hoverStop.latitude}
             ref={'popup'}
             key={'popup'}
           >
             <div className='popup'>
-              <div>{hoveredStop.name}</div>
-              <div><RouteList stop={hoveredStop} /></div>
+              <div>{hoverStop.name}</div>
+              <div><RouteList stop={hoverStop} /></div>
             </div>
           </Popup>
         )}
-        { hoveredStop && mode === socketMsg.dijkstra && 
-          hoveredStop != origin && hoveredStop != destination &&
+        { hoverStop && mode === socketMsg.dijkstra && 
+          hoverStop != origin && hoverStop != destination &&
           (
           <Popup
             map={this.state.map}
-            longitude={hoveredStop.longitude}
-            latitude={hoveredStop.latitude}
+            longitude={hoverStop.longitude}
+            latitude={hoverStop.latitude}
             ref={'popup'}
             key={'popup'}
           >
             <div className='popup'>
-              <div>{hoveredStop.name}</div>
-              <div><RouteList stop={hoveredStop} /></div>
+              <div>{hoverStop.name}</div>
+              <div><RouteList stop={hoverStop} /></div>
               <div>
-                <button className='btn btn-primary' onClick={this.props.onOriginClick.bind(null,hoveredStop.id)}>Origin</button>
-                <button className='btn btn-primary' onClick={this.props.onDestinationClick.bind(null,hoveredStop.id)}>Destination</button>
+                <button className='btn btn-primary' onClick={this.onEndpointClick.bind(null,'origin',hoverStop)}>Origin</button>
+                <button className='btn btn-primary' onClick={this.onEndpointClick.bind(null,'destination',hoverStop)}>Destination</button>
               </div>
             </div>
           </Popup>
@@ -424,29 +433,31 @@ var Map = React.createClass({
 });
 
 var Popup = React.createClass({
-  getInitialState: function() {
+  componentDidMount: function() {
     this.div = document.createElement('div');
     this.popup = new MapboxGl.Popup({
       closeButton: false,
       closeOnClick: false
     });
-    return { popup: undefined };
-  },
-  componentDidMount: function() {
+    
     const { longitude, latitude, children, map } = this.props;
     const { popup, div } = this;
     
-    if (children) {
-      popup.setDOMContent(this.div);
-    }
+    popup.setDOMContent(this.div);
     popup.setLngLat([longitude, latitude]);
     render(children, div, () => {
       popup.addTo(map);
     });
-    this.setState({ popup: popup });
+  },
+  componentDidUpdate: function() {
+    const { longitude, latitude, children } = this.props;
+    const { popup, div } = this;
+    
+    popup.setLngLat([longitude, latitude]);
+    render(children, div);
   },
   componentWillUnmount: function() {
-    this.state.popup.remove();
+    this.popup.remove();
     unmountComponentAtNode(this.div);
   },
   render: function() {
@@ -455,17 +466,10 @@ var Popup = React.createClass({
 });
 
 var Menu = React.createClass({
-  getInitialState: function() {
-    return {
-      mode: 'dfs',
-      origin: undefined,
-      destination: undefined
-    };
-  },
   handleRun: function() {
-    if (this.state.mode === socketMsg.dijkstra) {
-      let originInvalid = typeof this.state.origin === "undefined";
-      let destinationInvalid = typeof this.state.destination === "undefined";
+    if (this.props.mode === socketMsg.dijkstra) {
+      let originInvalid = typeof this.props.origin === "undefined";
+      let destinationInvalid = typeof this.props.destination === "undefined";
       
       if (originInvalid) {
         this.refs.origin.getInstance().markInvalid();
@@ -474,13 +478,13 @@ var Menu = React.createClass({
         this.refs.destination.getInstance().markInvalid();
       }
       if (!originInvalid && !destinationInvalid) {
-        this.props.onRun(this.state.mode, this.state.origin.id, this.state.destination.id);
+        this.props.onRun(this.props.mode, this.props.origin.id, this.props.destination.id);
       }
     } else {
-      if (typeof this.state.origin === "undefined") {
+      if (typeof this.props.origin === "undefined") {
         this.refs.origin.getInstance().markInvalid();
       } else {
-        this.props.onRun(this.state.mode, this.state.origin.id);
+        this.props.onRun(this.props.mode, this.props.origin.id);
       }
     }
   },
@@ -488,38 +492,32 @@ var Menu = React.createClass({
     this.props.onStop();
   },
   changeMode: function(mode) {
-    this.setState({ mode: mode });
+    if (mode === socketMsg.dfs || mode === socketMsg.bfs) {
+      this.props.zoomOut();
+    } else {
+      this.props.zoomIn();
+    }
+    this.props.onModeChange(mode);
   },
   handleAutocomplete: function(query) {
     return this.props.onAutocomplete(query);
   },
   handleEndpointSet: function(inputField, stop) {
-    this.state[inputField] = stop;
     this.props.onEndpointSet(inputField, stop);
   },
   handleEndpointClear: function(inputField) {
-    this.state[inputField] = undefined;
     this.props.onEndpointSet(inputField, undefined);
-  },
-  setOriginFromClick: function(stop) {
-    this.refs.origin.getInstance().setSelectedStop(stop);
-    this.state['origin'] = stop;
-    this.props.onEndpointSet('origin', stop);
-  },
-  setDestinationFromClick: function(stop) {
-    this.refs.destination.getInstance().setSelectedStop(stop);
-    this.state['destination'] = stop;
-    this.props.onEndpointSet('destination', stop);
   },
   render: function() {
     var selectors;
-    if (this.state.mode === socketMsg.dijkstra) {
+    if (this.props.mode === socketMsg.dijkstra) {
       selectors = (
         <div>
         <StopSelector
           onAutocomplete={this.handleAutocomplete}
           onEndpointSet={this.handleEndpointSet}
           onEndpointClear={this.handleEndpointClear}
+          selectedStop={this.props.origin}
           label='Origin'
           ref='origin'
         />
@@ -527,6 +525,7 @@ var Menu = React.createClass({
           onAutocomplete={this.handleAutocomplete}
           onEndpointSet={this.handleEndpointSet}
           onEndpointClear={this.handleEndpointClear}
+          selectedStop={this.props.destination}
           label='Destination'
           ref='destination'
         />
@@ -539,6 +538,7 @@ var Menu = React.createClass({
           onAutocomplete={this.handleAutocomplete}
           onEndpointSet={this.handleEndpointSet}
           onEndpointClear={this.handleEndpointClear}
+          selectedStop={this.props.origin}
           label='Origin'
           ref='origin'
         />
@@ -547,7 +547,10 @@ var Menu = React.createClass({
     }
     return (
       <div id="controlMenu" className='box'>
-        <ModeSelector onModeChange={this.changeMode} />
+        <ModeSelector
+         mode={this.props.mode}
+         onModeChange={this.changeMode}
+        />
         {selectors}
         <Button label='Run!' onClick={this.handleRun} key='run' />
         <Button label='Stop' onClick={this.handleStop} key='stop' />
@@ -566,7 +569,6 @@ var StopSelector = onClickOutside(React.createClass({
     return {
       searchValue: '',
       stops: [],
-      selectedStop: undefined,
       valid: true
     };
   },
@@ -577,7 +579,6 @@ var StopSelector = onClickOutside(React.createClass({
     this.setState({ valid: true });
   },
   setSelectedStop: function(selectedStop) {
-    this.setState({ selectedStop: selectedStop });
     this.setState({ valid: true });
   },
   handleSuggestionClick: function(itemId) {
@@ -587,7 +588,6 @@ var StopSelector = onClickOutside(React.createClass({
     let stop = stopFilter[0];
     
     this.setState({
-      selectedStop: stop,
       searchValue: stop.name,
       stops: []
     });
@@ -596,30 +596,30 @@ var StopSelector = onClickOutside(React.createClass({
     this.props.onEndpointSet(this.props.label.toLowerCase(), stop);
   },
   handleChange: function(e) {
-    this.setState({ searchValue: e.target.value, valid: true });
-    if (e.target.value.length > 0) {
-      this.setState({ stops: this.props.onAutocomplete(e.target.value) });
-    } else {
-      this.setState({ stops: [] });
-    }
+    this.setState({
+      searchValue: e.target.value,
+      valid: true,
+      stops: this.props.onAutocomplete(e.target.value)
+    });
   },
   handleTokenClose: function(e) {
     // Prevent the token click event from firing
     e.stopPropagation();
     
     this.setState({
-      selectedStop: undefined,
       searchValue: "",
       stops: []
     });
     this.props.onEndpointClear(this.props.label.toLowerCase());
   },
   handleTokenClick: function(e) {
-    var prevStopName = this.state.selectedStop.name;
+    var prevStopName = this.props.selectedStop.name;
     this.setState({
-      selectedStop: undefined,
       searchValue: prevStopName,
     });
+    this.props.onEndpointClear(this.props.label.toLowerCase());
+  },
+  componentWillUnmount: function() {
     this.props.onEndpointClear(this.props.label.toLowerCase());
   },
   render: function() {
@@ -633,10 +633,10 @@ var StopSelector = onClickOutside(React.createClass({
       'form-group': true,
       'has-danger': !this.state.valid
     });
-    if (typeof this.state.selectedStop !== "undefined") {
+    if (typeof this.props.selectedStop !== "undefined") {
       var token = (
         <SearchToken
-          stop={this.state.selectedStop}
+          stop={this.props.selectedStop}
           onTokenClose={this.handleTokenClose}
           onTokenClick={this.handleTokenClick}
         />
@@ -756,11 +756,7 @@ var Button = React.createClass({
 });
 
 var ModeSelector = React.createClass({
-  getInitialState: function() {
-    return { selectValue: 'dfs' };
-  },
-  handleChange: function(e) {
-    this.setState({ selectValue: e.target.value });
+  _handleChange: function(e) {
     this.props.onModeChange(e.target.value);
   },
   render: function() {
@@ -769,8 +765,8 @@ var ModeSelector = React.createClass({
       <select 
         id="type"
         className="form-control"
-        value={this.state.selectValue}
-        onChange={this.handleChange}
+        value={this.props.mode}
+        onChange={this._handleChange}
       >
         <option value={socketMsg.dijkstra}>Shortest Path Search</option>
         <option value={socketMsg.dfs}>Depth-First Search</option>
