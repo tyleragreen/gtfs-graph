@@ -38,7 +38,7 @@ var App = React.createClass({
   _socketEventHandler: function(event) {
     if (event.type === socketMsg.visitNode) {
       this.refs.map.visitEdge(event.data);
-      let newLine = 'Visit ' + event.data.origin.name + ' to ' + event.data.destination.name;
+      let newLine = event.data.origin.name + ' to ' + event.data.destination.name;
       this.setState({ infoBoxContents: update(this.state.infoBoxContents, {$push: [newLine]}) });
     } else if (event.type === socketMsg.leaveNode) {
       this.refs.map.leaveEdge(event.data);
@@ -49,7 +49,7 @@ var App = React.createClass({
       let newContents = this.state.infoBoxContents.slice();
       newContents.unshift(summaryMsg);
       this.setState({ infoBoxContents: newContents });
-      this.refs.infoBox.addContents(newContents);
+      this.setState({ infoBoxSnapshot: newContents });
     } else {
       throw 'bad event type';
     }
@@ -70,7 +70,7 @@ var App = React.createClass({
         throw 'bad data';
       }
     } else if (summary.hasOwnProperty('stationsVisited')) {
-      summaryMsg = 'Stations Visited: ' + event.data.stationsVisited;
+      summaryMsg = 'Stations Visited: ' + summary.stationsVisited;
     } else {
       throw 'bad summary message';
     }
@@ -96,7 +96,6 @@ var App = React.createClass({
     this.state.socket.emit(msg, origin, destination);
     this._clearTrace();
     this.setState({ infoBoxContents: [] });
-    this.refs.infoBox.addContents([]);
   },
   _clearTrace: function() {
     setTimeout(() => { this.refs.map.clearTrace()}, 80);
@@ -116,6 +115,7 @@ var App = React.createClass({
     this.handleEndpointSet(inputField, this._lookupStop(stopId));
   },
   handleEndpointSet: function(inputField, stop) {
+    this.setState({ infoBoxSnapshot: undefined });
     this.setState({ [inputField]: stop });
   },
   _lookupStop: function(stopId) {
@@ -155,29 +155,10 @@ var App = React.createClass({
           mode={this.state.mode}
           origin={this.state.origin}
           destination={this.state.destination}
+          infoBoxContents={this.state.infoBoxSnapshot}
           ref='menu'
         />
-        <InfoBox ref='infoBox' />
       </div>
-    );
-  }
-});
-
-var InfoBox = React.createClass({
-  getInitialState: function() {
-    return { contents: [] };
-  },
-  addContents: function(contents) {
-    this.setState({ contents: contents });
-  },
-  render: function() {
-    var contents = this.state.contents.map((item, index) => {
-      return (
-        <div key={index}>{item}</div>
-      );
-    });
-    return (
-      <div id='info-box' className='box' key='box'>{contents}</div>
     );
   }
 });
@@ -489,7 +470,7 @@ var Popup = React.createClass({
 });
 
 var Menu = React.createClass({
-  handleRun: function() {
+  _handleRun: function() {
     if (this.props.mode === socketMsg.dijkstra) {
       let originInvalid = typeof this.props.origin === "undefined";
       let destinationInvalid = typeof this.props.destination === "undefined";
@@ -511,10 +492,10 @@ var Menu = React.createClass({
       }
     }
   },
-  handleStop: function() {
+  _handleStop: function() {
     this.props.onStop();
   },
-  changeMode: function(mode) {
+  _handleModeChange: function(mode) {
     if (mode === socketMsg.dfs || mode === socketMsg.bfs) {
       this.props.zoomOut();
     } else {
@@ -568,16 +549,47 @@ var Menu = React.createClass({
         </div>
       );
     }
+    const { infoBoxContents, mode } = this.props;
+    let showInfoBox = infoBoxContents; //.length > 0;
+    let menuClasses = classNames({
+      'box': true,
+      'with-info': showInfoBox
+    });
+    let wrapperClass = classNames({
+      'top-menu-wrapper': true,
+      'hidden': showInfoBox
+    });
+
     return (
-      <div id="controlMenu" className='box'>
+      <div id="controlMenu" className={menuClasses}>
+        <div className={wrapperClass}>
         <ModeSelector
-         mode={this.props.mode}
-         onModeChange={this.changeMode}
+         mode={mode}
+         onModeChange={this._handleModeChange}
         />
         {selectors}
-        <Button label='Run!' onClick={this.handleRun} key='run' />
-        <Button label='Stop' onClick={this.handleStop} key='stop' />
+        <Button label='Run!' onClick={this._handleRun} key='run' />
+        <Button label='Stop' onClick={this._handleStop} key='stop' />
+        {showInfoBox && 
+          (<div className='info-wrapper'>
+          <InfoBox ref='infoBox' contents={infoBoxContents} />
+          </div>)
+        }
+        </div>
       </div>
+    );
+  }
+});
+
+var InfoBox = React.createClass({
+  render: function() {
+    var contents = this.props.contents.map((item, index) => {
+      return (
+        <div key={index}>{item}</div>
+      );
+    });
+    return (
+      <div id='info-box' className='box' key='box'>{contents}</div>
     );
   }
 });

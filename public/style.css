@@ -18,27 +18,38 @@ body {
 #controlMenu {
   position: absolute;
   width: 300px;
-  top: 10;
-  right: 10;
+  top: 10px;
+  right: 10px;
+}
+.with-info {
+  bottom: 30px;
+}
+.info-wrapper {
+  overflow-y: scroll;
+}
+.top-menu-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.hidden {
+  overflow: hidden;
 }
 #info-box {
-  position: absolute;
-  width: 300px;
-  bottom: 30;
-  right: 10;
-  overflow-y: scroll;
-  height: 200px;
+  /*overflow-y: scroll;*/
 }
 #suggestions {
   position: absolute;
   border-radius: 5px;
-  width: 94%;
+  width: 100%;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   background: rgba(255, 255, 255, 0.9);
   padding: 2px 0;
   font-size: 90%;
   overflow: auto;
   z-index: 1;
+  cursor: default;
 }
 #suggestions li {
   padding: 3px;
@@ -51,7 +62,7 @@ body {
   color: white;
 }
 .btn-container {
-  padding-top: 10px;
+  margin: 5px 0;
 }
 .input-field {
   width: 100%;
