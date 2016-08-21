@@ -26,19 +26,19 @@ var options = {
 describe('The server', function() {
   before(function (done) {
     function loadGraph(callback) {
-      createGraph(function(graph) {
-        callback(null, graph);
+      createGraph(function(graph, mergedGraph) {
+        callback(null, graph, mergedGraph);
       });
     }
     
-    function startServer(graph, callback) {
-      server.listen(graph);
+    function startServer(graph, mergedGraph, callback) {
+      server.listen(graph, mergedGraph);
       callback();
     }
     
     async.waterfall([
       function(callback) { loadGraph(callback) },
-      function(graph, callback) { startServer(graph, callback) }
+      function(graph, mergedGraph, callback) { startServer(graph, mergedGraph, callback) }
       ], function(err) {
         if (err) throw err;
         
