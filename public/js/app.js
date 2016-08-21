@@ -50,6 +50,7 @@ var App = React.createClass({
       let newLine = 'Leave ' + event.data.origin.name + ' to ' + event.data.destination.name;
       this.setState({ infoBoxContents: update(this.state.infoBoxContents, {$push: [newLine]}) });
     } else if (event.type === socketMsg.showRanks) {
+      this.setState({ infoBoxContents: this._orderStopsByRank(event.data) });
       this.refs.map.showRanks(this.state.mergedStops,event.data);
     } else if (event.type === socketMsg.summary) {
       let summaryMsg = this._parseSummaryMessage(event.data);
@@ -60,6 +61,25 @@ var App = React.createClass({
     } else {
       throw 'bad event type';
     }
+  },
+  _orderStopsByRank: function(ranks) {
+    let stopsWithRanks = [];
+    let stops = this.state.mergedStops;
+    ranks.forEach(function(rank, node) {
+      let stop = stops[node];
+      stop.rank = rank;
+      stopsWithRanks.push(stop);
+    });
+    return stopsWithRanks.sort((a,b) => {
+      if (a.rank < b.rank)
+        return 1;
+      if (a.rank > b.rank)
+        return -1;
+      return 0;
+    })
+    .map(stop => {
+      return stop.name + ': ' + stop.rank;
+    });
   },
   _parseSummaryMessage: function(summary) {
     var summaryMsg;
@@ -78,6 +98,8 @@ var App = React.createClass({
       }
     } else if (summary.hasOwnProperty('stationsVisited')) {
       summaryMsg = 'Stations Visited: ' + summary.stationsVisited;
+    } else if (summary.hasOwnProperty('ranks')) {
+      summaryMsg = 'Sorted Page Rank:';
     } else {
       throw 'bad summary message';
     }
@@ -135,6 +157,7 @@ var App = React.createClass({
     this.refs.map.setZoom(13);
   },
   _handleModeChange: function(mode) {
+    this.setState({ infoBoxSnapshot: undefined });
     this.setState({ mode: mode });
   },
   render: function() {
@@ -174,12 +197,16 @@ var Map = React.createClass({
   getInitialState: function() {
     return { 
       map: undefined,
-      zoomLevel: 13,
+      zoomLevel: 10,
       visitedEdges: {
         type: 'FeatureCollection',
         features: []
       },
       leftEdges: {
+        type: 'FeatureCollection',
+        features: []
+      },
+      pageRanks: {
         type: 'FeatureCollection',
         features: []
       }
@@ -194,12 +221,18 @@ var Map = React.createClass({
       type: 'FeatureCollection',
       features: []
     };
+    let clearedRanks = {
+      type: 'FeatureCollection',
+      features: []
+    };
     this.setState({
       visitedEdges: clearedVisited,
-      leftEdges: clearedLeft
+      leftEdges: clearedLeft,
+      pageRanks: clearedRanks
     });
     this.state.map.getSource('visited edges').setData(clearedVisited);
     this.state.map.getSource('left edges').setData(clearedLeft);
+    this.state.map.getSource('ranks').setData(clearedRanks);
   },
   componentDidMount: function() {
     
@@ -332,7 +365,7 @@ var Map = React.createClass({
       
       var feature = features[0];
       
-      if (self.props.mode !== socketMsg.dijkstra) {
+      if (self.props.mode !== socketMsg.dijkstra && self.props.mode !== socketMsg.pageRank) {
         self.props.onEndpointSetById('origin', feature.properties.id);
       }
     });
@@ -540,11 +573,11 @@ var Menu = React.createClass({
     this.props.onStop();
   },
   _handleModeChange: function(mode) {
-    if (mode === socketMsg.dfs || mode === socketMsg.bfs) {
-      this.props.zoomOut();
-    } else {
-      this.props.zoomIn();
-    }
+    //if (mode === socketMsg.dfs || mode === socketMsg.bfs) {
+    //  this.props.zoomOut();
+    //} else {
+    //  this.props.zoomIn();
+    //}
     this.props.onModeChange(mode);
   },
   handleAutocomplete: function(query) {
