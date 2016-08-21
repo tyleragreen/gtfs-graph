@@ -7,12 +7,13 @@ import classNames from 'classnames';
 
 var onClickOutside = require('react-onclickoutside');
 const socketMsg = require('./constants.js');
-const UNINCLUDED_ROUTES = ["SI"];
 
 var App = React.createClass({
   getInitialState: function() {
     return {
       infoBoxContents: [],
+      stops: undefined,
+      mergedStops: undefined,
       mode: socketMsg.dijkstra,
       origin: undefined,
       destination: undefined,
@@ -24,6 +25,7 @@ var App = React.createClass({
     
     socket.on(socketMsg.sendStops, this._socketSendStopsHandler);
     socket.on(socketMsg.sendEdges, this._socketSendEdgesHandler);
+    socket.on(socketMsg.sendMergedStops, this._socketSendMergedStopsHandler);
     socket.on(socketMsg.event, this._socketEventHandler);
     
     this.setState({ socket: socket });
@@ -31,6 +33,9 @@ var App = React.createClass({
   _socketSendStopsHandler: function(stops) {
     this.setState({ stops: stops });
     this.refs.map.addStops(stops);
+  },
+  _socketSendMergedStopsHandler: function(mergedStops) {
+    this.setState({ mergedStops: mergedStops });
   },
   _socketSendEdgesHandler: function(edges) {
     this.refs.map.addEdges(edges);
@@ -44,6 +49,8 @@ var App = React.createClass({
       this.refs.map.leaveEdge(event.data);
       let newLine = 'Leave ' + event.data.origin.name + ' to ' + event.data.destination.name;
       this.setState({ infoBoxContents: update(this.state.infoBoxContents, {$push: [newLine]}) });
+    } else if (event.type === socketMsg.showRanks) {
+      this.refs.map.showRanks(this.state.mergedStops,event.data);
     } else if (event.type === socketMsg.summary) {
       let summaryMsg = this._parseSummaryMessage(event.data);
       let newContents = this.state.infoBoxContents.slice();
@@ -232,7 +239,7 @@ var Map = React.createClass({
     this.state.map.easeTo({ zoom: newZoomLevel });
     this.setState({ zoomLevel: newZoomLevel });
   },
-  _getStopsAsGeoJson: function(stops) {
+  _getStopsAsGeoJson: function(stops, ranks) {
     var stopsGeoJson = [];
     
     for (var stopIndex in stops) {
@@ -248,6 +255,7 @@ var Map = React.createClass({
           'coordinates': [stops[stopIndex].longitude, stops[stopIndex].latitude]
         }
       };
+      if (ranks) { feature.properties.rank = ranks[stopIndex] }
       stopsGeoJson.push(feature);
     }
     stopsGeoJson = {
@@ -258,7 +266,7 @@ var Map = React.createClass({
     return stopsGeoJson;
   },
   addStops: function(stops) {
-    var stopGeoJson = this._getStopsAsGeoJson(stops);
+    let stopGeoJson = this._getStopsAsGeoJson(stops);
     
     this.state.map.addSource('stops', {
       "type": "geojson",
@@ -272,6 +280,36 @@ var Map = React.createClass({
       "layout": {
         "icon-image": "marker-11"
       }
+    });
+    this.state.map.addSource("ranks", {
+      type: "geojson",
+      data: {
+        type: 'FeatureCollection',
+        features: []
+      }
+    });
+    var layers = [
+      [0, 'rgba(0,255,0,0.5)', 70],
+      [1.0, 'rgba(255,165,0,0.5)', 80],
+      [1.5, 'rgba(255,0,0,0.8)', 90]
+    ];
+    var thatMap = this.state.map;
+    layers.forEach(function (layer, i) {
+      thatMap.addLayer({
+        "id": "cluster-" + i,
+        "type": "circle",
+        "source": 'ranks',
+        "paint": {
+          "circle-color": layer[1],
+          "circle-radius": layer[2],
+          "circle-blur": 1
+        },
+        "filter": i === layers.length - 1 ?
+          [">=", "rank", layer[0]] :
+          ["all",
+            [">=", "rank", layer[0]],
+            ["<", "rank", layers[i + 1][0]]]
+      });
     });
     var self = this;
     
@@ -301,6 +339,10 @@ var Map = React.createClass({
   },
   onEndpointClick: function(inputField, stop) {
     this.props.onEndpointSet(inputField, stop);
+  },
+  showRanks: function(stops,ranks) {
+    let stopGeoJson = this._getStopsAsGeoJson(stops,ranks);
+    this.state.map.getSource('ranks').setData(stopGeoJson);
   },
   addEdges: function(edges) {
     let createLayer = function(map, id, data, color, width, opacity) {
@@ -484,12 +526,14 @@ var Menu = React.createClass({
       if (!originInvalid && !destinationInvalid) {
         this.props.onRun(this.props.mode, this.props.origin.id, this.props.destination.id);
       }
-    } else {
+    } else if (this.props.mode === socketMsg.dfs || this.props.mode === socketMsg.bfs) {
       if (typeof this.props.origin === "undefined") {
         this.refs.origin.getInstance().markInvalid();
       } else {
         this.props.onRun(this.props.mode, this.props.origin.id);
       }
+    } else {
+      this.props.onRun(this.props.mode);
     }
   },
   _handleStop: function() {
@@ -535,7 +579,7 @@ var Menu = React.createClass({
         />
         </div>
       );
-    } else {
+    } else if (this.props.mode === socketMsg.dfs || this.props.mode === socketMsg.bfs) {
       selectors = (
         <div>
         <StopSelector
@@ -585,7 +629,7 @@ var InfoBox = React.createClass({
   render: function() {
     var contents = this.props.contents.map((item, index) => {
       return (
-        <div key={index}>{item}</div>
+        <div className='info-row' key={index}>{item}</div>
       );
     });
     return (
@@ -806,6 +850,7 @@ var ModeSelector = React.createClass({
         <option value={socketMsg.dijkstra}>Shortest Path Search</option>
         <option value={socketMsg.dfs}>Depth-First Search</option>
         <option value={socketMsg.bfs}>Breadth-First Search</option>
+        <option value={socketMsg.pageRank}>Page Rank</option>
       </select>
       </div>
     );

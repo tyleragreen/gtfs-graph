@@ -2,6 +2,7 @@ const socketMsg = {
   log: 'log',
   requestStops: 'request stops',
   sendStops: 'send stops',
+  sendMergedStops: 'send merged stops',
   requestEdges: 'request edges',
   sendEdges: 'send edges',
   sendPR: 'send page rank',
@@ -12,10 +13,12 @@ const socketMsg = {
   dijkstra: 'dij',
   dfs: 'dfs',
   bfs: 'bfs',
+  pageRank: 'pr',
   clearQueue: 'clearQueue',
   event: 'event',
   visitNode: 'visit node',
   leaveNode: 'leave node',
+  showRanks: 'show rank',
   summary: 'summary'
 };
 

@@ -36,8 +36,8 @@ body {
 .hidden {
   overflow: hidden;
 }
-#info-box {
-  /*overflow-y: scroll;*/
+.info-row {
+  border-bottom: 1px solid grey;
 }
 #suggestions {
   position: absolute;
