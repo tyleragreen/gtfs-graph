@@ -91,8 +91,10 @@ var App = React.createClass({
         summaryMsg += hours + ' hour, ' + minutes + ' minutes';
       } else if (hours > 1) {
         summaryMsg += hours + ' hours, ' + minutes + ' minutes';
-      } else if (hours === 0) {
+      } else if (hours === 0 && minutes !== 0) {
         summaryMsg += minutes + ' minutes';
+      } else if (hours === 0 && minutes === 0) {
+        summaryMsg = 'No path!';
       } else {
         throw 'bad data';
       }

@@ -25,7 +25,7 @@ body {
   bottom: 30px;
 }
 .info-wrapper {
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 .top-menu-wrapper {
   position: relative;
@@ -36,8 +36,11 @@ body {
 .hidden {
   overflow: hidden;
 }
-.info-row {
+#info-box div {
   border-bottom: 1px solid grey;
+}
+#info-box div:last-child{
+  border: 0;
 }
 #suggestions {
   position: absolute;
