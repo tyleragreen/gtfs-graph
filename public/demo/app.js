@@ -3,7 +3,7 @@ import DOM from 'react-dom';
 import update from 'react-addons-update';
 import IO from 'socket.io-client';
 import classNames from 'classnames';
-import { Map, RouteList } from '../../lib/dom/index';
+import { Map, RouteList, Popup } from '../../lib/dom/index';
 const socketMsg = require('../../lib/constants.js');
 
 var onClickOutside = require('react-onclickoutside');
@@ -135,11 +135,16 @@ var App = React.createClass({
     this.state.socket.emit(socketMsg.clearQueue);
     this._clearTrace();
   },
-  handleStopHover: function(stopId) {
+  _handleStopHover: function(stopId) {
     if (typeof stopId === "undefined") {
       this.setState({ hoverStop: undefined });
     } else {
       this.setState({ hoverStop: this._lookupStop(stopId) });
+    }
+  },
+  _handleStopClick: function(stopId) {
+    if (this.state.mode !== socketMsg.dijkstra && this.state.mode !== socketMsg.pageRank) {
+      this.handleEndpointSetById('origin', stopId);
     }
   },
   handleEndpointSetById: function(inputField, stopId) {
@@ -152,30 +157,84 @@ var App = React.createClass({
   _lookupStop: function(stopId) {
     return this.state.stops[this.state.stops.map(stop => stop.id).indexOf(stopId)];
   },
-  _handleZoomOut: function() {
-    this.refs.map.setZoom(9);
-  },
-  _handleZoomIn: function() {
-    this.refs.map.setZoom(13);
-  },
   _handleModeChange: function(mode) {
     this.setState({ infoBoxSnapshot: undefined });
     this.setState({ mode: mode });
   },
   render: function() {
+    const { hoverStop, mode, origin, destination } = this.state;
+    
     return (
       <div>
         <Map
           onMapLoad={this.handleMapLoad}
-          onStopHover={this.handleStopHover}
-          onEndpointSet={this.handleEndpointSet}
-          onEndpointSetById={this.handleEndpointSetById}
-          hoverStop={this.state.hoverStop}
-          mode={this.state.mode}
-          origin={this.state.origin}
-          destination={this.state.destination}
+          onStopHover={this._handleStopHover}
+          onStopClick={this._handleStopClick}
           ref='map'
-        />
+        >
+        { origin && (
+          <Popup
+            longitude={origin.longitude}
+            latitude={origin.latitude}
+            ref={'origin'}
+            key={'origin'}
+          >
+            <div className='popup'>
+              <div><b>Origin</b></div>
+              <div>{origin.name}</div>
+              <div><RouteList stop={origin} /></div>
+            </div>
+          </Popup>
+        )}
+        { destination && (
+          <Popup
+            longitude={destination.longitude}
+            latitude={destination.latitude}
+            ref={'destination'}
+            key={'destination'}
+          >
+            <div className='popup'>
+              <div><b>Destination</b></div>
+              <div>{destination.name}</div>
+              <div><RouteList stop={destination} /></div>
+            </div>
+          </Popup>
+        )}
+        { hoverStop && mode !== socketMsg.dijkstra && 
+          hoverStop != origin && hoverStop != destination &&
+          (
+          <Popup
+            longitude={hoverStop.longitude}
+            latitude={hoverStop.latitude}
+            ref={'popup'}
+            key={'popup'}
+          >
+            <div className='popup'>
+              <div>{hoverStop.name}</div>
+              <div><RouteList stop={hoverStop} /></div>
+            </div>
+          </Popup>
+        )}
+        { hoverStop && mode === socketMsg.dijkstra && 
+          hoverStop != origin && hoverStop != destination &&
+          (
+          <Popup
+            longitude={hoverStop.longitude}
+            latitude={hoverStop.latitude}
+            ref={'popup'}
+            key={'popup'}
+          >
+            <div className='popup'>
+              <div>{hoverStop.name}</div>
+              <div><RouteList stop={hoverStop} /></div>
+              <div>
+                <button className='btn btn-primary' onClick={this.handleEndpointSet.bind(null,'origin',hoverStop)}>Origin</button>
+                <button className='btn btn-primary' onClick={this.handleEndpointSet.bind(null,'destination',hoverStop)}>Destination</button>
+              </div>
+            </div>
+          </Popup>
+        )}
+        </Map>
         <Menu
           onAutocomplete={this.handleAutocomplete}
           onEndpointSet={this.handleEndpointSet}

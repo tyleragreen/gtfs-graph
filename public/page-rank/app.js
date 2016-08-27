@@ -2,7 +2,7 @@ import React from 'react';
 import DOM from 'react-dom';
 import update from 'react-addons-update';
 import IO from 'socket.io-client';
-import { Map, RouteList } from '../../lib/dom/index';
+import { Map, RouteList, Popup } from '../../lib/dom/index';
 const socketMsg = require('../../lib/constants.js');
 
 var PageRankDisplay = React.createClass({
@@ -131,19 +131,26 @@ var PageRankDisplay = React.createClass({
     return this.state.stops[this.state.stops.map(stop => stop.id).indexOf(stopId)];
   },
   render: function() {
+    const { hoverStop } = this.state;
     return (
       <div>
         <Map
           onMapLoad={this.handleMapLoad}
           onStopHover={this.handleStopHover}
-          onEndpointSet={this.handleEndpointSet}
-          onEndpointSetById={this.handleEndpointSetById}
-          hoverStop={this.state.hoverStop}
-          mode={this.state.mode}
-          origin={this.state.origin}
-          destination={this.state.destination}
           ref='map'
-        />
+        >
+        { hoverStop && (
+          <Popup
+            longitude={hoverStop.longitude}
+            latitude={hoverStop.latitude}
+          >
+            <div className='popup'>
+              <div>{hoverStop.name}</div>
+              <div><RouteList stop={hoverStop} /></div>
+            </div>
+          </Popup>
+        )}
+        </Map>
       </div>
     );
   }
