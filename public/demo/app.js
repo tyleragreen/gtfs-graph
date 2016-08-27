@@ -3,11 +3,10 @@ import DOM from 'react-dom';
 import update from 'react-addons-update';
 import IO from 'socket.io-client';
 import classNames from 'classnames';
-import Map from './Map';
-import RouteList from './route-list';
+import { Map, RouteList } from '../../lib/dom/index';
+const socketMsg = require('../../lib/constants.js');
 
 var onClickOutside = require('react-onclickoutside');
-const socketMsg = require('./constants.js');
 
 var App = React.createClass({
   getInitialState: function() {

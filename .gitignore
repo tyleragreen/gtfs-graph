@@ -5,7 +5,7 @@ npm-debug.log*
 pageRank.csv
 
 # Bundled js
-public/js/bundle.js
+public/*/bundle.js
 
 # Runtime data
 pids

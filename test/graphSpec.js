@@ -2,11 +2,11 @@
 
 process.env.NODE_ENV = 'test';
 
-var TransitGraph = require('../lib/graph.js');
-var Stop = require('../lib/stop.js');
-var Edge = require('../lib/edge.js');
-var BasicTraverser = require('../lib/graphTraverser.js').BasicTraverser;
-var traversals = require('../lib/traversals.js');
+var TransitGraph = require('../lib/server/graph.js');
+var Stop = require('../lib/server/stop.js');
+var Edge = require('../lib/server/edge.js');
+var BasicTraverser = require('../lib/server/graphTraverser.js').BasicTraverser;
+var traversals = require('../lib/server/traversals.js');
 
 var expect = require('chai').expect;
 

@@ -7,8 +7,8 @@
   },
   "scripts": {
     "test": "mocha --timeout 45000",
-    "build-js": "browserify public/js/app.js -o public/js/bundle.js -t [ babelify --presets [ react es2015 ] ]",
-    "start": "npm run build-js && node index.js"
+    "build-js": "browserify public/demo/app.js -o public/demo/bundle.js -t [ babelify --presets [ react es2015 ] ]",
+    "start": "npm run build-js && node lib/server/index.js"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
     "browserify": "^13.0.1",
     "classnames": "^2.2.5",
     "express": "^4.14.0",
+    "factor-bundle": "^2.5.0",
     "mapbox-gl": "^0.21.0",
     "pg": "^4.5.5",
     "react": "^15.3.0",

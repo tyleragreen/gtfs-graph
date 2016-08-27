@@ -4,13 +4,12 @@ var expect = require('chai').expect;
 
 process.env.NODE_ENV = 'test';
 
-var server = require('../lib/server.js');
+var server = require('../lib/server/server.js');
 var http = require('http');
 var io = require('socket.io-client');
-var socketMsg = require('../public/js/constants.js');
-var createGraph = require('../lib/createGraph.js');
+var socketMsg = require('../lib/constants.js');
+var createGraph = require('../lib/server/createGraph.js');
 var async = require('async');
-var Edge = require('../lib/edge.js');
 
 var socketURL = 'http://' + (process.env.IP || '0.0.0.0') + ':' + (process.env.PORT || 3000);
 var http_options = {
