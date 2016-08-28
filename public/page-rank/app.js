@@ -63,8 +63,8 @@ var PageRankDisplay = React.createClass({
     })*/;
   },
   handleMapLoad: function() {
-    this.state.socket.emit(socketMsg.requestStops);
-    this.state.socket.emit(socketMsg.requestMergedEdges);
+    this.state.socket.emit(socketMsg.requestStops, socketMsg.MTA);
+    this.state.socket.emit(socketMsg.requestMergedEdges, socketMsg.MTA);
     this.state.socket.emit(socketMsg.startPR);
   },
   handleStopHover: function(stopId) {

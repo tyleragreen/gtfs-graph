@@ -108,8 +108,8 @@ var App = React.createClass({
     return summaryMsg;
   },
   handleMapLoad: function() {
-    this.state.socket.emit(socketMsg.requestStops);
-    this.state.socket.emit(socketMsg.requestEdges);
+    this.state.socket.emit(socketMsg.requestStops, socketMsg.MTA);
+    this.state.socket.emit(socketMsg.requestEdges, socketMsg.MTA);
   },
   handleAutocomplete: function(query,numToReturn=10) {
     return this.state.stops
