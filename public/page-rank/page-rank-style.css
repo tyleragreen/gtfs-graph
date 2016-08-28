@@ -1,0 +1,15 @@
+body {
+  overflow: hidden;
+}
+.side-panel {
+  overflow-y: auto;
+  color: white;
+  right: 0;
+  top: 0;
+  height: 100%;
+  z-index: 1;
+  padding: 15px;
+  position: absolute;
+  background: black;
+  width: 400px;
+}

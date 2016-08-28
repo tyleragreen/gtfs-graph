@@ -4,7 +4,7 @@ import update from 'react-addons-update';
 import IO from 'socket.io-client';
 import classNames from 'classnames';
 import { Map, RouteList, Popup } from '../../lib/dom/index';
-const socketMsg = require('../../lib/constants.js');
+import socketMsg from '../../lib/constants.js';
 
 var onClickOutside = require('react-onclickoutside');
 
