@@ -1,6 +1,5 @@
 import React from 'react';
 import DOM from 'react-dom';
-import update from 'react-addons-update';
 import IO from 'socket.io-client';
 import { Map, RouteList, Popup } from '../../lib/dom/index';
 import socketMsg from '../../lib/constants.js';
@@ -11,9 +10,7 @@ var PageRankDisplay = React.createClass({
       infoBoxContents: [],
       stops: undefined,
       mergedStops: undefined,
-      mode: socketMsg.dijkstra,
-      origin: undefined,
-      destination: undefined,
+      system: socketMsg.MTA,
       hoverStop: undefined
     };
   },
@@ -63,8 +60,8 @@ var PageRankDisplay = React.createClass({
     })*/;
   },
   handleMapLoad: function() {
-    this.state.socket.emit(socketMsg.requestStops, socketMsg.MTA);
-    this.state.socket.emit(socketMsg.requestMergedEdges, socketMsg.MTA);
+    this.state.socket.emit(socketMsg.requestStops, this.state.system);
+    this.state.socket.emit(socketMsg.requestMergedEdges, this.state.system);
     this.state.socket.emit(socketMsg.startPR);
   },
   handleStopHover: function(stopId) {
@@ -79,11 +76,13 @@ var PageRankDisplay = React.createClass({
   },
   render: function() {
     const { hoverStop } = this.state;
+    var self = this;
+    
     let ranks = this.state.infoBoxContents.map(function(stop) {
       return (
         <div key={stop.id}>
-          <div>{stop.name}</div>
-          <div><RouteList stop={stop} key={stop.id} /></div>
+          <div className='clear-right'>{self.state.infoBoxContents.indexOf(stop)+1}. <b>{stop.rank}</b><span className='float-right'>{stop.name}</span></div>
+          <div className='float-right'><RouteList stop={stop} key={stop.id} /></div>
         </div>
       );
     });
@@ -91,6 +90,9 @@ var PageRankDisplay = React.createClass({
     return (
       <div>
         <Map
+          latitude={40.75}
+          longitude={-73.96}
+          zoomLevel={13}
           onMapLoad={this.handleMapLoad}
           onStopHover={this.handleStopHover}
           ref='map'
@@ -101,15 +103,16 @@ var PageRankDisplay = React.createClass({
             latitude={hoverStop.latitude}
           >
             <div className='popup'>
-              <div>{hoverStop.name}</div>
+              <div><em>{hoverStop.name}</em></div>
               <div>Page Rank: {hoverStop.rank}</div>
+              <div>Rank: {this.state.infoBoxContents.indexOf(hoverStop)+1} of {this.state.infoBoxContents.length}</div>
               <div><RouteList stop={hoverStop} /></div>
             </div>
           </Popup>
         )}
         </Map>
         <div className='side-panel'>
-          <h1>Stations</h1>
+          <h2>New York City Subway Stations by Page Rank</h2>
           {ranks}
         </div>
       </div>

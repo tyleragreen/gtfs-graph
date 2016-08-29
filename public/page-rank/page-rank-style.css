@@ -8,8 +8,14 @@ body {
   top: 0;
   height: 100%;
   z-index: 1;
-  padding: 15px;
+  padding: 0 15px;
   position: absolute;
   background: black;
   width: 400px;
+}
+.float-right {
+  float: right;
+}
+.clear-right {
+  clear: right;
 }
