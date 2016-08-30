@@ -5,6 +5,7 @@ import IO from 'socket.io-client';
 import classNames from 'classnames';
 import { Map, RouteList, Popup } from '../../lib/dom/index';
 import socketMsg from '../../lib/constants.js';
+import Systems from '../../lib/systems.js';
 
 var onClickOutside = require('react-onclickoutside');
 
@@ -167,6 +168,9 @@ var App = React.createClass({
     return (
       <div>
         <Map
+          latitude={Systems.MTA.latitude}
+          longitude={Systems.MTA.longitude}
+          zoomLevel={11}
           onMapLoad={this.handleMapLoad}
           onStopHover={this._handleStopHover}
           onStopClick={this._handleStopClick}

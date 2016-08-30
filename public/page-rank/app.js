@@ -3,6 +3,7 @@ import DOM from 'react-dom';
 import IO from 'socket.io-client';
 import { Map, RouteList, Popup } from '../../lib/dom/index';
 import socketMsg from '../../lib/constants.js';
+import Systems from '../../lib/systems.js';
 
 var PageRankDisplay = React.createClass({
   getInitialState: function() {
@@ -17,12 +18,18 @@ var PageRankDisplay = React.createClass({
   componentDidMount: function() {
     var socket = IO();
     
+    socket.emit(socketMsg.requestSystem, this.state.system);
+    socket.on(socketMsg.sendSystem, this._socketSendSystemHandler);
+    
     socket.on(socketMsg.sendStops, this._socketSendStopsHandler);
     socket.on(socketMsg.sendMergedEdges, this._socketSendEdgesHandler);
     socket.on(socketMsg.sendMergedStops, this._socketSendMergedStopsHandler);
     socket.on(socketMsg.event, this._socketEventHandler);
     
     this.setState({ socket: socket });
+  },
+  _socketSendSystemHandler: function(system) {
+    this.setState({ latitude: system.latitude, longitude: system.longitude });
   },
   _socketSendStopsHandler: function(stops) {
     this.setState({ stops: stops });
@@ -90,8 +97,8 @@ var PageRankDisplay = React.createClass({
     return (
       <div>
         <Map
-          latitude={40.75}
-          longitude={-73.96}
+          latitude={this.state.latitude}
+          longitude={this.state.longitude}
           zoomLevel={13}
           onMapLoad={this.handleMapLoad}
           onStopHover={this.handleStopHover}
