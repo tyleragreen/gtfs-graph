@@ -18,6 +18,7 @@ var PageRankDisplay = React.createClass({
   componentDidMount: function() {
     var socket = IO();
     
+    console.log('requested system');
     socket.emit(socketMsg.requestSystem, this.state.system);
     socket.on(socketMsg.sendSystem, this._socketSendSystemHandler);
     
@@ -29,6 +30,7 @@ var PageRankDisplay = React.createClass({
     this.setState({ socket: socket });
   },
   _socketSendSystemHandler: function(system) {
+    console.log('received system', system);
     this.setState({ latitude: system.latitude, longitude: system.longitude });
   },
   _socketSendStopsHandler: function(stops) {
