@@ -20,7 +20,6 @@ var PageRankDisplay = React.createClass({
     
     let { socket } = this;
     
-    console.log('requested system');
     socket.emit(socketMsg.requestSystem, this.state.system);
     socket.on(socketMsg.sendSystem, this._socketSendSystemHandler);
     
@@ -30,7 +29,6 @@ var PageRankDisplay = React.createClass({
     socket.on(socketMsg.event, this._socketEventHandler);
   },
   _socketSendSystemHandler: function(system) {
-    console.log('received system', system);
     this.refs.map.setCenter(system.longitude, system.latitude, 13);
     this.setState({ 
       system: system.id
@@ -85,13 +83,13 @@ var PageRankDisplay = React.createClass({
   },
   _handleSystemChange: function(system) {
     this.socket.emit(socketMsg.requestSystem, system);
-    console.log('changing to ', system);
     this.socket.emit(socketMsg.requestStops, system);
     this.socket.emit(socketMsg.requestMergedEdges, system);
     this.socket.emit(socketMsg.startPR, system);
   },
   render: function() {
     const { hoverStop } = this.state;
+    var icons = this.state.system === 'MTA';
     var self = this;
     
     let ranks = this.state.infoBoxContents.map(function(stop) {
@@ -103,7 +101,9 @@ var PageRankDisplay = React.createClass({
           <td className='cell-name'>{stop.name}</td>
         </tr>
         <tr>
-          <td className='cell-routes' colSpan='2'><RouteList stop={stop} key={stop.id} /></td>
+          <td className='cell-routes' colSpan='2'>
+            { icons && <RouteList stop={stop} key={stop.id} /> }
+          </td>
         </tr>
         </tbody>
         </table>
