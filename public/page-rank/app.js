@@ -11,12 +11,14 @@ var PageRankDisplay = React.createClass({
       infoBoxContents: [],
       stops: undefined,
       mergedStops: undefined,
-      system: socketMsg.MTA,
+      system: 'MTA',
       hoverStop: undefined
     };
   },
   componentDidMount: function() {
-    var socket = IO();
+    this.socket = IO();
+    
+    let { socket } = this;
     
     console.log('requested system');
     socket.emit(socketMsg.requestSystem, this.state.system);
@@ -26,12 +28,13 @@ var PageRankDisplay = React.createClass({
     socket.on(socketMsg.sendMergedEdges, this._socketSendEdgesHandler);
     socket.on(socketMsg.sendMergedStops, this._socketSendMergedStopsHandler);
     socket.on(socketMsg.event, this._socketEventHandler);
-    
-    this.setState({ socket: socket });
   },
   _socketSendSystemHandler: function(system) {
     console.log('received system', system);
-    this.setState({ latitude: system.latitude, longitude: system.longitude });
+    this.refs.map.setCenter(system.longitude, system.latitude, 13);
+    this.setState({ 
+      system: system.id
+    });
   },
   _socketSendStopsHandler: function(stops) {
     this.setState({ stops: stops });
@@ -63,15 +66,12 @@ var PageRankDisplay = React.createClass({
       if (a.rank > b.rank)
         return -1;
       return 0;
-    })
-    /*.map(stop => {
-      return stop.name + ': ' + stop.rank;
-    })*/;
+    });
   },
   handleMapLoad: function() {
-    this.state.socket.emit(socketMsg.requestStops, this.state.system);
-    this.state.socket.emit(socketMsg.requestMergedEdges, this.state.system);
-    this.state.socket.emit(socketMsg.startPR);
+    this.socket.emit(socketMsg.requestStops, this.state.system);
+    this.socket.emit(socketMsg.requestMergedEdges, this.state.system);
+    this.socket.emit(socketMsg.startPR, this.state.system);
   },
   handleStopHover: function(stopId) {
     if (typeof stopId === "undefined") {
@@ -83,25 +83,40 @@ var PageRankDisplay = React.createClass({
   _lookupStop: function(stopId) {
     return this.state.mergedStops[this.state.mergedStops.map(stop => stop.id).indexOf(stopId)];
   },
+  _handleSystemChange: function(system) {
+    this.socket.emit(socketMsg.requestSystem, system);
+    console.log('changing to ', system);
+    this.socket.emit(socketMsg.requestStops, system);
+    this.socket.emit(socketMsg.requestMergedEdges, system);
+    this.socket.emit(socketMsg.startPR, system);
+  },
   render: function() {
     const { hoverStop } = this.state;
     var self = this;
     
     let ranks = this.state.infoBoxContents.map(function(stop) {
       return (
-        <div key={stop.id}>
-          <div className='clear-right'>{self.state.infoBoxContents.indexOf(stop)+1}. <b>{stop.rank}</b><span className='float-right'>{stop.name}</span></div>
-          <div className='float-right'><RouteList stop={stop} key={stop.id} /></div>
-        </div>
+        <table key={stop.id} className='stop-table'>
+        <tbody>
+        <tr>
+          <td className='cell-rank'>{self.state.infoBoxContents.indexOf(stop)+1}. <b>{stop.rank}</b></td>
+          <td className='cell-name'>{stop.name}</td>
+        </tr>
+        <tr>
+          <td className='cell-routes' colSpan='2'><RouteList stop={stop} key={stop.id} /></td>
+        </tr>
+        </tbody>
+        </table>
       );
+    });
+    
+    let buttons = ['MTA','MBTA'].map(function(system) {
+      return (<button className='btn btn-primary' onClick={self._handleSystemChange.bind(null, system)} key={system}>{system}</button>);
     });
     
     return (
       <div>
         <Map
-          latitude={this.state.latitude}
-          longitude={this.state.longitude}
-          zoomLevel={13}
           onMapLoad={this.handleMapLoad}
           onStopHover={this.handleStopHover}
           ref='map'
@@ -120,8 +135,12 @@ var PageRankDisplay = React.createClass({
           </Popup>
         )}
         </Map>
+        <div className='system-selector'>
+          {buttons}
+        </div>
         <div className='side-panel'>
-          <h2>New York City Subway Stations by Page Rank</h2>
+          <h3>New York City Subway</h3>
+          <h4>Stations by Page Rank</h4>
           {ranks}
         </div>
       </div>

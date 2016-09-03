@@ -11,6 +11,7 @@ var onClickOutside = require('react-onclickoutside');
 
 var App = React.createClass({
   getInitialState: function() {
+    this.system = 'MTA';
     return {
       infoBoxContents: [],
       stops: undefined,
@@ -125,7 +126,7 @@ var App = React.createClass({
   },
   handleRun: function(mode, origin, destination) {
     var msg = 'start ' + mode;
-    this.state.socket.emit(msg, origin, destination);
+    this.state.socket.emit(msg, this.system, origin, destination);
     this._clearTrace();
     this.setState({ infoBoxContents: [] });
   },

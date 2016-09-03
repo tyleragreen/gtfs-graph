@@ -13,6 +13,33 @@ body {
   background: black;
   width: 400px;
 }
+.side-panel div {
+  margin: 4px 0;
+}
+.stop-table {
+  width: 100%;
+  color: white;
+  font-size: 14px;
+}
+.cell-rank {
+  vertical-align: top;
+}
+.cell-name {
+  text-align: right;
+}
+.cell-routes {
+  padding-bottom: 5px;
+  text-align: right;
+}
+.system-selector {
+  position: absolute;
+  top: 10px;
+  left: 60px;
+  z-index: 1;
+}
+.system-selector button {
+  margin: 0 5px;
+}
 .float-right {
   float: right;
 }
