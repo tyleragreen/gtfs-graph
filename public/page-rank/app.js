@@ -35,9 +35,11 @@ var PageRankDisplay = React.createClass({
     });
   },
   _socketSendStopsHandler: function(stops) {
+    console.log('stops', stops);
     this.setState({ stops: stops });
   },
   _socketSendMergedStopsHandler: function(mergedStops) {
+    console.log('merged stops', mergedStops);
     this.setState({ mergedStops: mergedStops });
     this.refs.map.addStops(mergedStops);
   },
@@ -128,9 +130,10 @@ var PageRankDisplay = React.createClass({
           >
             <div className='popup'>
               <div><em>{hoverStop.name}</em></div>
+              <div><em>{hoverStop.id}</em></div>
               <div>Page Rank: {hoverStop.rank}</div>
               <div>Rank: {this.state.infoBoxContents.indexOf(hoverStop)+1} of {this.state.infoBoxContents.length}</div>
-              <div><RouteList stop={hoverStop} /></div>
+              { icons && <div><RouteList stop={hoverStop} /></div> }
             </div>
           </Popup>
         )}
