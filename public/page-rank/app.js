@@ -10,7 +10,6 @@ var PageRankDisplay = React.createClass({
     return {
       infoBoxContents: [],
       stops: undefined,
-      stops: undefined,
       system: 'MBTA',
       hoverStop: undefined
     };
@@ -80,21 +79,21 @@ var PageRankDisplay = React.createClass({
   },
   _handleSystemChange: function(system) {
     this.socket.emit(socketMsg.requestSystem, system);
-    this.socket.emit(socketMsg.requestStops, system);
+    this.socket.emit(socketMsg.requestMergedStops, system);
     this.socket.emit(socketMsg.requestMergedEdges, system);
     this.socket.emit(socketMsg.startPR, system);
   },
   render: function() {
-    const { hoverStop } = this.state;
+    const { hoverStop, system, infoBoxContents } = this.state;
     var icons = this.state.system === 'MTA';
     var self = this;
     
-    let ranks = this.state.infoBoxContents.map(function(stop) {
+    let ranks = infoBoxContents.map(function(stop) {
       return (
         <table key={stop.id} className='stop-table'>
         <tbody>
         <tr>
-          <td className='cell-rank'>{self.state.infoBoxContents.indexOf(stop)+1}. <b>{stop.rank}</b></td>
+          <td className='cell-rank'>{infoBoxContents.indexOf(stop)+1}. <b>{stop.rank}</b></td>
           <td className='cell-name'>{stop.name}</td>
         </tr>
         <tr>
@@ -125,9 +124,8 @@ var PageRankDisplay = React.createClass({
           >
             <div className='popup'>
               <div><em>{hoverStop.name}</em></div>
-              <div><em>{hoverStop.id}</em></div>
               <div>Page Rank: {hoverStop.rank}</div>
-              <div>Rank: {this.state.infoBoxContents.indexOf(hoverStop)+1} of {this.state.infoBoxContents.length}</div>
+              <div>Rank: {infoBoxContents.indexOf(hoverStop)+1} of {infoBoxContents.length}</div>
               { icons && <div><RouteList stop={hoverStop} /></div> }
             </div>
           </Popup>
@@ -137,7 +135,7 @@ var PageRankDisplay = React.createClass({
           {buttons}
         </div>
         <div className='side-panel'>
-          <h3>New York City Subway</h3>
+          <h3>{system}</h3>
           <h4>Stations by Page Rank</h4>
           {ranks}
         </div>

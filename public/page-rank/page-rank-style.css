@@ -23,6 +23,7 @@ body {
 }
 .cell-rank {
   vertical-align: top;
+  width: 65px;
 }
 .cell-name {
   text-align: right;
