@@ -10,8 +10,8 @@ var PageRankDisplay = React.createClass({
     return {
       infoBoxContents: [],
       stops: undefined,
-      mergedStops: undefined,
-      system: 'MTA',
+      stops: undefined,
+      system: 'MBTA',
       hoverStop: undefined
     };
   },
@@ -23,7 +23,6 @@ var PageRankDisplay = React.createClass({
     socket.emit(socketMsg.requestSystem, this.state.system);
     socket.on(socketMsg.sendSystem, this._socketSendSystemHandler);
     
-    socket.on(socketMsg.sendStops, this._socketSendStopsHandler);
     socket.on(socketMsg.sendMergedEdges, this._socketSendEdgesHandler);
     socket.on(socketMsg.sendMergedStops, this._socketSendMergedStopsHandler);
     socket.on(socketMsg.event, this._socketEventHandler);
@@ -34,14 +33,9 @@ var PageRankDisplay = React.createClass({
       system: system.id
     });
   },
-  _socketSendStopsHandler: function(stops) {
-    console.log('stops', stops);
-    this.setState({ stops: stops });
-  },
-  _socketSendMergedStopsHandler: function(mergedStops) {
-    console.log('merged stops', mergedStops);
-    this.setState({ mergedStops: mergedStops });
-    this.refs.map.addStops(mergedStops);
+  _socketSendMergedStopsHandler: function(stops) {
+    this.setState({ stops });
+    this.refs.map.addStops(stops);
   },
   _socketSendEdgesHandler: function(edges) {
     this.refs.map.addEdges(edges);
@@ -49,12 +43,13 @@ var PageRankDisplay = React.createClass({
   _socketEventHandler: function(event) {
     if (event.type === socketMsg.showRanks) {
       this.setState({ infoBoxContents: this._orderStopsByRank(event.data) });
-      this.refs.map.showRanks(this.state.mergedStops,event.data);
+      this.refs.map.showRanks(this.state.stops,event.data);
     }
   },
   _orderStopsByRank: function(ranks) {
     let stopsWithRanks = [];
-    let stops = this.state.mergedStops;
+    let { stops } = this.state;
+    
     ranks.forEach(function(rank, node) {
       let stop = stops[node];
       stop.rank = Math.round(rank * 100) / 100;
@@ -69,9 +64,9 @@ var PageRankDisplay = React.createClass({
     });
   },
   handleMapLoad: function() {
-    this.socket.emit(socketMsg.requestStops, this.state.system);
-    this.socket.emit(socketMsg.requestMergedEdges, this.state.system);
-    this.socket.emit(socketMsg.startPR, this.state.system);
+    this.socket.emit(socketMsg.requestMergedStops, this.state.system);
+    //this.socket.emit(socketMsg.requestMergedEdges, this.state.system);
+    //this.socket.emit(socketMsg.startPR, this.state.system);
   },
   handleStopHover: function(stopId) {
     if (typeof stopId === "undefined") {
@@ -81,7 +76,7 @@ var PageRankDisplay = React.createClass({
     }
   },
   _lookupStop: function(stopId) {
-    return this.state.mergedStops[this.state.mergedStops.map(stop => stop.id).indexOf(stopId)];
+    return this.state.stops[this.state.stops.map(stop => stop.id).indexOf(stopId)];
   },
   _handleSystemChange: function(system) {
     this.socket.emit(socketMsg.requestSystem, system);
