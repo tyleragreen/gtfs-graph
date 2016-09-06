@@ -85,8 +85,8 @@ var PageRankDisplay = React.createClass({
   },
   render: function() {
     const { hoverStop, system, infoBoxContents } = this.state;
-    var icons = this.state.system === 'MTA';
-    var self = this;
+    var showIcons = system === 'MTA';
+    var self      = this;
     
     let ranks = infoBoxContents.map(function(stop) {
       return (
@@ -98,7 +98,7 @@ var PageRankDisplay = React.createClass({
         </tr>
         <tr>
           <td className='cell-routes' colSpan='2'>
-            { icons && <RouteList stop={stop} key={stop.id} /> }
+            <RouteList showIcons={showIcons} stop={stop} key={stop.id} />
           </td>
         </tr>
         </tbody>
@@ -126,7 +126,7 @@ var PageRankDisplay = React.createClass({
               <div><em>{hoverStop.name}</em></div>
               <div>Page Rank: {hoverStop.rank}</div>
               <div>Rank: {infoBoxContents.indexOf(hoverStop)+1} of {infoBoxContents.length}</div>
-              { icons && <div><RouteList stop={hoverStop} /></div> }
+              <div><RouteList showIcons={showIcons} stop={hoverStop} /></div>
             </div>
           </Popup>
         )}
