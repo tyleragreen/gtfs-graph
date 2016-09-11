@@ -2,7 +2,7 @@
 
 process.env.NODE_ENV = 'test';
 
-var Edge = require('../lib/server/edge.js');
+var Edge = require('../lib/graph/edge.js');
 var expect = require('chai').expect;
 
 describe('An edge', function() {

@@ -2,7 +2,7 @@
 
 process.env.NODE_ENV = 'test';
 
-var Stop = require('../lib/server/stop.js');
+var Stop = require('../lib/graph/stop.js');
 
 var expect = require('chai').expect;
 

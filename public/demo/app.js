@@ -25,12 +25,18 @@ var App = React.createClass({
   componentDidMount: function() {
     var socket = IO();
     
+    socket.emit(socketMsg.requestSystem, this.system);
+    socket.on(socketMsg.sendSystem, this._socketSendSystemHandler);
+    
     socket.on(socketMsg.sendStops, this._socketSendStopsHandler);
     socket.on(socketMsg.sendEdges, this._socketSendEdgesHandler);
     socket.on(socketMsg.sendMergedStops, this._socketSendMergedStopsHandler);
     socket.on(socketMsg.event, this._socketEventHandler);
     
     this.setState({ socket: socket });
+  },
+  _socketSendSystemHandler: function(system) {
+    this.refs.map.setCenter(system.longitude, system.latitude, 13);
   },
   _socketSendStopsHandler: function(stops) {
     this.setState({ stops: stops });
@@ -110,8 +116,8 @@ var App = React.createClass({
     return summaryMsg;
   },
   handleMapLoad: function() {
-    this.state.socket.emit(socketMsg.requestStops, socketMsg.MTA);
-    this.state.socket.emit(socketMsg.requestEdges, socketMsg.MTA);
+    this.state.socket.emit(socketMsg.requestStops, this.system);
+    this.state.socket.emit(socketMsg.requestEdges, this.system);
   },
   handleAutocomplete: function(query,numToReturn=10) {
     return this.state.stops
@@ -188,7 +194,7 @@ var App = React.createClass({
             <div className='popup'>
               <div><b>Origin</b></div>
               <div>{origin.name}</div>
-              <div><RouteList stop={origin} /></div>
+              <div><RouteList showIcons={true} stop={origin} /></div>
             </div>
           </Popup>
         )}
@@ -202,7 +208,7 @@ var App = React.createClass({
             <div className='popup'>
               <div><b>Destination</b></div>
               <div>{destination.name}</div>
-              <div><RouteList stop={destination} /></div>
+              <div><RouteList showIcons={true} stop={destination} /></div>
             </div>
           </Popup>
         )}
@@ -217,7 +223,7 @@ var App = React.createClass({
           >
             <div className='popup'>
               <div>{hoverStop.name}</div>
-              <div><RouteList stop={hoverStop} /></div>
+              <div><RouteList showIcons={true} stop={hoverStop} /></div>
             </div>
           </Popup>
         )}
@@ -232,7 +238,7 @@ var App = React.createClass({
           >
             <div className='popup'>
               <div>{hoverStop.name}</div>
-              <div><RouteList stop={hoverStop} /></div>
+              <div><RouteList showIcons={true} stop={hoverStop} /></div>
               <div>
                 <button className='btn btn-primary' onClick={this.handleEndpointSet.bind(null,'origin',hoverStop)}>Origin</button>
                 <button className='btn btn-primary' onClick={this.handleEndpointSet.bind(null,'destination',hoverStop)}>Destination</button>
@@ -498,7 +504,7 @@ var SearchToken = React.createClass({
   render: function() {
     return (
       <div className="input-token" onClick={this.props.onTokenClick}>
-        <RouteList stop={this.props.stop} />&nbsp;&nbsp;{this.props.stop.name}
+        <RouteList showIcons={true} stop={this.props.stop} />&nbsp;&nbsp;{this.props.stop.name}
         <div className="input-token-close" onClick={this.props.onTokenClose}>&times;</div>
       </div>
     );
@@ -544,7 +550,7 @@ var SearchSuggestion = React.createClass({
       <li
         onClick={this.handleClick}
       >
-      <RouteList stop={this.props.stop} />&nbsp;&nbsp;{this.props.stop.name}
+      <RouteList showIcons={true} stop={this.props.stop} />&nbsp;&nbsp;{this.props.stop.name}
       </li>
     );
   }
