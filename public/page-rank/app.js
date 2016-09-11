@@ -1,25 +1,25 @@
 import React from 'react';
 import DOM from 'react-dom';
 import IO from 'socket.io-client';
-import { Map, RouteList, Popup } from '../../lib/dom/index';
+import { Map, RouteList, Popup, GitHubRibbon } from '../../lib/dom/index';
 import socketMsg from '../../lib/constants.js';
-import Systems from '../../lib/systems.js';
 
 var PageRankDisplay = React.createClass({
   getInitialState: function() {
     return {
       infoBoxContents: [],
       stops: undefined,
-      system: 'MBTA',
+      system: undefined,
       hoverStop: undefined
     };
   },
   componentDidMount: function() {
-    this.socket = IO();
+    let { system } = this.props;
     
+    this.socket = IO();
     let { socket } = this;
     
-    socket.emit(socketMsg.requestSystem, this.state.system);
+    socket.emit(socketMsg.requestSystem, system);
     socket.on(socketMsg.sendSystem, this._socketSendSystemHandler);
     
     socket.on(socketMsg.sendMergedEdges, this._socketSendEdgesHandler);
@@ -84,7 +84,8 @@ var PageRankDisplay = React.createClass({
     this.socket.emit(socketMsg.startPR, system);
   },
   render: function() {
-    const { hoverStop, system, infoBoxContents } = this.state;
+    const { hoverStop, infoBoxContents } = this.state;
+    const { system } = this.props;
     var showIcons = system === 'MTA';
     var self      = this;
     
@@ -106,12 +107,18 @@ var PageRankDisplay = React.createClass({
       );
     });
     
-    let buttons = ['MTA','MBTA'].map(function(system) {
-      return (<button className='btn btn-primary' onClick={self._handleSystemChange.bind(null, system)} key={system}>{system}</button>);
+    function navigateTo(system) {
+      let url = '/page-rank/' + system.toLowerCase();
+      window.location = url;
+    }
+    
+    let buttons = ['NYC','Boston'].map(function(system) {
+      return (<button className='btn btn-primary' onClick={navigateTo.bind(null, system)} key={system}>{system}</button>);
     });
     
     return (
       <div>
+        <GitHubRibbon />
         <Map
           onMapLoad={this.handleMapLoad}
           onStopHover={this.handleStopHover}
@@ -144,7 +151,5 @@ var PageRankDisplay = React.createClass({
   }
 });
 
-DOM.render(
-  <PageRankDisplay />,
-  document.getElementById('content')
-);
+module.exports = PageRankDisplay;
+
