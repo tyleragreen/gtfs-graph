@@ -4,9 +4,6 @@ logs
 npm-debug.log*
 pageRank.csv
 
-# Bundled js
-public/bundle/
-
 # Runtime data
 pids
 *.pid
