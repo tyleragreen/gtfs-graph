@@ -3,7 +3,7 @@ import DOM from 'react-dom';
 import update from 'react-addons-update';
 import IO from 'socket.io-client';
 import classNames from 'classnames';
-import { Map, RouteList, Popup, GitHubRibbon } from '../../lib/dom/index';
+import { Map, RouteList, Popup, GitHubRibbon, TweetButton } from '../../lib/dom/index';
 import socketMsg from '../../lib/constants.js';
 import Systems from '../../lib/systems.js';
 

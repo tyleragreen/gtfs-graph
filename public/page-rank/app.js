@@ -1,7 +1,7 @@
 import React from 'react';
 import DOM from 'react-dom';
 import IO from 'socket.io-client';
-import { Map, RouteList, Popup, GitHubRibbon } from '../../lib/dom/index';
+import { Map, RouteList, Popup, GitHubRibbon, TweetButton } from '../../lib/dom/index';
 import socketMsg from '../../lib/constants.js';
 
 var PageRankDisplay = React.createClass({
@@ -94,11 +94,12 @@ var PageRankDisplay = React.createClass({
         <table key={stop.id} className='stop-table'>
         <tbody>
         <tr>
-          <td className='cell-rank'>{infoBoxContents.indexOf(stop)+1}. <b>{stop.rank}</b></td>
+          <td className='cell-rank'>{infoBoxContents.indexOf(stop)+1}.</td>
+          <td className='cell-rank'><b>{stop.rank}</b></td>
           <td className='cell-name'>{stop.name}</td>
         </tr>
         <tr>
-          <td className='cell-routes' colSpan='2'>
+          <td className='cell-routes' colSpan='3'>
             <RouteList showIcons={showIcons} stop={stop} key={stop.id} />
           </td>
         </tr>
@@ -142,9 +143,16 @@ var PageRankDisplay = React.createClass({
           {buttons}
         </div>
         <div className='side-panel'>
-          <h3>{system}</h3>
-          <h4>Stations by Page Rank</h4>
-          {ranks}
+          <div>
+            <h1>{system}</h1>
+            Stations by Page Rank
+          </div>
+          <div className='ranks'>
+            {ranks}
+          </div>
+          <div>
+            A <a href="http://www.tyleragreen.com/" target="_blank">Tyler A. Green</a> Project
+          </div>
         </div>
       </div>
     );

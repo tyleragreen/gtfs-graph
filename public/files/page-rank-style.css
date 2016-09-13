@@ -1,6 +1,14 @@
 body {
   overflow: hidden;
 }
+a {
+  color: white;
+  text-decoration: underline;
+}
+a:hover {
+  color: white;
+  text-decoration: none;
+}
 .side-panel {
   overflow-y: auto;
   color: white;
@@ -8,13 +16,18 @@ body {
   top: 0;
   height: 100%;
   z-index: 1;
-  padding: 0 15px;
   position: absolute;
   background: black;
   width: 400px;
+  display: flex;
+  flex-direction: column;
+}
+.ranks {
+  overflow-y: auto;
 }
 .side-panel div {
   margin: 4px 0;
+  padding: 0 15px;
 }
 .stop-table {
   width: 100%;
@@ -23,7 +36,7 @@ body {
 }
 .cell-rank {
   vertical-align: top;
-  width: 65px;
+  width: 35px;
 }
 .cell-name {
   text-align: right;
