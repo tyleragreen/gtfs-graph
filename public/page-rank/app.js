@@ -63,9 +63,9 @@ var PageRankDisplay = React.createClass({
     });
   },
   handleMapLoad: function() {
-    this.socket.emit(socketMsg.requestMergedStops, this.state.system);
-    this.socket.emit(socketMsg.requestMergedEdges, this.state.system);
-    this.socket.emit(socketMsg.startPR, this.state.system);
+    this.socket.emit(socketMsg.requestMergedStops, this.props.system);
+    this.socket.emit(socketMsg.requestMergedEdges, this.props.system);
+    this.socket.emit(socketMsg.startPR, this.props.system);
   },
   handleStopHover: function(stopId) {
     if (typeof stopId === "undefined") {
