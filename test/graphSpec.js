@@ -44,7 +44,7 @@ describe('A transit graph', function() {
       [],
       [0],
       [0,{type: 'route', weight: 2, origin: 2, destination: 1}],
-      [{type: 'route', weight: -1, origin: 3, destination: 0},{type: 'route', weight: -1, origin: 3, destination: 1},{type: 'route', weight: -1, origin: 3, destination: 2}],
+      [{type: 'route', weight: 2, origin: 3, destination: 0},{type: 'route', weight: 2, origin: 3, destination: 1},{type: 'route', weight: 2, origin: 3, destination: 2}],
     ];
     this.graph = new TransitGraph(edgeList, numNodes, this.stops);
   });
@@ -103,7 +103,7 @@ describe('A transit graph', function() {
     this.expectedSuperGraph = [
       [],
       [0],
-      [{type: 'route', weight: -1, origin: 2, destination: 0},{type: 'route', weight: -1, origin: 2, destination: 1}],
+      [{type: 'route', weight: 2, origin: 2, destination: 0},{type: 'route', weight: 2, origin: 2, destination: 1}],
     ];
     this.graph = new TransitGraph(edgeList, numNodes, this.stops);
     expect(traversals.mergeTransferNodes(this.graph).G).to.deep.equal(this.expectedSuperGraph);
@@ -122,5 +122,18 @@ describe('A transit graph', function() {
     
     expect(traverser.results.pathLength).to.equal(4);
     expect(edgesToArrays(traverser.visitedEdges)).to.deep.equal([[1,2],[2,3]]);
+  });
+  
+  it('will fail when provided a negative edge', function() {
+    const numNodes = 5;
+    const edgeList = [
+      new Edge({ type: 'route', origin: 1, destination: 0, weight: 2 }),
+      new Edge({ type: 'transfer', origin: 2, destination: 1, weight: 2 }),
+      new Edge({ type: 'route', origin: 4, destination: 1, weight: -2 }),
+      new Edge({ type: 'transfer', origin: 3, destination: 2, weight: 2 }),
+      new Edge({ type: 'route', origin: 4, destination: 3, weight: 2 }),
+      ];
+
+    expect(function() { new TransitGraph(edgeList, numNodes, this.stops); }).to.throw(Error);
   });
 });
