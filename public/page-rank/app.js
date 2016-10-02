@@ -51,7 +51,7 @@ var PageRankDisplay = React.createClass({
     
     ranks.forEach(function(rank, node) {
       let stop = stops[node];
-      stop.rank = Math.round(rank * 100) / 100;
+      stop.rank = Math.round(rank * 100000) / 100000;
       stopsWithRanks.push(stop);
     });
     return stopsWithRanks.sort((a,b) => {
