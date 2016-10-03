@@ -109,11 +109,11 @@ var PageRankDisplay = React.createClass({
     });
     
     function navigateTo(system) {
-      let url = '/page-rank/' + system.toLowerCase();
+      let url = '/rank/' + system.toLowerCase();
       window.location = url;
     }
     
-    let buttons = ['NYC','Boston'].map(function(system) {
+    let buttons = ['NYC','Boston','Paris'].map(function(system) {
       return (<button className='btn btn-primary' onClick={navigateTo.bind(null, system)} key={system}>{system}</button>);
     });
     
@@ -145,7 +145,6 @@ var PageRankDisplay = React.createClass({
         <div className='side-panel'>
           <div>
             <h1>{system}</h1>
-            Stations by Page Rank
           </div>
           <div className='ranks'>
             {ranks}
