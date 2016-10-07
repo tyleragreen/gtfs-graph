@@ -36,21 +36,21 @@ describe('A transit graph', function() {
     this.expectedGraph = [
       [],
       [edgeList[0]],
-      [0,edgeList[1]],
-      [0,0,edgeList[3]],
-      [0,edgeList[2],0,edgeList[4]]
+      [null,edgeList[1]],
+      [null,null,edgeList[3]],
+      [null,edgeList[2],null,edgeList[4]]
     ];
     this.expectedSuperGraph = [
       [],
-      [0],
-      [0,{type: 'route', weight: 2, origin: 2, destination: 1}],
+      [null],
+      [null,{type: 'route', weight: 2, origin: 2, destination: 1}],
       [{type: 'route', weight: 2, origin: 3, destination: 0},{type: 'route', weight: 2, origin: 3, destination: 1},{type: 'route', weight: 2, origin: 3, destination: 2}],
     ];
     this.graph = new TransitGraph(edgeList, numNodes, this.stops);
   });
   
   it('can be created', function() {
-    expect(this.graph.G).to.deep.equal(this.expectedGraph);
+    expect(this.graph.G.matrix).to.deep.equal(this.expectedGraph);
   });
   
   it('can be traversed by dfs search', function() {
@@ -81,7 +81,7 @@ describe('A transit graph', function() {
   });
   
   it('can have its transfer nodes merged', function() {
-    expect(traversals.mergeTransferNodes(this.graph).G).to.deep.equal(this.expectedSuperGraph);
+    expect(traversals.mergeTransferNodes(this.graph).G.matrix).to.deep.equal(this.expectedSuperGraph);
   });
   
   it('can be merged twice', function() {
@@ -96,17 +96,17 @@ describe('A transit graph', function() {
     this.expectedGraph = [
       [],
       [edgeList[0]],
-      [0,edgeList[1]],
-      [0,0,edgeList[3]],
-      [0,edgeList[2],0,edgeList[4]]
+      [null,edgeList[1]],
+      [null,null,edgeList[3]],
+      [null,edgeList[2],0,edgeList[4]]
     ];
     this.expectedSuperGraph = [
       [],
-      [0],
+      [null],
       [{type: 'route', weight: 2, origin: 2, destination: 0},{type: 'route', weight: 2, origin: 2, destination: 1}],
     ];
     this.graph = new TransitGraph(edgeList, numNodes, this.stops);
-    expect(traversals.mergeTransferNodes(this.graph).G).to.deep.equal(this.expectedSuperGraph);
+    expect(traversals.mergeTransferNodes(this.graph).G.matrix).to.deep.equal(this.expectedSuperGraph);
   });
   
   it('can be ranked with Page Rank', function() {
