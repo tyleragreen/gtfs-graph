@@ -86,7 +86,7 @@ var PageRankDisplay = React.createClass({
   render: function() {
     const { hoverStop, infoBoxContents } = this.state;
     const { system } = this.props;
-    var showIcons = system === 'MTA';
+    var showIcons = system !== 'MBTA';
     var self      = this;
     
     let ranks = infoBoxContents.map(function(stop) {
@@ -100,7 +100,12 @@ var PageRankDisplay = React.createClass({
         </tr>
         <tr>
           <td className='cell-routes' colSpan='3'>
-            <RouteList showIcons={showIcons} stop={stop} key={stop.id} />
+            <RouteList
+              system={system}
+              showIcons={showIcons}
+              stop={stop}
+              key={stop.id}
+            />
           </td>
         </tr>
         </tbody>
@@ -134,7 +139,7 @@ var PageRankDisplay = React.createClass({
               <div><em>{hoverStop.name}</em></div>
               <div>Page Rank: {hoverStop.rank}</div>
               <div>Rank: {infoBoxContents.indexOf(hoverStop)+1} of {infoBoxContents.length}</div>
-              <div><RouteList showIcons={showIcons} stop={hoverStop} /></div>
+              <div><RouteList system={system} showIcons={showIcons} stop={hoverStop} /></div>
             </div>
           </Popup>
         )}
@@ -150,7 +155,7 @@ var PageRankDisplay = React.createClass({
             {ranks}
           </div>
           <div>
-            A <a href="http://www.tyleragreen.com/" target="_blank">Tyler A. Green</a> Project
+            A <a href="http://www.tyleragreen.com/" target="_blank">Tyler A. Green</a> Project. See <a href="/demo">how this works</a>!
           </div>
         </div>
       </div>

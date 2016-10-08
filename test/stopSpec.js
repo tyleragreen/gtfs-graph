@@ -8,8 +8,8 @@ var expect = require('chai').expect;
 
 describe('A stop', function() {
   before(function() {
-    this.stopOne = new Stop(0,'Stop One', 40, 50, ['1','2']);
-    this.stopTwo = new Stop(1,'Stop Two', -40, 75, ['3','2']);
+    this.stopOne = new Stop(0,'Stop One', 40, 50, [{id:'1'},{id:'2'}]);
+    this.stopTwo = new Stop(1,'Stop Two', -40, 75, [{id:'3'},{id:'2'}]);
   });
   
   it('should be created', function() {
@@ -24,7 +24,7 @@ describe('A stop', function() {
     expect(newStop.name).to.equal('Stop One / Stop Two');
     expect(newStop.latitude).to.equal(0);
     expect(newStop.longitude).to.equal(62.5);
-    expect(newStop.routes).to.deep.equal(['1','2','3']);
+    expect(newStop.routes).to.deep.equal([{id:'1'},{id:'2'},{id:'3'}]);
   });
   
   it('avoids appending a non-unique name', function() {

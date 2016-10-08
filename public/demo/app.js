@@ -9,6 +9,8 @@ import Systems from '../../lib/systems.js';
 
 var onClickOutside = require('react-onclickoutside');
 
+const systemID = 'MTA';
+
 var App = React.createClass({
   getInitialState: function() {
     this.system = 'MTA';
@@ -194,7 +196,7 @@ var App = React.createClass({
             <div className='popup'>
               <div><b>Origin</b></div>
               <div>{origin.name}</div>
-              <div><RouteList showIcons={true} stop={origin} /></div>
+              <div><RouteList system={systemID} showIcons={true} stop={origin} /></div>
             </div>
           </Popup>
         )}
@@ -208,7 +210,7 @@ var App = React.createClass({
             <div className='popup'>
               <div><b>Destination</b></div>
               <div>{destination.name}</div>
-              <div><RouteList showIcons={true} stop={destination} /></div>
+              <div><RouteList system={systemID} showIcons={true} stop={destination} /></div>
             </div>
           </Popup>
         )}
@@ -223,7 +225,7 @@ var App = React.createClass({
           >
             <div className='popup'>
               <div>{hoverStop.name}</div>
-              <div><RouteList showIcons={true} stop={hoverStop} /></div>
+              <div><RouteList system={systemID} showIcons={true} stop={hoverStop} /></div>
             </div>
           </Popup>
         )}
@@ -238,7 +240,7 @@ var App = React.createClass({
           >
             <div className='popup'>
               <div>{hoverStop.name}</div>
-              <div><RouteList showIcons={true} stop={hoverStop} /></div>
+              <div><RouteList system={systemID} showIcons={true} stop={hoverStop} /></div>
               <div>
                 <button className='btn btn-primary' onClick={this.handleEndpointSet.bind(null,'origin',hoverStop)}>Origin</button>
                 <button className='btn btn-primary' onClick={this.handleEndpointSet.bind(null,'destination',hoverStop)}>Destination</button>
@@ -504,7 +506,7 @@ var SearchToken = React.createClass({
   render: function() {
     return (
       <div className="input-token" onClick={this.props.onTokenClick}>
-        <RouteList showIcons={true} stop={this.props.stop} />&nbsp;&nbsp;{this.props.stop.name}
+        <RouteList system={systemID} showIcons={true} stop={this.props.stop} />&nbsp;&nbsp;{this.props.stop.name}
         <div className="input-token-close" onClick={this.props.onTokenClose}>&times;</div>
       </div>
     );
@@ -550,7 +552,7 @@ var SearchSuggestion = React.createClass({
       <li
         onClick={this.handleClick}
       >
-      <RouteList showIcons={true} stop={this.props.stop} />&nbsp;&nbsp;{this.props.stop.name}
+      <RouteList system={systemID} showIcons={true} stop={this.props.stop} />&nbsp;&nbsp;{this.props.stop.name}
       </li>
     );
   }
@@ -582,7 +584,6 @@ var ModeSelector = React.createClass({
         <option value={socketMsg.dijkstra}>Shortest Path Search</option>
         <option value={socketMsg.dfs}>Depth-First Search</option>
         <option value={socketMsg.bfs}>Breadth-First Search</option>
-        <option value={socketMsg.pageRank}>Page Rank</option>
       </select>
       </div>
     );
