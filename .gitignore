@@ -3,7 +3,6 @@ logs
 *.log
 npm-debug.log*
 pageRank.csv
-public/bundle/*
 
 # Runtime data
 pids
