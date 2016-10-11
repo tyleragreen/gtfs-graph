@@ -1,8 +1,16 @@
 # gtfs-graph
 
-gtfs-graph is a project to visually implement graph traversal algorithms on a MTA transit map.
+gtfs-graph is a project to study transit system design using graph algorithms.
 
 ![Image](http://www.tyleragreen.com/blog_files/2016-10-gtfs-graph/routing1.png)
+
+## Supported Algorithms
+
+* Depth-First Search
+* Breadth-First Search
+* Dijkstra's Algorithm
+* Page Rank
+* Closeness Centrality
 
 ### Run Locally
 
