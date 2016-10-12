@@ -105,6 +105,9 @@ var PageRankDisplay = _react2.default.createClass({
     this.socket.emit(_constants2.default.requestMergedEdges, system);
     this.socket.emit(_constants2.default.startPR, system);
   },
+  _handleModeChange: function _handleModeChange(mode) {
+    this.socket.emit(_constants2.default.getMode, this.props.system, mode);
+  },
   render: function render() {
     var _state = this.state;
     var hoverStop = _state.hoverStop;
@@ -175,6 +178,13 @@ var PageRankDisplay = _react2.default.createClass({
         system
       );
     });
+    var modes = ['PageRank', 'Closeness'].map(function (mode) {
+      return _react2.default.createElement(
+        'button',
+        { className: 'btn btn-primary', onClick: self._handleModeChange.bind(null, mode), key: mode },
+        mode
+      );
+    });
 
     return _react2.default.createElement(
       'div',
@@ -231,6 +241,11 @@ var PageRankDisplay = _react2.default.createClass({
         'div',
         { className: 'system-selector' },
         buttons
+      ),
+      _react2.default.createElement(
+        'div',
+        { className: 'mode-selector' },
+        modes
       ),
       _react2.default.createElement(
         'div',
@@ -7821,7 +7836,7 @@ exports.default = _react2.default.createClass({
   },
   componentDidMount: function componentDidMount() {
 
-    //this._preloadImages();
+    this._preloadImages();
 
     _mapboxGl2.default.accessToken = 'pk.eyJ1IjoiZ3JlZW50IiwiYSI6ImNpazBqdWFsOTM5Nnh2M2x6dWZ2dnB3aHkifQ.97-pFPD8lQf02B6edag1rA';
     var that = this;
@@ -60406,7 +60421,8 @@ var socketMsg = {
   visitNode: 'visit node',
   leaveNode: 'leave node',
   showRanks: 'show rank',
-  summary: 'summary'
+  summary: 'summary',
+  getMode: 'get mode'
 };
 
 Object.freeze(socketMsg);

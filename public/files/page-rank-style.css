@@ -54,6 +54,15 @@ a:hover {
 .system-selector button {
   margin: 0 5px;
 }
+.mode-selector {
+  position: absolute;
+  top: 60px;
+  left: 60px;
+  z-index: 1;
+}
+.mode-selector button {
+  margin: 0 5px;
+}
 .float-right {
   float: right;
 }

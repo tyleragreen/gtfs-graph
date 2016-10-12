@@ -83,6 +83,9 @@ var PageRankDisplay = React.createClass({
     this.socket.emit(socketMsg.requestMergedEdges, system);
     this.socket.emit(socketMsg.startPR, system);
   },
+  _handleModeChange: function(mode) {
+    this.socket.emit(socketMsg.getMode, this.props.system, mode);
+  },
   render: function() {
     const { hoverStop, infoBoxContents } = this.state;
     const { system } = this.props;
@@ -121,6 +124,9 @@ var PageRankDisplay = React.createClass({
     let buttons = ['NYC','Boston','Paris'].map(function(system) {
       return (<button className='btn btn-primary' onClick={navigateTo.bind(null, system)} key={system}>{system}</button>);
     });
+    let modes = ['PageRank','Closeness'].map(function(mode) {
+      return (<button className='btn btn-primary' onClick={self._handleModeChange.bind(null, mode)} key={mode}>{mode}</button>);
+    });
     
     return (
       <div>
@@ -146,6 +152,9 @@ var PageRankDisplay = React.createClass({
         </Map>
         <div className='system-selector'>
           {buttons}
+        </div>
+        <div className='mode-selector'>
+          {modes}
         </div>
         <div className='side-panel'>
           <div>
