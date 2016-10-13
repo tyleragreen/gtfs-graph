@@ -124,7 +124,7 @@ var PageRankDisplay = React.createClass({
     let buttons = ['NYC','Boston','Paris'].map(function(system) {
       return (<button className='btn btn-primary' onClick={navigateTo.bind(null, system)} key={system}>{system}</button>);
     });
-    let modes = ['PageRank','Closeness'].map(function(mode) {
+    let modes = ['PageRank','Closeness','Katz'].map(function(mode) {
       return (<button className='btn btn-primary' onClick={self._handleModeChange.bind(null, mode)} key={mode}>{mode}</button>);
     });
     

@@ -178,7 +178,7 @@ var PageRankDisplay = _react2.default.createClass({
         system
       );
     });
-    var modes = ['PageRank', 'Closeness'].map(function (mode) {
+    var modes = ['PageRank', 'Closeness', 'Katz'].map(function (mode) {
       return _react2.default.createElement(
         'button',
         { className: 'btn btn-primary', onClick: self._handleModeChange.bind(null, mode), key: mode },
