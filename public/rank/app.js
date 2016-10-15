@@ -74,6 +74,11 @@ var PageRankDisplay = React.createClass({
       this.setState({ hoverStop: this._lookupStop(stopId) });
     }
   },
+  handleStopClick: function(stopId) {
+    const stop = this._lookupStop(stopId);
+    this.setState({ hoverStop: stop });
+    this.refs.map.panTo(stop);
+  },
   _lookupStop: function(stopId) {
     return this.state.stops[this.state.stops.map(stop => stop.id).indexOf(stopId)];
   },
@@ -94,7 +99,12 @@ var PageRankDisplay = React.createClass({
     
     let ranks = infoBoxContents.map(function(stop) {
       return (
-        <table key={stop.id} className='stop-table'>
+        <table
+          key={stop.id}
+          className='stop-table'
+          onMouseOver={self.handleStopHover.bind(null, stop.id)}
+          onClick={self.handleStopClick.bind(null, stop.id)}
+        >
         <tbody>
         <tr>
           <td className='cell-rank'>{infoBoxContents.indexOf(stop)+1}.</td>

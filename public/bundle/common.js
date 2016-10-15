@@ -94,6 +94,11 @@ var PageRankDisplay = _react2.default.createClass({
       this.setState({ hoverStop: this._lookupStop(stopId) });
     }
   },
+  handleStopClick: function handleStopClick(stopId) {
+    var stop = this._lookupStop(stopId);
+    this.setState({ hoverStop: stop });
+    this.refs.map.panTo(stop);
+  },
   _lookupStop: function _lookupStop(stopId) {
     return this.state.stops[this.state.stops.map(function (stop) {
       return stop.id;
@@ -120,7 +125,12 @@ var PageRankDisplay = _react2.default.createClass({
     var ranks = infoBoxContents.map(function (stop) {
       return _react2.default.createElement(
         'table',
-        { key: stop.id, className: 'stop-table' },
+        {
+          key: stop.id,
+          className: 'stop-table',
+          onMouseOver: self.handleStopHover.bind(null, stop.id),
+          onClick: self.handleStopClick.bind(null, stop.id)
+        },
         _react2.default.createElement(
           'tbody',
           null,
@@ -7895,6 +7905,9 @@ exports.default = _react2.default.createClass({
     this.state.map.easeTo({ zoom: newZoomLevel });
     this.setState({ zoomLevel: newZoomLevel });
   },
+  panTo: function panTo(stop) {
+    this.state.map.easeTo({ center: [stop.longitude, stop.latitude] });
+  },
   _getStopsAsGeoJson: function _getStopsAsGeoJson(stops, ranks) {
     var stopsGeoJson = [];
 
@@ -7933,29 +7946,6 @@ exports.default = _react2.default.createClass({
         features: []
       }
     });
-    //var layers = [
-    //  [0, 'rgba(0,255,0,0.5)', 70],
-    //  [0.1, 'rgba(255,165,0,0.5)', 80],
-    //  [0.15, 'rgba(255,0,0,0.8)', 90]
-    //];
-    //var thatMap = this.state.map;
-    //layers.forEach(function (layer, i) {
-    //  thatMap.addLayer({
-    //    "id": "cluster-" + i,
-    //    "type": "circle",
-    //    "source": RANKS,
-    //    "paint": {
-    //      "circle-color": layer[1],
-    //      "circle-radius": layer[2],
-    //      "circle-blur": 1
-    //    },
-    //    "filter": i === layers.length - 1 ?
-    //      [">=", "rank", layer[0]] :
-    //      ["all",
-    //        [">=", "rank", layer[0]],
-    //        ["<", "rank", layers[i + 1][0]]]
-    //  });
-    //});
     this.state.map.addSource(STOPS, {
       "type": "geojson",
       "data": stopGeoJson
