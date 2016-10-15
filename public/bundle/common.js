@@ -188,7 +188,7 @@ var PageRankDisplay = _react2.default.createClass({
         system
       );
     });
-    var modes = ['PageRank', 'Closeness', 'Katz'].map(function (mode) {
+    var modes = ['PageRank', 'Closeness', 'Katz', 'Accessibility'].map(function (mode) {
       return _react2.default.createElement(
         'button',
         { className: 'btn btn-primary', onClick: self._handleModeChange.bind(null, mode), key: mode },
@@ -7864,7 +7864,7 @@ exports.default = _react2.default.createClass({
     var map = new _mapboxGl2.default.Map({
       container: 'map',
       style: 'mapbox://styles/mapbox/dark-v9',
-      zoom: 13
+      zoom: 11
     });
 
     map.addControl(new _mapboxGl2.default.Navigation({
