@@ -7790,6 +7790,13 @@ var _mapboxGl2 = _interopRequireDefault(_mapboxGl);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+var RANKS = 'ranks';
+var VISITED = 'visited edges';
+var LEFT = 'left edges';
+var STOPS = 'stops';
+
 exports.default = _react2.default.createClass({
   displayName: 'map',
 
@@ -7831,9 +7838,9 @@ exports.default = _react2.default.createClass({
       leftEdges: clearedLeft,
       pageRanks: clearedRanks
     });
-    this.state.map.getSource('visited edges').setData(clearedVisited);
-    this.state.map.getSource('left edges').setData(clearedLeft);
-    this.state.map.getSource('ranks').setData(clearedRanks);
+    this.state.map.getSource(VISITED).setData(clearedVisited);
+    this.state.map.getSource(LEFT).setData(clearedLeft);
+    this.state.map.getSource(RANKS).setData(clearedRanks);
   },
   componentDidMount: function componentDidMount() {
 
@@ -7917,37 +7924,45 @@ exports.default = _react2.default.createClass({
   addStops: function addStops(stops) {
     var stopGeoJson = this._getStopsAsGeoJson(stops);
 
-    this.state.map.addSource("ranks", {
+    this.state.map.addSource(RANKS, {
       type: "geojson",
       data: {
         type: 'FeatureCollection',
         features: []
       }
     });
-    var layers = [[0, 'rgba(0,255,0,0.5)', 70], [0.1, 'rgba(255,165,0,0.5)', 80], [0.15, 'rgba(255,0,0,0.8)', 90]];
-    var thatMap = this.state.map;
-    layers.forEach(function (layer, i) {
-      thatMap.addLayer({
-        "id": "cluster-" + i,
-        "type": "circle",
-        "source": 'ranks',
-        "paint": {
-          "circle-color": layer[1],
-          "circle-radius": layer[2],
-          "circle-blur": 1
-        },
-        "filter": i === layers.length - 1 ? [">=", "rank", layer[0]] : ["all", [">=", "rank", layer[0]], ["<", "rank", layers[i + 1][0]]]
-      });
-    });
-    this.state.map.addSource('stops', {
+    //var layers = [
+    //  [0, 'rgba(0,255,0,0.5)', 70],
+    //  [0.1, 'rgba(255,165,0,0.5)', 80],
+    //  [0.15, 'rgba(255,0,0,0.8)', 90]
+    //];
+    //var thatMap = this.state.map;
+    //layers.forEach(function (layer, i) {
+    //  thatMap.addLayer({
+    //    "id": "cluster-" + i,
+    //    "type": "circle",
+    //    "source": RANKS,
+    //    "paint": {
+    //      "circle-color": layer[1],
+    //      "circle-radius": layer[2],
+    //      "circle-blur": 1
+    //    },
+    //    "filter": i === layers.length - 1 ?
+    //      [">=", "rank", layer[0]] :
+    //      ["all",
+    //        [">=", "rank", layer[0]],
+    //        ["<", "rank", layers[i + 1][0]]]
+    //  });
+    //});
+    this.state.map.addSource(STOPS, {
       "type": "geojson",
       "data": stopGeoJson
     });
 
     this.state.map.addLayer({
-      "id": 'stops',
+      "id": STOPS,
       "type": "symbol",
-      "source": 'stops',
+      "source": STOPS,
       "layout": {
         "icon-image": "marker-11"
       }
@@ -7955,7 +7970,7 @@ exports.default = _react2.default.createClass({
     var self = this;
 
     this.state.map.on('mousemove', function (e) {
-      var features = self.state.map.queryRenderedFeatures(e.point, { layers: ['stops'] });
+      var features = self.state.map.queryRenderedFeatures(e.point, { layers: [STOPS] });
       self.state.map.getCanvas().style.cursor = features.length ? 'pointer' : '';
 
       if (!features.length) {
@@ -7970,7 +7985,7 @@ exports.default = _react2.default.createClass({
       }
     });
     this.state.map.on('click', function (e) {
-      var features = self.state.map.queryRenderedFeatures(e.point, { layers: ['stops'] });
+      var features = self.state.map.queryRenderedFeatures(e.point, { layers: [STOPS] });
       if (!features.length) {
         return;
       }
@@ -7984,8 +7999,36 @@ exports.default = _react2.default.createClass({
   },
   showRanks: function showRanks(stops, ranks) {
     var stopGeoJson = this._getStopsAsGeoJson(stops, ranks);
-    this.state.map.getSource('stops').setData(stopGeoJson);
-    this.state.map.getSource('ranks').setData(stopGeoJson);
+    this.addRankLayers(stopGeoJson);
+    this.state.map.getSource(STOPS).setData(stopGeoJson);
+    this.state.map.getSource(RANKS).setData(stopGeoJson);
+  },
+  addRankLayers: function addRankLayers(stopGeoJson) {
+    var ranks = stopGeoJson.features.map(function (stop) {
+      return stop.properties.rank;
+    });
+    var min = Math.min.apply(Math, _toConsumableArray(ranks));
+    var max = Math.max.apply(Math, _toConsumableArray(ranks));
+    var range = max - min;
+    var firstQuarter = 0.25 * range + min;
+    var half = 0.5 * range + min;
+    var thirdQuarter = 0.75 * range + min;
+
+    var layers = [[min, 'rgba(0,255,0,0.5)', 70], [firstQuarter, 'rgba(0,204,0,0.6)', 70], [half, 'rgba(0,153,0,0.7)', 70], [thirdQuarter, 'rgba(0,102,0,0.7)', 70]];
+    var thatMap = this.state.map;
+    layers.forEach(function (layer, i) {
+      thatMap.addLayer({
+        "id": "cluster-" + i,
+        "type": "circle",
+        "source": RANKS,
+        "paint": {
+          "circle-color": layer[1],
+          "circle-radius": layer[2],
+          "circle-blur": 1
+        },
+        "filter": i === layers.length - 1 ? [">=", "rank", layer[0]] : ["all", [">=", "rank", layer[0]], ["<", "rank", layers[i + 1][0]]]
+      });
+    });
   },
   addEdges: function addEdges(edges) {
     var createLayer = function createLayer(map, id, data, color, width, opacity) {
@@ -8024,8 +8067,8 @@ exports.default = _react2.default.createClass({
     createLayer(this.state.map, 'routes', routeEdges, '#ffffff', 2, 0.7);
 
     // Create source and layer for visited (and left) edges to be populated later
-    createLayer(this.state.map, 'visited edges', this.state.visitedEdges, '#ff0000', 3, 1.0);
-    createLayer(this.state.map, 'left edges', this.state.leftEdges, '#0000ff', 3, 1.0);
+    createLayer(this.state.map, VISITED, this.state.visitedEdges, '#ff0000', 3, 1.0);
+    createLayer(this.state.map, LEFT, this.state.leftEdges, '#0000ff', 3, 1.0);
   },
   visitEdge: function visitEdge(edge) {
     this.state.visitedEdges.features.push({
@@ -8035,7 +8078,7 @@ exports.default = _react2.default.createClass({
         coordinates: [[edge.origin.longitude, edge.origin.latitude], [edge.destination.longitude, edge.destination.latitude]]
       }
     });
-    this.state.map.getSource('visited edges').setData(this.state.visitedEdges);
+    this.state.map.getSource(VISITED).setData(this.state.visitedEdges);
   },
   leaveEdge: function leaveEdge(edge) {
     this.state.leftEdges.features.push({
@@ -8045,7 +8088,7 @@ exports.default = _react2.default.createClass({
         coordinates: [[edge.origin.longitude, edge.origin.latitude], [edge.destination.longitude, edge.destination.latitude]]
       }
     });
-    this.state.map.getSource('left edges').setData(this.state.leftEdges);
+    this.state.map.getSource(LEFT).setData(this.state.leftEdges);
   },
   render: function render() {
     var children = this.props.children;
