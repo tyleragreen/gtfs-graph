@@ -7625,10 +7625,11 @@ exports.default = _react2.default.createClass({
 
 
     var routes = stop.routes.map(function (route) {
+      var key = stop.id + '-' + route.id;
       return _react2.default.createElement(Icon, {
         showIcon: showIcons,
         system: system,
-        key: window.performance.now(),
+        key: key,
         id: route.id.toLowerCase(),
         color: route.color
       });
