@@ -7796,6 +7796,8 @@ var RANKS = 'ranks';
 var VISITED = 'visited edges';
 var LEFT = 'left edges';
 var STOPS = 'stops';
+var ROUTES = 'routes';
+var TRANSFERS = 'transfers';
 
 exports.default = _react2.default.createClass({
   displayName: 'map',
@@ -7966,7 +7968,7 @@ exports.default = _react2.default.createClass({
       "layout": {
         "icon-image": "marker-11"
       }
-    });
+    }, ROUTES);
     var self = this;
 
     this.state.map.on('mousemove', function (e) {
@@ -8004,6 +8006,7 @@ exports.default = _react2.default.createClass({
     this.state.map.getSource(RANKS).setData(stopGeoJson);
   },
   addRankLayers: function addRankLayers(stopGeoJson) {
+    var thatMap = this.state.map;
     var ranks = stopGeoJson.features.map(function (stop) {
       return stop.properties.rank;
     });
@@ -8011,14 +8014,18 @@ exports.default = _react2.default.createClass({
     var max = Math.max.apply(Math, _toConsumableArray(ranks));
     var range = max - min;
     var firstQuarter = 0.25 * range + min;
-    var half = 0.5 * range + min;
+    var secondQuarter = 0.5 * range + min;
     var thirdQuarter = 0.75 * range + min;
 
-    var layers = [[min, 'rgba(0,255,0,0.5)', 70], [firstQuarter, 'rgba(0,204,0,0.6)', 70], [half, 'rgba(0,153,0,0.7)', 70], [thirdQuarter, 'rgba(0,102,0,0.7)', 70]];
-    var thatMap = this.state.map;
+    var layers = [[min, 'rgba(0,255,0,0.5)', 50], [firstQuarter, 'rgba(0,204,0,0.6)', 60], [secondQuarter, 'rgba(0,153,0,0.7)', 70], [thirdQuarter, 'rgba(0,102,0,0.8)', 80]];
     layers.forEach(function (layer, i) {
+      var layerId = 'cluster-' + i;
+      // Remove this layer if it already exists
+      if (typeof thatMap.getLayer(layerId) !== "undefined") {
+        thatMap.removeLayer(layerId);
+      }
       thatMap.addLayer({
-        "id": "cluster-" + i,
+        "id": layerId,
         "type": "circle",
         "source": RANKS,
         "paint": {
@@ -8027,7 +8034,7 @@ exports.default = _react2.default.createClass({
           "circle-blur": 1
         },
         "filter": i === layers.length - 1 ? [">=", "rank", layer[0]] : ["all", [">=", "rank", layer[0]], ["<", "rank", layers[i + 1][0]]]
-      });
+      }, STOPS);
     });
   },
   addEdges: function addEdges(edges) {
@@ -8063,8 +8070,8 @@ exports.default = _react2.default.createClass({
     var routeEdges = edges.features.filter(function (feature) {
       return feature.properties.edgeType == 'route';
     });
-    createLayer(this.state.map, 'transfers', transferEdges, '#708090', 2, 0.7);
-    createLayer(this.state.map, 'routes', routeEdges, '#ffffff', 2, 0.7);
+    createLayer(this.state.map, TRANSFERS, transferEdges, '#708090', 2, 0.7);
+    createLayer(this.state.map, ROUTES, routeEdges, '#ffffff', 2, 0.7);
 
     // Create source and layer for visited (and left) edges to be populated later
     createLayer(this.state.map, VISITED, this.state.visitedEdges, '#ff0000', 3, 1.0);
