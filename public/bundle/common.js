@@ -21,15 +21,25 @@ var _constants2 = _interopRequireDefault(_constants);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var PageRankDisplay = _react2.default.createClass({
-  displayName: 'PageRankDisplay',
+var MODES = {
+  pageRank: 'Page Rank',
+  closeness: 'Closeness',
+  katz: 'Katz',
+  accessibility: 'Accessibility'
+};
+
+var ZOOM = 13;
+
+var GraphRankDisplay = _react2.default.createClass({
+  displayName: 'GraphRankDisplay',
 
   getInitialState: function getInitialState() {
     return {
       infoBoxContents: [],
       stops: undefined,
       system: undefined,
-      hoverStop: undefined
+      hoverStop: undefined,
+      mode: MODES.closeness
     };
   },
   componentDidMount: function componentDidMount() {
@@ -48,7 +58,7 @@ var PageRankDisplay = _react2.default.createClass({
     socket.on(_constants2.default.event, this._socketEventHandler);
   },
   _socketSendSystemHandler: function _socketSendSystemHandler(system) {
-    this.refs.map.setCenter(system.longitude, system.latitude, 13);
+    this.refs.map.setCenter(system.longitude, system.latitude, ZOOM);
     this.setState({
       system: system.id
     });
@@ -83,9 +93,12 @@ var PageRankDisplay = _react2.default.createClass({
     });
   },
   handleMapLoad: function handleMapLoad() {
-    this.socket.emit(_constants2.default.requestMergedStops, this.props.system);
-    this.socket.emit(_constants2.default.requestMergedEdges, this.props.system);
-    this.socket.emit(_constants2.default.startPR, this.props.system);
+    var system = this.props.system;
+    var mode = this.state.mode;
+
+    this.socket.emit(_constants2.default.requestMergedStops, system);
+    this.socket.emit(_constants2.default.requestMergedEdges, system);
+    this.socket.emit(_constants2.default.getMode, system, mode);
   },
   handleStopHover: function handleStopHover(stopId) {
     if (typeof stopId === "undefined") {
@@ -104,14 +117,15 @@ var PageRankDisplay = _react2.default.createClass({
       return stop.id;
     }).indexOf(stopId)];
   },
-  _handleSystemChange: function _handleSystemChange(system) {
-    this.socket.emit(_constants2.default.requestSystem, system);
-    this.socket.emit(_constants2.default.requestMergedStops, system);
-    this.socket.emit(_constants2.default.requestMergedEdges, system);
-    this.socket.emit(_constants2.default.startPR, system);
-  },
+  //_handleSystemChange: function(system) {
+  //  this.socket.emit(socketMsg.requestSystem, system);
+  //  this.socket.emit(socketMsg.requestMergedStops, system);
+  //  this.socket.emit(socketMsg.requestMergedEdges, system);
+  //  this.socket.emit(socketMsg.startPR, system);
+  //},
   _handleModeChange: function _handleModeChange(mode) {
     this.socket.emit(_constants2.default.getMode, this.props.system, mode);
+    this.setState({ mode: mode });
   },
   render: function render() {
     var _state = this.state;
@@ -188,8 +202,7 @@ var PageRankDisplay = _react2.default.createClass({
         system
       );
     });
-    var modes = ['PageRank', 'Closeness', 'Katz', 'Accessibility'].map(function (mode) {
-      //let modes = ['PageRank','Closeness','Katz'].map(function(mode) {
+    var modes = Object.values(MODES).map(function (mode) {
       return _react2.default.createElement(
         'button',
         { className: 'btn btn-primary', onClick: self._handleModeChange.bind(null, mode), key: mode },
@@ -297,7 +310,7 @@ var PageRankDisplay = _react2.default.createClass({
   }
 });
 
-module.exports = PageRankDisplay;
+module.exports = GraphRankDisplay;
 
 },{"../../lib/constants.js":1,"../../lib/dom/index":2,"react":379,"react-dom":208,"socket.io-client":380}],380:[function(require,module,exports){
 
@@ -8004,11 +8017,12 @@ exports.default = _react2.default.createClass({
     var min = Math.min.apply(Math, _toConsumableArray(ranks));
     var max = Math.max.apply(Math, _toConsumableArray(ranks));
     var range = max - min;
-    var firstQuarter = 0.25 * range + min;
-    var secondQuarter = 0.5 * range + min;
-    var thirdQuarter = 0.75 * range + min;
+    var firstFifth = 0.2 * range + min;
+    var secondFifth = 0.4 * range + min;
+    var thirdFifth = 0.6 * range + min;
+    var fourthFifth = 0.8 * range + min;
 
-    var layers = [[min, 'rgba(0,255,0,0.5)', 50], [firstQuarter, 'rgba(0,204,0,0.6)', 60], [secondQuarter, 'rgba(0,153,0,0.7)', 70], [thirdQuarter, 'rgba(0,102,0,0.8)', 80]];
+    var layers = [[min, 'rgba(0,255,0,0.8)', 60], [firstFifth, 'rgba(0,255,255,0.8)', 60], [secondFifth, 'rgba(0,0,255,0.8)', 60], [thirdFifth, 'rgba(255,0,255,0.8)', 60], [fourthFifth, 'rgba(255,0,0,0.8)', 60]];
     layers.forEach(function (layer, i) {
       var layerId = 'cluster-' + i;
       // Remove this layer if it already exists

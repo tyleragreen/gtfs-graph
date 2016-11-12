@@ -1,8 +1,8 @@
 import React from 'react';
 import DOM from 'react-dom';
-import PageRankDisplay from '../app';
+import GraphRankDisplay from '../app';
 
 DOM.render(
-  <PageRankDisplay system='MBTA' />,
+  <GraphRankDisplay system='MBTA' />,
   document.getElementById('content')
 );

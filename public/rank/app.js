@@ -1,16 +1,26 @@
 import React from 'react';
 import DOM from 'react-dom';
 import IO from 'socket.io-client';
-import { Map, RouteList, Popup, GitHubRibbon, TweetButton } from '../../lib/dom/index';
+import { Map, RouteList, Popup, GitHubRibbon } from '../../lib/dom/index';
 import socketMsg from '../../lib/constants.js';
 
-var PageRankDisplay = React.createClass({
+const MODES = {
+  pageRank: 'Page Rank',
+  closeness: 'Closeness',
+  katz: 'Katz',
+  accessibility: 'Accessibility'
+};
+
+const ZOOM = 13;
+
+var GraphRankDisplay = React.createClass({
   getInitialState: function() {
     return {
       infoBoxContents: [],
       stops: undefined,
       system: undefined,
-      hoverStop: undefined
+      hoverStop: undefined,
+      mode: MODES.closeness
     };
   },
   componentDidMount: function() {
@@ -27,7 +37,7 @@ var PageRankDisplay = React.createClass({
     socket.on(socketMsg.event, this._socketEventHandler);
   },
   _socketSendSystemHandler: function(system) {
-    this.refs.map.setCenter(system.longitude, system.latitude, 13);
+    this.refs.map.setCenter(system.longitude, system.latitude, ZOOM);
     this.setState({ 
       system: system.id
     });
@@ -63,9 +73,11 @@ var PageRankDisplay = React.createClass({
     });
   },
   handleMapLoad: function() {
-    this.socket.emit(socketMsg.requestMergedStops, this.props.system);
-    this.socket.emit(socketMsg.requestMergedEdges, this.props.system);
-    this.socket.emit(socketMsg.startPR, this.props.system);
+    const { system } = this.props;
+    const { mode } = this.state;
+    this.socket.emit(socketMsg.requestMergedStops, system);
+    this.socket.emit(socketMsg.requestMergedEdges, system);
+    this.socket.emit(socketMsg.getMode, system, mode);
   },
   handleStopHover: function(stopId) {
     if (typeof stopId === "undefined") {
@@ -82,14 +94,15 @@ var PageRankDisplay = React.createClass({
   _lookupStop: function(stopId) {
     return this.state.stops[this.state.stops.map(stop => stop.id).indexOf(stopId)];
   },
-  _handleSystemChange: function(system) {
-    this.socket.emit(socketMsg.requestSystem, system);
-    this.socket.emit(socketMsg.requestMergedStops, system);
-    this.socket.emit(socketMsg.requestMergedEdges, system);
-    this.socket.emit(socketMsg.startPR, system);
-  },
+  //_handleSystemChange: function(system) {
+  //  this.socket.emit(socketMsg.requestSystem, system);
+  //  this.socket.emit(socketMsg.requestMergedStops, system);
+  //  this.socket.emit(socketMsg.requestMergedEdges, system);
+  //  this.socket.emit(socketMsg.startPR, system);
+  //},
   _handleModeChange: function(mode) {
     this.socket.emit(socketMsg.getMode, this.props.system, mode);
+    this.setState({ mode });
   },
   render: function() {
     const { hoverStop, infoBoxContents } = this.state;
@@ -134,8 +147,7 @@ var PageRankDisplay = React.createClass({
     let buttons = ['NYC','Boston','Paris'].map(function(system) {
       return (<button className='btn btn-primary' onClick={navigateTo.bind(null, system)} key={system}>{system}</button>);
     });
-    let modes = ['PageRank','Closeness','Katz','Accessibility'].map(function(mode) {
-    //let modes = ['PageRank','Closeness','Katz'].map(function(mode) {
+    let modes = Object.values(MODES).map(function(mode) {
       return (<button className='btn btn-primary' onClick={self._handleModeChange.bind(null, mode)} key={mode}>{mode}</button>);
     });
     
@@ -183,5 +195,4 @@ var PageRankDisplay = React.createClass({
   }
 });
 
-module.exports = PageRankDisplay;
-
+module.exports = GraphRankDisplay;
