@@ -236,7 +236,10 @@ var GraphRankDisplay = _react2.default.createClass({
               _react2.default.createElement(
                 'em',
                 null,
-                hoverStop.name
+                hoverStop.name,
+                ' (',
+                hoverStop.id,
+                ')'
               )
             ),
             _react2.default.createElement(
