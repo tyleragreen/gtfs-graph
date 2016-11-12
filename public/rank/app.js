@@ -1,6 +1,7 @@
 import React from 'react';
 import DOM from 'react-dom';
 import IO from 'socket.io-client';
+import classNames from 'classnames';
 import { Map, RouteList, Popup, GitHubRibbon } from '../../lib/dom/index';
 import socketMsg from '../../lib/constants.js';
 
@@ -9,6 +10,12 @@ const MODES = {
   closeness: 'Closeness',
   katz: 'Katz',
   accessibility: 'Accessibility'
+};
+
+const CITIES = {
+  nyc: 'NYC',
+  boston: 'Boston',
+  paris: 'Paris'
 };
 
 const ZOOM = 13;
@@ -94,12 +101,6 @@ var GraphRankDisplay = React.createClass({
   _lookupStop: function(stopId) {
     return this.state.stops[this.state.stops.map(stop => stop.id).indexOf(stopId)];
   },
-  //_handleSystemChange: function(system) {
-  //  this.socket.emit(socketMsg.requestSystem, system);
-  //  this.socket.emit(socketMsg.requestMergedStops, system);
-  //  this.socket.emit(socketMsg.requestMergedEdges, system);
-  //  this.socket.emit(socketMsg.startPR, system);
-  //},
   _handleModeChange: function(mode) {
     this.socket.emit(socketMsg.getMode, this.props.system, mode);
     this.setState({ mode });
@@ -143,12 +144,22 @@ var GraphRankDisplay = React.createClass({
       let url = '/rank/' + system.toLowerCase();
       window.location = url;
     }
+    let currentMode = this.state.mode;
+    let currentCity = this.props.city;
     
-    let buttons = ['NYC','Boston','Paris'].map(function(system) {
-      return (<button className='btn btn-primary' onClick={navigateTo.bind(null, system)} key={system}>{system}</button>);
+    let buttons = Object.values(CITIES).map(function(system) {
+      let btnClasses = classNames({
+        btn: true,
+        'btn-primary': system === currentCity
+      });
+      return (<button className={btnClasses} onClick={navigateTo.bind(null, system)} key={system}>{system}</button>);
     });
     let modes = Object.values(MODES).map(function(mode) {
-      return (<button className='btn btn-primary' onClick={self._handleModeChange.bind(null, mode)} key={mode}>{mode}</button>);
+      let btnClasses = classNames({
+        btn: true,
+        'btn-primary': mode === currentMode
+      });
+      return (<button className={btnClasses} onClick={self._handleModeChange.bind(null, mode)} key={mode}>{mode}</button>);
     });
     
     return (
@@ -165,7 +176,7 @@ var GraphRankDisplay = React.createClass({
             latitude={hoverStop.latitude}
           >
             <div className='popup'>
-              <div><em>{hoverStop.name} ({hoverStop.id})</em></div>
+              <div><em>{hoverStop.name}</em></div>
               <div>Page Rank: {hoverStop.rank}</div>
               <div>Rank: {infoBoxContents.indexOf(hoverStop)+1} of {infoBoxContents.length}</div>
               <div><RouteList system={system} showIcons={showIcons} stop={hoverStop} /></div>

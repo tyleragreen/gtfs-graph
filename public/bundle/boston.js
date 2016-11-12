@@ -15,6 +15,6 @@ var _app2 = _interopRequireDefault(_app);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-_reactDom2.default.render(_react2.default.createElement(_app2.default, { system: 'MBTA' }), document.getElementById('content'));
+_reactDom2.default.render(_react2.default.createElement(_app2.default, { system: 'MBTA', city: 'Boston' }), document.getElementById('content'));
 
 },{"../app":428,"react":379,"react-dom":208}]},{},[429]);

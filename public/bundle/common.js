@@ -13,6 +13,10 @@ var _socket = require('socket.io-client');
 
 var _socket2 = _interopRequireDefault(_socket);
 
+var _classnames = require('classnames');
+
+var _classnames2 = _interopRequireDefault(_classnames);
+
 var _index = require('../../lib/dom/index');
 
 var _constants = require('../../lib/constants.js');
@@ -26,6 +30,12 @@ var MODES = {
   closeness: 'Closeness',
   katz: 'Katz',
   accessibility: 'Accessibility'
+};
+
+var CITIES = {
+  nyc: 'NYC',
+  boston: 'Boston',
+  paris: 'Paris'
 };
 
 var ZOOM = 13;
@@ -117,12 +127,6 @@ var GraphRankDisplay = _react2.default.createClass({
       return stop.id;
     }).indexOf(stopId)];
   },
-  //_handleSystemChange: function(system) {
-  //  this.socket.emit(socketMsg.requestSystem, system);
-  //  this.socket.emit(socketMsg.requestMergedStops, system);
-  //  this.socket.emit(socketMsg.requestMergedEdges, system);
-  //  this.socket.emit(socketMsg.startPR, system);
-  //},
   _handleModeChange: function _handleModeChange(mode) {
     this.socket.emit(_constants2.default.getMode, this.props.system, mode);
     this.setState({ mode: mode });
@@ -194,18 +198,28 @@ var GraphRankDisplay = _react2.default.createClass({
       var url = '/rank/' + system.toLowerCase();
       window.location = url;
     }
+    var currentMode = this.state.mode;
+    var currentCity = this.props.city;
 
-    var buttons = ['NYC', 'Boston', 'Paris'].map(function (system) {
+    var buttons = Object.values(CITIES).map(function (system) {
+      var btnClasses = (0, _classnames2.default)({
+        btn: true,
+        'btn-primary': system === currentCity
+      });
       return _react2.default.createElement(
         'button',
-        { className: 'btn btn-primary', onClick: navigateTo.bind(null, system), key: system },
+        { className: btnClasses, onClick: navigateTo.bind(null, system), key: system },
         system
       );
     });
     var modes = Object.values(MODES).map(function (mode) {
+      var btnClasses = (0, _classnames2.default)({
+        btn: true,
+        'btn-primary': mode === currentMode
+      });
       return _react2.default.createElement(
         'button',
-        { className: 'btn btn-primary', onClick: self._handleModeChange.bind(null, mode), key: mode },
+        { className: btnClasses, onClick: self._handleModeChange.bind(null, mode), key: mode },
         mode
       );
     });
@@ -236,10 +250,7 @@ var GraphRankDisplay = _react2.default.createClass({
               _react2.default.createElement(
                 'em',
                 null,
-                hoverStop.name,
-                ' (',
-                hoverStop.id,
-                ')'
+                hoverStop.name
               )
             ),
             _react2.default.createElement(
@@ -315,7 +326,7 @@ var GraphRankDisplay = _react2.default.createClass({
 
 module.exports = GraphRankDisplay;
 
-},{"../../lib/constants.js":1,"../../lib/dom/index":2,"react":379,"react-dom":208,"socket.io-client":380}],380:[function(require,module,exports){
+},{"../../lib/constants.js":1,"../../lib/dom/index":2,"classnames":21,"react":379,"react-dom":208,"socket.io-client":380}],380:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -7556,6 +7567,56 @@ function on(obj, ev, fn) {
     }
   };
 }
+
+},{}],21:[function(require,module,exports){
+/*!
+  Copyright (c) 2016 Jed Watson.
+  Licensed under the MIT License (MIT), see
+  http://jedwatson.github.io/classnames
+*/
+/* global define */
+
+(function () {
+	'use strict';
+
+	var hasOwn = {}.hasOwnProperty;
+
+	function classNames () {
+		var classes = [];
+
+		for (var i = 0; i < arguments.length; i++) {
+			var arg = arguments[i];
+			if (!arg) continue;
+
+			var argType = typeof arg;
+
+			if (argType === 'string' || argType === 'number') {
+				classes.push(arg);
+			} else if (Array.isArray(arg)) {
+				classes.push(classNames.apply(null, arg));
+			} else if (argType === 'object') {
+				for (var key in arg) {
+					if (hasOwn.call(arg, key) && arg[key]) {
+						classes.push(key);
+					}
+				}
+			}
+		}
+
+		return classes.join(' ');
+	}
+
+	if (typeof module !== 'undefined' && module.exports) {
+		module.exports = classNames;
+	} else if (typeof define === 'function' && typeof define.amd === 'object' && define.amd) {
+		// register as 'classnames', consistent with npm package name
+		define('classnames', [], function () {
+			return classNames;
+		});
+	} else {
+		window.classNames = classNames;
+	}
+}());
 
 },{}],9:[function(require,module,exports){
 
