@@ -256,7 +256,8 @@ var GraphRankDisplay = _react2.default.createClass({
             _react2.default.createElement(
               'div',
               null,
-              'Page Rank: ',
+              currentMode,
+              ': ',
               hoverStop.rank
             ),
             _react2.default.createElement(
@@ -294,7 +295,7 @@ var GraphRankDisplay = _react2.default.createClass({
           _react2.default.createElement(
             'h1',
             null,
-            system
+            currentCity
           )
         ),
         _react2.default.createElement(

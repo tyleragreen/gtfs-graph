@@ -177,7 +177,7 @@ var GraphRankDisplay = React.createClass({
           >
             <div className='popup'>
               <div><em>{hoverStop.name}</em></div>
-              <div>Page Rank: {hoverStop.rank}</div>
+              <div>{currentMode}: {hoverStop.rank}</div>
               <div>Rank: {infoBoxContents.indexOf(hoverStop)+1} of {infoBoxContents.length}</div>
               <div><RouteList system={system} showIcons={showIcons} stop={hoverStop} /></div>
             </div>
@@ -192,7 +192,7 @@ var GraphRankDisplay = React.createClass({
         </div>
         <div className='side-panel'>
           <div>
-            <h1>{system}</h1>
+            <h1>{currentCity}</h1>
           </div>
           <div className='ranks'>
             {ranks}
