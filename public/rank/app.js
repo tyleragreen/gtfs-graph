@@ -2,7 +2,7 @@ import React from 'react';
 import DOM from 'react-dom';
 import IO from 'socket.io-client';
 import classNames from 'classnames';
-import { Map, RouteList, Popup, GitHubRibbon } from '../../lib/dom/index';
+import { Map, RouteList, Popup, GitHubRibbon, Modal, ModalTrigger } from '../../lib/dom/index';
 import socketMsg from '../../lib/constants.js';
 
 const MODES = {
@@ -17,6 +17,8 @@ const CITIES = {
   boston: 'Boston',
   paris: 'Paris'
 };
+
+const MODAL_ID = 'infoModal';
 
 const ZOOM = 13;
 
@@ -164,6 +166,15 @@ var GraphRankDisplay = React.createClass({
     
     return (
       <div>
+        <Modal
+          id={MODAL_ID}
+          title='About gtfs-graph'
+        >
+          <h3>Page Rank</h3>
+          <h3>Closeness Centrality</h3>
+          <h3>Katz Centrality</h3>
+          <h3>Outward Accessibility</h3>
+        </Modal>
         <GitHubRibbon />
         <Map
           onMapLoad={this.handleMapLoad}
@@ -193,6 +204,7 @@ var GraphRankDisplay = React.createClass({
         <div className='side-panel'>
           <div>
             <h1>{currentCity}</h1>
+            <ModalTrigger id={MODAL_ID} label='Info' />
           </div>
           <div className='ranks'>
             {ranks}
