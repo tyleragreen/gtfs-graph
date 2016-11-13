@@ -136,4 +136,31 @@ describe('A transit graph', function() {
 
     expect(function() { new TransitGraph(edgeList, numNodes, this.stops); }).to.throw(Error);
   });
+  
+  it('can have its diversity entropy calculated', function() {
+    const edgeList = [
+      new Edge({ type: 'route', origin: 0, destination: 1, weight: 1 }),
+      new Edge({ type: 'route', origin: 0, destination: 2, weight: 1 }),
+      new Edge({ type: 'route', origin: 0, destination: 4, weight: 1 }),
+      new Edge({ type: 'route', origin: 2, destination: 3, weight: 1 }),
+      new Edge({ type: 'route', origin: 4, destination: 5, weight: 1 }),
+      new Edge({ type: 'route', origin: 5, destination: 6, weight: 1 }),
+    ];
+    const stopList = [
+      new Stop(0,'0',0,0,[]),
+      new Stop(1,'1',0,0,[]),
+      new Stop(2,'2',0,0,[]),
+      new Stop(3,'3',0,0,[]),
+      new Stop(4,'4',0,0,[]),
+      new Stop(5,'5',0,0,[]),
+      new Stop(6,'6',0,0,[]),
+    ];
+    const graph = new TransitGraph(edgeList, stopList.length, stopList);
+    
+    graph.calculateRandomWalksFrom(0,55,4);
+    
+    //console.log('distance 1',graph.diversityEntropy(0,1));
+    //console.log('distance 2',graph.diversityEntropy(0,2));
+    //console.log('distance 3',graph.diversityEntropy(0,3));
+  });
 });
