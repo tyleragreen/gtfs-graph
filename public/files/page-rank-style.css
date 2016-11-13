@@ -74,3 +74,15 @@ a:hover {
 .clear-right {
   clear: right;
 }
+#legend {
+  width: 100%;
+}
+#legend label,
+#legend span {
+  display: block;
+  float: left;
+  height: 15px;
+  width: 20%;
+  text-align: center;
+  font-size: 9px;
+ }

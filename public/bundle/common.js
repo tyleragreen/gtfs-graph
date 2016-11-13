@@ -49,7 +49,7 @@ var GraphRankDisplay = _react2.default.createClass({
       stops: undefined,
       system: undefined,
       hoverStop: undefined,
-      mode: MODES.closeness
+      mode: MODES.accessibility
     };
   },
   componentDidMount: function componentDidMount() {
@@ -301,6 +301,45 @@ var GraphRankDisplay = _react2.default.createClass({
           'div',
           { className: 'ranks' },
           ranks
+        ),
+        _react2.default.createElement(
+          'div',
+          { id: 'legend' },
+          _react2.default.createElement(
+            'p',
+            null,
+            _react2.default.createElement(
+              'strong',
+              null,
+              'Centrality Ranking'
+            )
+          ),
+          _react2.default.createElement(
+            'nav',
+            { className: 'clearfix' },
+            _react2.default.createElement('span', { style: { background: '#00ff00' } }),
+            _react2.default.createElement('span', { style: { background: '#00ffff' } }),
+            _react2.default.createElement('span', { style: { background: '#0000ff' } }),
+            _react2.default.createElement('span', { style: { background: '#ff00ff' } }),
+            _react2.default.createElement('span', { style: { background: '#ff0000' } }),
+            _react2.default.createElement(
+              'label',
+              null,
+              'Low'
+            ),
+            _react2.default.createElement('label', null),
+            _react2.default.createElement(
+              'label',
+              null,
+              'Medium'
+            ),
+            _react2.default.createElement('label', null),
+            _react2.default.createElement(
+              'label',
+              null,
+              'High'
+            )
+          )
         ),
         _react2.default.createElement(
           'div',

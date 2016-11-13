@@ -156,11 +156,21 @@ describe('A transit graph', function() {
       new Stop(6,'6',0,0,[]),
     ];
     const graph = new TransitGraph(edgeList, stopList.length, stopList);
+    // Define a threshold with which to evaluate the diversity entropy values
+    const epsilon = 0.1;
     
-    graph.calculateRandomWalksFrom(0,55,4);
+    graph.calculateRandomWalksFrom(0,100,4);
     
-    //console.log('distance 1',graph.diversityEntropy(0,1));
-    //console.log('distance 2',graph.diversityEntropy(0,2));
-    //console.log('distance 3',graph.diversityEntropy(0,3));
+    expect((Math.abs(graph.diversityEntropy(0,1) - 1.10)) < epsilon).to.equal(true);
+    expect((Math.abs(graph.diversityEntropy(0,2) - 0.73)) < epsilon).to.equal(true);
+    expect((Math.abs(graph.diversityEntropy(0,3) - 0.37)) < epsilon).to.equal(true);
+    
+    // Do the same procedure, but this time with dead end nodes contributing 
+    // the remainder of the path length
+    graph.calculateRandomWalksFrom(0,100,4,true);
+    
+    expect((Math.abs(graph.diversityEntropy(0,1) - 1.10)) < epsilon).to.equal(true);
+    expect((Math.abs(graph.diversityEntropy(0,2) - 1.10)) < epsilon).to.equal(true);
+    expect((Math.abs(graph.diversityEntropy(0,3) - 1.10)) < epsilon).to.equal(true);
   });
 });

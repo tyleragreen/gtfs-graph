@@ -27,7 +27,7 @@ var GraphRankDisplay = React.createClass({
       stops: undefined,
       system: undefined,
       hoverStop: undefined,
-      mode: MODES.closeness
+      mode: MODES.accessibility
     };
   },
   componentDidMount: function() {
@@ -196,6 +196,21 @@ var GraphRankDisplay = React.createClass({
           </div>
           <div className='ranks'>
             {ranks}
+          </div>
+          <div id='legend'>
+            <p><strong>Centrality Ranking</strong></p>
+            <nav className='clearfix'>
+              <span style={{background: '#00ff00'}}></span>
+              <span style={{background: '#00ffff'}}></span>
+              <span style={{background: '#0000ff'}}></span>
+              <span style={{background: '#ff00ff'}}></span>
+              <span style={{background: '#ff0000'}}></span>
+              <label>Low</label>
+              <label></label>
+              <label>Medium</label>
+              <label></label>
+              <label>High</label>
+            </nav>
           </div>
           <div>
             A <a href="http://www.tyleragreen.com/" target="_blank">Tyler A. Green</a> Project. See <a href="/demo">how this works</a>!
