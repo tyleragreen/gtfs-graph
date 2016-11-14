@@ -38,7 +38,7 @@ var CITIES = {
   paris: 'Paris'
 };
 
-var MODAL_ID = 'modalGtfsGeojson';
+var MODAL_ID = 'infoModal';
 
 var ZOOM = 13;
 
@@ -233,25 +233,44 @@ var GraphRankDisplay = _react2.default.createClass({
         _index.Modal,
         {
           id: MODAL_ID,
-          title: 'About gtfs-graph'
+          title: 'About'
         },
         _react2.default.createElement(
-          'h3',
+          'p',
+          null,
+          'This project has two goals:'
+        ),
+        _react2.default.createElement(
+          'ol',
+          null,
+          _react2.default.createElement(
+            'li',
+            null,
+            'Identify the most important stations in a transit network.'
+          ),
+          _react2.default.createElement(
+            'li',
+            null,
+            'Characterize the distribution of stations\' importance across networks.'
+          )
+        ),
+        _react2.default.createElement(
+          'h4',
           null,
           'Page Rank'
         ),
         _react2.default.createElement(
-          'h3',
+          'h4',
           null,
           'Closeness Centrality'
         ),
         _react2.default.createElement(
-          'h3',
+          'h4',
           null,
           'Katz Centrality'
         ),
         _react2.default.createElement(
-          'h3',
+          'h4',
           null,
           'Outward Accessibility'
         )

@@ -168,12 +168,17 @@ var GraphRankDisplay = React.createClass({
       <div>
         <Modal
           id={MODAL_ID}
-          title='About gtfs-graph'
+          title='About'
         >
-          <h3>Page Rank</h3>
-          <h3>Closeness Centrality</h3>
-          <h3>Katz Centrality</h3>
-          <h3>Outward Accessibility</h3>
+          <p>This project has two goals:</p>
+          <ol>
+            <li>Identify the most important stations in a transit network.</li>
+            <li>Characterize the distribution of stations' importance across networks.</li>
+          </ol>
+          <h4>Page Rank</h4>
+          <h4>Closeness Centrality</h4>
+          <h4>Katz Centrality</h4>
+          <h4>Outward Accessibility</h4>
         </Modal>
         <GitHubRibbon />
         <Map
