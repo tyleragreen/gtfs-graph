@@ -27,8 +27,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var MODES = {
   pageRank: 'Page Rank',
-  closeness: 'Closeness',
   katz: 'Katz',
+  closeness: 'Closeness',
   accessibility: 'Accessibility'
 };
 
@@ -255,14 +255,19 @@ var GraphRankDisplay = _react2.default.createClass({
           )
         ),
         _react2.default.createElement(
+          'p',
+          null,
+          'Four "centrality" algorithms are employed. The first two, Page Rank and Katz, address the first question. The second two, Closeness and Outward Accessibility, address the second. None of these were invented with transit in mind, so all have advantages and drawbacks to this particular application. In the descriptions below, "nodes" can be thought of as "stations", and "edges" thought of as "routes".'
+        ),
+        _react2.default.createElement(
           'h4',
           null,
           'Page Rank'
         ),
         _react2.default.createElement(
-          'h4',
+          'p',
           null,
-          'Closeness Centrality'
+          'Page Rank was invented by Google founder Larry Page and Sergey Brin to rank web pages for their search engine. In this algorithm, a node\'s importance is derived from the importance of all the nodes which link to it.'
         ),
         _react2.default.createElement(
           'h4',
@@ -270,9 +275,63 @@ var GraphRankDisplay = _react2.default.createClass({
           'Katz Centrality'
         ),
         _react2.default.createElement(
+          'p',
+          null,
+          'Katz Centrality is similar to Page Rank, but it considers the walk distance between nodes when evaluating their importance. A walk distance is the number of edges between any two nodes when performing a graph walk. A node will rank highly when it is connected via a small walk distance to many important nodes.'
+        ),
+        _react2.default.createElement(
+          'h4',
+          null,
+          'Closeness Centrality'
+        ),
+        _react2.default.createElement(
+          'p',
+          null,
+          'Perhaps the most intuitive of the centrality algorithms, closeness centrality ranks a node by the sum of the shortest paths to all other nodes in the network. The closer a node is to all other nodes, the more it is considered to be "central".'
+        ),
+        _react2.default.createElement(
           'h4',
           null,
           'Outward Accessibility'
+        ),
+        _react2.default.createElement(
+          'p',
+          null,
+          'Outward accessibility is a normalized version of diversity entropy proposed in ',
+          _react2.default.createElement(
+            'a',
+            { href: 'http://www.sciencedirect.com/science/article/pii/S0375960108015867', target: '_blank' },
+            'this paper'
+          ),
+          ' by Travençolo and Costa. A node ranks highly when many unique paths can be taken from it over a course of random walks of varying distances. Sections of a graph which rank high in this metric are found to have high network redundancy and high accessibility from the rest of the network.'
+        ),
+        _react2.default.createElement(
+          'p',
+          { style: { 'border-top': '1px solid #e5e5e5', 'padding-top': '10px' } },
+          'This project was built by ',
+          _react2.default.createElement(
+            'a',
+            { href: 'http://www.tyleragreen.com', target: '_blank' },
+            'Tyler Green'
+          ),
+          '. There is an additional ',
+          _react2.default.createElement(
+            'a',
+            { href: '/demo', target: '_blank' },
+            'landing page'
+          ),
+          ' to demonstrate basic graph algorithms applied to a transit graph.'
+        ),
+        _react2.default.createElement(
+          'p',
+          null,
+          'Feel free to contribute to the ',
+          _react2.default.createElement(
+            'a',
+            { href: 'https://github.com/tyleragreen/gtfs-graph', target: '_blank' },
+            'code on GitHub'
+          ),
+          '!'
         )
       ),
       _react2.default.createElement(_index.GitHubRibbon, null),
@@ -345,7 +404,7 @@ var GraphRankDisplay = _react2.default.createClass({
             null,
             currentCity
           ),
-          _react2.default.createElement(_index.ModalTrigger, { id: MODAL_ID, label: 'Info' })
+          _react2.default.createElement(_index.ModalTrigger, { id: MODAL_ID, label: 'About', classes: 'modal-trigger' })
         ),
         _react2.default.createElement(
           'div',
@@ -400,13 +459,7 @@ var GraphRankDisplay = _react2.default.createClass({
             { href: 'http://www.tyleragreen.com/', target: '_blank' },
             'Tyler A. Green'
           ),
-          ' Project. See ',
-          _react2.default.createElement(
-            'a',
-            { href: '/demo' },
-            'how this works'
-          ),
-          '!'
+          ' Project.'
         )
       )
     );
@@ -8020,7 +8073,7 @@ exports.default = _react2.default.createClass({
             { className: 'modal-footer' },
             _react2.default.createElement(
               'button',
-              { type: 'button', className: 'btn btn-default', 'data-dismiss': 'modal' },
+              { type: 'button', className: 'btn btn-primary', 'data-dismiss': 'modal' },
               'Close'
             )
           )
@@ -8054,11 +8107,12 @@ exports.default = _react2.default.createClass({
     var _props = this.props;
     var id = _props.id;
     var label = _props.label;
+    var classes = _props.classes;
 
 
     return _react2.default.createElement(
       'button',
-      { 'data-toggle': 'modal', 'data-target': '#' + id },
+      { className: 'btn btn-primary ' + classes, 'data-toggle': 'modal', 'data-target': '#' + id },
       label
     );
   }

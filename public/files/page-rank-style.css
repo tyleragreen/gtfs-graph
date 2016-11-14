@@ -85,4 +85,13 @@ a:hover {
   width: 20%;
   text-align: center;
   font-size: 9px;
- }
+}
+.modal-trigger {
+  position: absolute;
+  top: 10;
+  right: 20;
+}
+.modal-content {
+  background: black;
+  color: white;
+}
