@@ -173,4 +173,8 @@ describe('A transit graph', function() {
     expect((Math.abs(graph.diversityEntropy(0,2) - 1.10)) < epsilon).to.equal(true);
     expect((Math.abs(graph.diversityEntropy(0,3) - 1.10)) < epsilon).to.equal(true);
   });
+  
+  it('can have random edges created as part of a Population', function() {
+    traversals.findCriticalEdges(this.graph);
+  });
 });
