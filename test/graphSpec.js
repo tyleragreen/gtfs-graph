@@ -5,6 +5,7 @@ process.env.NODE_ENV = 'test';
 var TransitGraph = require('../lib/graph/graph.js');
 var Stop = require('../lib/graph/stop.js');
 var Edge = require('../lib/graph/edge.js');
+var EdgeList = require('../lib/graph/edgeList');
 var BasicTraverser = require('../lib/graph/graphTraverser.js').BasicTraverser;
 var traversals = require('../lib/graph/traversals.js');
 
@@ -18,8 +19,8 @@ function edgesToArrays(edges) {
 
 describe('A transit graph', function() {
   before(function() {
-    let numNodes = 5;
-    let edgeList = [
+    const numNodes = 5;
+    const edges = [
       { type: 'route', origin: 1, destination: 0, weight: 2 },
       { type: 'transfer', origin: 2, destination: 1, weight: 2 },
       { type: 'route', origin: 4, destination: 1, weight: 2 },
@@ -35,10 +36,10 @@ describe('A transit graph', function() {
     ];
     this.expectedGraph = [
       [],
-      [edgeList[0]],
-      [null,edgeList[1]],
-      [null,null,edgeList[3]],
-      [null,edgeList[2],null,edgeList[4]]
+      [edges[0]],
+      [null,edges[1]],
+      [null,null,edges[3]],
+      [null,edges[2],null,edges[4]]
     ];
     this.expectedSuperGraph = [
       [],
@@ -46,7 +47,7 @@ describe('A transit graph', function() {
       [null,{type: 'route', weight: 2, origin: 2, destination: 1}],
       [{type: 'route', weight: 2, origin: 3, destination: 0},{type: 'route', weight: 2, origin: 3, destination: 1},{type: 'route', weight: 2, origin: 3, destination: 2}],
     ];
-    this.graph = new TransitGraph(edgeList, numNodes, this.stops);
+    this.graph = new TransitGraph(new EdgeList(edges), numNodes, this.stops);
   });
   
   it('can be created', function() {
@@ -86,7 +87,7 @@ describe('A transit graph', function() {
   
   it('can be merged twice', function() {
     let numNodes = 5;
-    let edgeList = [
+    let edges = [
       new Edge({ type: 'route', origin: 1, destination: 0, weight: 2 }),
       new Edge({ type: 'transfer', origin: 2, destination: 1, weight: 2 }),
       new Edge({ type: 'route', origin: 4, destination: 1, weight: 2 }),
@@ -95,17 +96,17 @@ describe('A transit graph', function() {
       ];
     this.expectedGraph = [
       [],
-      [edgeList[0]],
-      [null,edgeList[1]],
-      [null,null,edgeList[3]],
-      [null,edgeList[2],0,edgeList[4]]
+      [edges[0]],
+      [null,edges[1]],
+      [null,null,edges[3]],
+      [null,edges[2],0,edges[4]]
     ];
     this.expectedSuperGraph = [
       [],
       [null],
       [{type: 'route', weight: 2, origin: 2, destination: 0},{type: 'route', weight: 2, origin: 2, destination: 1}],
     ];
-    this.graph = new TransitGraph(edgeList, numNodes, this.stops);
+    this.graph = new TransitGraph(new EdgeList(edges), numNodes, this.stops);
     expect(traversals.mergeTransferNodes(this.graph).G.matrix).to.deep.equal(this.expectedSuperGraph);
   });
   
@@ -126,7 +127,7 @@ describe('A transit graph', function() {
   
   it('will fail when provided a negative edge', function() {
     const numNodes = 5;
-    const edgeList = [
+    const edges = [
       new Edge({ type: 'route', origin: 1, destination: 0, weight: 2 }),
       new Edge({ type: 'transfer', origin: 2, destination: 1, weight: 2 }),
       new Edge({ type: 'route', origin: 4, destination: 1, weight: -2 }),
@@ -134,11 +135,13 @@ describe('A transit graph', function() {
       new Edge({ type: 'route', origin: 4, destination: 3, weight: 2 }),
       ];
 
-    expect(function() { new TransitGraph(edgeList, numNodes, this.stops); }).to.throw(Error);
+    expect(function() {
+      new TransitGraph(new EdgeList(edges), numNodes, this.stops);
+    }).to.throw(Error);
   });
   
   it('can have its diversity entropy calculated', function() {
-    const edgeList = [
+    const edges = [
       new Edge({ type: 'route', origin: 0, destination: 1, weight: 1 }),
       new Edge({ type: 'route', origin: 0, destination: 2, weight: 1 }),
       new Edge({ type: 'route', origin: 0, destination: 4, weight: 1 }),
@@ -155,7 +158,7 @@ describe('A transit graph', function() {
       new Stop(5,'5',0,0,[]),
       new Stop(6,'6',0,0,[]),
     ];
-    const graph = new TransitGraph(edgeList, stopList.length, stopList);
+    const graph = new TransitGraph(new EdgeList(edges), stopList.length, stopList);
     // Define a threshold with which to evaluate the diversity entropy values
     const epsilon = 0.1;
     
