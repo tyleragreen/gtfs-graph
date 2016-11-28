@@ -140,6 +140,14 @@ describe('A transit graph', function() {
     }).to.throw(Error);
   });
   
+  /* 
+  This example is from the following paper:
+  
+  Accessibility in complex networks
+  B.A.N. Travencolo, L. da F. Costa
+  Physics Letters A
+  
+  */
   it('can have its diversity entropy calculated', function() {
     const edges = [
       new Edge({ type: 'route', origin: 0, destination: 1, weight: 1 }),
