@@ -27,7 +27,7 @@
     "classnames": "^2.2.5",
     "express": "^4.14.0",
     "factor-bundle": "^2.5.0",
-    "mapbox-gl": "^0.21.0",
+    "mapbox-gl": "^0.28.0",
     "pg": "^4.5.5",
     "react": "^15.3.0",
     "react-addons-update": "^15.3.0",
