@@ -32,7 +32,6 @@ var App = React.createClass({
     
     socket.on(socketMsg.sendStops, this._socketSendStopsHandler);
     socket.on(socketMsg.sendEdges, this._socketSendEdgesHandler);
-    socket.on(socketMsg.sendMergedStops, this._socketSendMergedStopsHandler);
     socket.on(socketMsg.event, this._socketEventHandler);
     
     this.setState({ socket: socket });
@@ -43,9 +42,6 @@ var App = React.createClass({
   _socketSendStopsHandler: function(stops) {
     this.setState({ stops: stops });
     this.refs.map.addStops(stops);
-  },
-  _socketSendMergedStopsHandler: function(mergedStops) {
-    this.setState({ mergedStops: mergedStops });
   },
   _socketSendEdgesHandler: function(edges) {
     this.refs.map.addEdges(edges);

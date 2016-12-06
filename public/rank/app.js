@@ -184,7 +184,7 @@ var GraphRankDisplay = React.createClass({
           <p>Perhaps the most intuitive of the centrality algorithms, closeness centrality ranks a node by the sum of the shortest paths to all other nodes in the network. The closer a node is to all other nodes, the more it is considered to be "central".</p>
           <h4>Outward Accessibility</h4>
           <p>Outward accessibility is a normalized version of diversity entropy proposed in <a href="http://www.sciencedirect.com/science/article/pii/S0375960108015867" target="_blank">this paper</a> by Travençolo and Costa. A node ranks highly when many unique paths can be taken from it over a course of random walks of varying distances. Sections of a graph which rank high in this metric are found to have high network redundancy and high accessibility from the rest of the network.</p>
-          <p style={{'border-top': '1px solid #e5e5e5', 'padding-top': '10px'}}>This project was built by <a href="http://www.tyleragreen.com" target="_blank">Tyler Green</a>. There is an additional <a href="/demo" target="_blank">landing page</a> to demonstrate basic graph algorithms applied to a transit graph.</p>
+          <p style={{'borderTop': '1px solid #e5e5e5', 'paddingTop': '10px'}}>This project was built by <a href="http://www.tyleragreen.com" target="_blank">Tyler Green</a>. There is an additional <a href="/demo" target="_blank">landing page</a> to demonstrate basic graph algorithms applied to a transit graph.</p>
           <p>Feel free to contribute to the <a href="https://github.com/tyleragreen/gtfs-graph" target="_blank">code on GitHub</a>!</p>
         </Modal>
         <GitHubRibbon />

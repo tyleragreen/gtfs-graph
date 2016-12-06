@@ -1,4 +1,4 @@
-require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({429:[function(require,module,exports){
+require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({442:[function(require,module,exports){
 'use strict';
 
 var _react = require('react');
@@ -62,7 +62,6 @@ var App = _react2.default.createClass({
 
     socket.on(_constants2.default.sendStops, this._socketSendStopsHandler);
     socket.on(_constants2.default.sendEdges, this._socketSendEdgesHandler);
-    socket.on(_constants2.default.sendMergedStops, this._socketSendMergedStopsHandler);
     socket.on(_constants2.default.event, this._socketEventHandler);
 
     this.setState({ socket: socket });
@@ -73,9 +72,6 @@ var App = _react2.default.createClass({
   _socketSendStopsHandler: function _socketSendStopsHandler(stops) {
     this.setState({ stops: stops });
     this.refs.map.addStops(stops);
-  },
-  _socketSendMergedStopsHandler: function _socketSendMergedStopsHandler(mergedStops) {
-    this.setState({ mergedStops: mergedStops });
   },
   _socketSendEdgesHandler: function _socketSendEdgesHandler(edges) {
     this.refs.map.addEdges(edges);
@@ -149,7 +145,7 @@ var App = _react2.default.createClass({
     this.state.socket.emit(_constants2.default.requestEdges, this.system);
   },
   handleAutocomplete: function handleAutocomplete(query) {
-    var numToReturn = arguments.length <= 1 || arguments[1] === undefined ? 10 : arguments[1];
+    var numToReturn = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 10;
 
     return this.state.stops.filter(function (stop) {
       return stop.name.toLowerCase().indexOf(query.toLowerCase()) !== -1;
@@ -205,11 +201,11 @@ var App = _react2.default.createClass({
     this.setState({ mode: mode });
   },
   render: function render() {
-    var _state = this.state;
-    var hoverStop = _state.hoverStop;
-    var mode = _state.mode;
-    var origin = _state.origin;
-    var destination = _state.destination;
+    var _state = this.state,
+        hoverStop = _state.hoverStop,
+        mode = _state.mode,
+        origin = _state.origin,
+        destination = _state.destination;
 
 
     return _react2.default.createElement(
@@ -454,9 +450,9 @@ var Menu = _react2.default.createClass({
         })
       );
     }
-    var _props = this.props;
-    var infoBoxContents = _props.infoBoxContents;
-    var mode = _props.mode;
+    var _props = this.props,
+        infoBoxContents = _props.infoBoxContents,
+        mode = _props.mode;
 
     var showInfoBox = infoBoxContents; //.length > 0;
     var menuClasses = (0, _classnames2.default)({
@@ -604,7 +600,7 @@ var StopSelector = onClickOutside(_react2.default.createClass({
         'div',
         { className: 'input-label' },
         this.props.label,
-        ': '
+        ':\xA0'
       ),
       _react2.default.createElement(
         'div',
@@ -636,12 +632,12 @@ var SearchToken = _react2.default.createClass({
       'div',
       { className: 'input-token', onClick: this.props.onTokenClick },
       _react2.default.createElement(_index.RouteList, { system: systemID, showIcons: true, stop: this.props.stop }),
-      '  ',
+      '\xA0\xA0',
       this.props.stop.name,
       _react2.default.createElement(
         'div',
         { className: 'input-token-close', onClick: this.props.onTokenClose },
-        '×'
+        '\xD7'
       )
     );
   }
@@ -694,7 +690,7 @@ var SearchSuggestion = _react2.default.createClass({
         onClick: this.handleClick
       },
       _react2.default.createElement(_index.RouteList, { system: systemID, showIcons: true, stop: this.props.stop }),
-      '  ',
+      '\xA0\xA0',
       this.props.stop.name
     );
   }
@@ -726,7 +722,7 @@ var ModeSelector = _react2.default.createClass({
     return _react2.default.createElement(
       'div',
       null,
-      'Traversal Type: ',
+      'Traversal Type:\xA0',
       _react2.default.createElement(
         'select',
         {
@@ -757,7 +753,7 @@ var ModeSelector = _react2.default.createClass({
 
 _reactDom2.default.render(_react2.default.createElement(App, null), document.getElementById('content'));
 
-},{"../../lib/constants.js":1,"../../lib/dom/index":2,"../../lib/systems.js":10,"classnames":23,"react":381,"react-addons-update":209,"react-dom":210,"react-onclickoutside":211,"socket.io-client":382}],211:[function(require,module,exports){
+},{"../../lib/constants.js":1,"../../lib/dom/index":2,"../../lib/systems.js":10,"classnames":23,"react":392,"react-addons-update":209,"react-dom":210,"react-onclickoutside":361,"socket.io-client":393}],361:[function(require,module,exports){
 /**
  * A higher-order-component for handling onClickOutside for React components.
  */
@@ -859,6 +855,13 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
          * linked to this component's state.
          */
         componentDidMount: function() {
+          // If we are in an environment without a DOM such 
+          // as shallow rendering or snapshots then we exit 
+          // early to prevent any unhandled errors being thrown.
+          if (typeof document === 'undefined' || !document.createElement){
+            return;
+          }
+
           var instance = this.getInstance();
           var clickOutsideHandler;
 
@@ -1013,9 +1016,9 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
 
 }(this));
 
-},{"react":381,"react-dom":210}],209:[function(require,module,exports){
+},{"react":392,"react-dom":210}],209:[function(require,module,exports){
 module.exports = require('react/lib/update');
-},{"react/lib/update":353}],353:[function(require,module,exports){
+},{"react/lib/update":386}],386:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -1025,7 +1028,6 @@ module.exports = require('react/lib/update');
  * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  *
- * @providesModule update
  */
 
 /* global hasOwnProperty:true */
@@ -1035,7 +1037,6 @@ module.exports = require('react/lib/update');
 var _prodInvariant = require('./reactProdInvariant'),
     _assign = require('object-assign');
 
-var keyOf = require('fbjs/lib/keyOf');
 var invariant = require('fbjs/lib/invariant');
 var hasOwnProperty = {}.hasOwnProperty;
 
@@ -1049,12 +1050,12 @@ function shallowCopy(x) {
   }
 }
 
-var COMMAND_PUSH = keyOf({ $push: null });
-var COMMAND_UNSHIFT = keyOf({ $unshift: null });
-var COMMAND_SPLICE = keyOf({ $splice: null });
-var COMMAND_SET = keyOf({ $set: null });
-var COMMAND_MERGE = keyOf({ $merge: null });
-var COMMAND_APPLY = keyOf({ $apply: null });
+var COMMAND_PUSH = '$push';
+var COMMAND_UNSHIFT = '$unshift';
+var COMMAND_SPLICE = '$splice';
+var COMMAND_SET = '$set';
+var COMMAND_MERGE = '$merge';
+var COMMAND_APPLY = '$apply';
 
 var ALL_COMMANDS_LIST = [COMMAND_PUSH, COMMAND_UNSHIFT, COMMAND_SPLICE, COMMAND_SET, COMMAND_MERGE, COMMAND_APPLY];
 
@@ -1131,7 +1132,7 @@ function update(value, spec) {
 
 module.exports = update;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":347,"_process":13,"fbjs/lib/invariant":370,"fbjs/lib/keyOf":374,"object-assign":380}],10:[function(require,module,exports){
+},{"./reactProdInvariant":384,"_process":13,"fbjs/lib/invariant":389,"object-assign":391}],10:[function(require,module,exports){
 'use strict';
 
 var Systems = {
@@ -1167,4 +1168,4 @@ var Systems = {
 
 module.exports = Systems;
 
-},{}]},{},[429]);
+},{}]},{},[442]);
