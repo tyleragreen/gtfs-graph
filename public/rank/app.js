@@ -29,19 +29,11 @@ var GraphRankDisplay = React.createClass({
   },
   componentDidMount: function() {
     let { system } = this.props;
-    
-    this.socket = IO();
-    let { socket } = this;
     let that = this;
     
-    socket.emit(socketMsg.requestSystem, system);
     $.getJSON(API + 'system/'+system,function(json) {
       that._socketSendSystemHandler(json);
     });
-    
-    socket.on(socketMsg.sendMergedEdges, this._socketSendEdgesHandler);
-    socket.on(socketMsg.sendMergedStops, this._socketSendMergedStopsHandler);
-    socket.on(socketMsg.event, this._socketEventHandler);
   },
   _socketSendSystemHandler: function(system) {
     this.refs.map.setCenter(system.longitude, system.latitude, ZOOM);
@@ -49,7 +41,7 @@ var GraphRankDisplay = React.createClass({
       system: system.id
     });
   },
-  _socketSendMergedStopsHandler: function(stops) {
+  _socketSendStopsHandler: function(stops) {
     this.setState({ stops });
     this.refs.map.addStops(stops);
   },
@@ -82,8 +74,13 @@ var GraphRankDisplay = React.createClass({
   handleMapLoad: function() {
     const { system } = this.props;
     const { mode } = this.state;
-    this.socket.emit(socketMsg.requestMergedStops, system);
-    this.socket.emit(socketMsg.requestMergedEdges, system);
+    let that = this;
+    $.getJSON(`${API}graph/${system}?type=merged&filter=edges`,function(json) {
+      that._socketSendEdgesHandler(json);
+    });
+    $.getJSON(`${API}graph/${system}?type=merged&filter=stops`,function(json) {
+      that._socketSendStopsHandler(json);
+    });
     this.socket.emit(socketMsg.getMode, system, mode);
   },
   handleStopHover: function(stopId) {

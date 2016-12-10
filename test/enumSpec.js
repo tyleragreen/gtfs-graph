@@ -20,6 +20,10 @@ describe('An enum', function() {
   it('can return all its members', function() {
     expect(Mode.ALL).to.deep.equal([Mode.BEST,Mode.WORST]); 
   });
+  it('should test for membership', function() {
+    expect(Mode.isValid('BEST')).to.equal(true);
+    expect(Mode.isValid('NOT_BEST')).to.equal(false);
+  });
   it('should fail to modify a member', function() {
     expect(function() {
       Mode.BEST = Symbol('medium best');
