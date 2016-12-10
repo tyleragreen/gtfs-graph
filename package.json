@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Graph algorithms for transit schedules",
   "engines": {
-    "node": "4.4.0"
+    "node": "7.2.1"
   },
   "scripts": {
     "test": "mocha --timeout 45000",
