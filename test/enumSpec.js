@@ -9,8 +9,12 @@ var expect = require('chai').expect;
 let Mode = Enum(['BEST','WORST']);
 
 describe('An enum', function() {
+  it('should fail if created without an array', function() {
+    expect(function() {
+      Enum('BEST','WORST');
+    }).to.throw(Error);
+  });
   it('has members that equal themselves', function() {
-    expect(Mode.BEST).to.equal(Symbol.for('BEST'));
     expect(Mode.WORST).to.equal(Mode.WORST);
   });
   it('can return all its members', function() {

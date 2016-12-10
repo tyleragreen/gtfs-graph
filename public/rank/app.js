@@ -4,13 +4,8 @@ import IO from 'socket.io-client';
 import classNames from 'classnames';
 import { Map, RouteList, Popup, GitHubRibbon, Modal, ModalTrigger } from '../../lib/dom/index';
 import socketMsg from '../../lib/constants.js';
-
-const MODES = {
-  pageRank: 'Page Rank',
-  katz: 'Katz',
-  closeness: 'Closeness',
-  accessibility: 'Accessibility'
-};
+//import Mode from '../../lib/mode';
+var Mode = require('../../lib/mode');
 
 const CITIES = {
   nyc: 'NYC',
@@ -29,7 +24,7 @@ var GraphRankDisplay = React.createClass({
       stops: undefined,
       system: undefined,
       hoverStop: undefined,
-      mode: MODES.accessibility
+      mode: Mode.ACCESSIBILITY
     };
   },
   componentDidMount: function() {
@@ -156,7 +151,7 @@ var GraphRankDisplay = React.createClass({
       });
       return (<button className={btnClasses} onClick={navigateTo.bind(null, system)} key={system}>{system}</button>);
     });
-    let modes = Object.values(MODES).map(function(mode) {
+    let modes = Mode.ALL.map(function(mode) {
       let btnClasses = classNames({
         btn: true,
         'btn-primary': mode === currentMode
