@@ -12,7 +12,7 @@ const CITIES = {
   boston: 'Boston',
   paris: 'Paris'
 };
-
+const API = `https://${window.location.hostname}/api/v0/`;
 const MODAL_ID = 'infoModal';
 
 const ZOOM = 13;
@@ -32,9 +32,12 @@ var GraphRankDisplay = React.createClass({
     
     this.socket = IO();
     let { socket } = this;
+    let that = this;
     
     socket.emit(socketMsg.requestSystem, system);
-    socket.on(socketMsg.sendSystem, this._socketSendSystemHandler);
+    $.getJSON(API + 'system/'+system,function(json) {
+      that._socketSendSystemHandler(json);
+    });
     
     socket.on(socketMsg.sendMergedEdges, this._socketSendEdgesHandler);
     socket.on(socketMsg.sendMergedStops, this._socketSendMergedStopsHandler);

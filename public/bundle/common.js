@@ -33,7 +33,8 @@ var CITIES = {
   boston: 'Boston',
   paris: 'Paris'
 };
-
+//const API = 'https://gtfs-realtime-tgreen8091.c9users.io/api/v0/';
+var API = 'https://' + window.location.hostname + '/api/v0/';
 var MODAL_ID = 'infoModal';
 
 var ZOOM = 13;
@@ -57,9 +58,12 @@ var GraphRankDisplay = _react2.default.createClass({
     this.socket = (0, _socket2.default)();
     var socket = this.socket;
 
+    var that = this;
 
     socket.emit(_constants2.default.requestSystem, system);
-    socket.on(_constants2.default.sendSystem, this._socketSendSystemHandler);
+    $.getJSON(API + 'system/' + system, function (json) {
+      that._socketSendSystemHandler(json);
+    });
 
     socket.on(_constants2.default.sendMergedEdges, this._socketSendEdgesHandler);
     socket.on(_constants2.default.sendMergedStops, this._socketSendMergedStopsHandler);
