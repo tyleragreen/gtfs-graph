@@ -11,11 +11,12 @@ describe('An edge', function() {
   });
 
   it('should be created', function() {
-    let edge = new Edge({ origin: 0, destination: 1, type: 'route', weight: 10}); 
+    const props = { origin: 0, destination: 1, type: 'ROUTE', weight: 10};
+    const edge = new Edge(props); 
     
-    expect(edge.origin).to.equal(0);
-    expect(edge.destination).to.equal(1);
-    expect(edge.type).to.equal('route');
-    expect(edge.weight).to.equal(10);
+    expect(edge.origin).to.equal(props.origin);
+    expect(edge.destination).to.equal(props.destination);
+    expect(edge.type).to.equal(props.type);
+    expect(edge.weight).to.equal(props.weight);
   });
 });

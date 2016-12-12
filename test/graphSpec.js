@@ -8,6 +8,7 @@ var Edge = require('../lib/graph/edge.js');
 var EdgeList = require('../lib/graph/edgeList');
 var BasicTraverser = require('../lib/graph/graphTraverser.js').BasicTraverser;
 var traversals = require('../lib/graph/traversals.js');
+var EdgeType = require('../lib/enums').EdgeType;
 
 var expect = require('chai').expect;
 
@@ -21,11 +22,11 @@ describe('A transit graph', function() {
   before(function() {
     const numNodes = 5;
     const edges = [
-      { type: 'route', origin: 1, destination: 0, weight: 2 },
-      { type: 'transfer', origin: 2, destination: 1, weight: 2 },
-      { type: 'route', origin: 4, destination: 1, weight: 2 },
-      { type: 'route', origin: 3, destination: 2, weight: 2 },
-      { type: 'route', origin: 4, destination: 3, weight: 2 },
+      { type: EdgeType.ROUTE, origin: 1, destination: 0, weight: 2 },
+      { type: EdgeType.TRANSFER, origin: 2, destination: 1, weight: 2 },
+      { type: EdgeType.ROUTE, origin: 4, destination: 1, weight: 2 },
+      { type: EdgeType.ROUTE, origin: 3, destination: 2, weight: 2 },
+      { type: EdgeType.ROUTE, origin: 4, destination: 3, weight: 2 },
       ];
     this.stops = [
       new Stop(0,'A',0,0,['1']),
@@ -44,8 +45,8 @@ describe('A transit graph', function() {
     this.expectedSuperGraph = [
       [],
       [null],
-      [null,{type: 'route', weight: 2, origin: 2, destination: 1}],
-      [{type: 'route', weight: 2, origin: 3, destination: 0},{type: 'route', weight: 2, origin: 3, destination: 1},{type: 'route', weight: 2, origin: 3, destination: 2}],
+      [null,{type: EdgeType.ROUTE, weight: 2, origin: 2, destination: 1}],
+      [{type: EdgeType.ROUTE, weight: 2, origin: 3, destination: 0},{type: EdgeType.ROUTE, weight: 2, origin: 3, destination: 1},{type: EdgeType.ROUTE, weight: 2, origin: 3, destination: 2}],
     ];
     this.graph = new TransitGraph(new EdgeList(edges), numNodes, this.stops);
   });
@@ -88,11 +89,11 @@ describe('A transit graph', function() {
   it('can be merged twice', function() {
     let numNodes = 5;
     let edges = [
-      new Edge({ type: 'route', origin: 1, destination: 0, weight: 2 }),
-      new Edge({ type: 'transfer', origin: 2, destination: 1, weight: 2 }),
-      new Edge({ type: 'route', origin: 4, destination: 1, weight: 2 }),
-      new Edge({ type: 'transfer', origin: 3, destination: 2, weight: 2 }),
-      new Edge({ type: 'route', origin: 4, destination: 3, weight: 2 }),
+      new Edge({ type: EdgeType.ROUTE, origin: 1, destination: 0, weight: 2 }),
+      new Edge({ type: EdgeType.TRANSFER, origin: 2, destination: 1, weight: 2 }),
+      new Edge({ type: EdgeType.ROUTE, origin: 4, destination: 1, weight: 2 }),
+      new Edge({ type: EdgeType.TRANSFER, origin: 3, destination: 2, weight: 2 }),
+      new Edge({ type: EdgeType.ROUTE, origin: 4, destination: 3, weight: 2 }),
       ];
     this.expectedGraph = [
       [],
@@ -104,7 +105,7 @@ describe('A transit graph', function() {
     this.expectedSuperGraph = [
       [],
       [null],
-      [{type: 'route', weight: 2, origin: 2, destination: 0},{type: 'route', weight: 2, origin: 2, destination: 1}],
+      [{type: EdgeType.ROUTE, weight: 2, origin: 2, destination: 0},{type: EdgeType.ROUTE, weight: 2, origin: 2, destination: 1}],
     ];
     this.graph = new TransitGraph(new EdgeList(edges), numNodes, this.stops);
     expect(traversals.mergeTransferNodes(this.graph).G.matrix).to.deep.equal(this.expectedSuperGraph);
@@ -128,11 +129,11 @@ describe('A transit graph', function() {
   it('will fail when provided a negative edge', function() {
     const numNodes = 5;
     const edges = [
-      new Edge({ type: 'route', origin: 1, destination: 0, weight: 2 }),
-      new Edge({ type: 'transfer', origin: 2, destination: 1, weight: 2 }),
-      new Edge({ type: 'route', origin: 4, destination: 1, weight: -2 }),
-      new Edge({ type: 'transfer', origin: 3, destination: 2, weight: 2 }),
-      new Edge({ type: 'route', origin: 4, destination: 3, weight: 2 }),
+      new Edge({ type: EdgeType.ROUTE, origin: 1, destination: 0, weight: 2 }),
+      new Edge({ type: EdgeType.TRANSFER, origin: 2, destination: 1, weight: 2 }),
+      new Edge({ type: EdgeType.ROUTE, origin: 4, destination: 1, weight: -2 }),
+      new Edge({ type: EdgeType.TRANSFER, origin: 3, destination: 2, weight: 2 }),
+      new Edge({ type: EdgeType.ROUTE, origin: 4, destination: 3, weight: 2 }),
       ];
 
     expect(function() {
@@ -150,12 +151,12 @@ describe('A transit graph', function() {
   */
   it('can have its diversity entropy calculated', function() {
     const edges = [
-      new Edge({ type: 'route', origin: 0, destination: 1, weight: 1 }),
-      new Edge({ type: 'route', origin: 0, destination: 2, weight: 1 }),
-      new Edge({ type: 'route', origin: 0, destination: 4, weight: 1 }),
-      new Edge({ type: 'route', origin: 2, destination: 3, weight: 1 }),
-      new Edge({ type: 'route', origin: 4, destination: 5, weight: 1 }),
-      new Edge({ type: 'route', origin: 5, destination: 6, weight: 1 }),
+      new Edge({ type: EdgeType.ROUTE, origin: 0, destination: 1, weight: 1 }),
+      new Edge({ type: EdgeType.ROUTE, origin: 0, destination: 2, weight: 1 }),
+      new Edge({ type: EdgeType.ROUTE, origin: 0, destination: 4, weight: 1 }),
+      new Edge({ type: EdgeType.ROUTE, origin: 2, destination: 3, weight: 1 }),
+      new Edge({ type: EdgeType.ROUTE, origin: 4, destination: 5, weight: 1 }),
+      new Edge({ type: EdgeType.ROUTE, origin: 5, destination: 6, weight: 1 }),
     ];
     const stopList = [
       new Stop(0,'0',0,0,[]),
