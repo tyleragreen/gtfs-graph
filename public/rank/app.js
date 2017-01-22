@@ -4,8 +4,8 @@ import IO from 'socket.io-client';
 import classNames from 'classnames';
 import { Map, RouteList, Popup, GitHubRibbon, Modal, ModalTrigger } from '../../lib/dom/index';
 import socketMsg from '../../lib/constants.js';
-//import Mode from '../../lib/mode';
-var Mode = require('../../lib/mode');
+var Mode = require('../../lib/enums').Mode;
+var getStopList = require('../../lib/dom/unpack');
 
 const CITIES = {
   nyc: 'NYC',
@@ -28,27 +28,30 @@ var GraphRankDisplay = React.createClass({
     };
   },
   componentDidMount: function() {
+    this.socket = IO();
     let { system } = this.props;
+    let { socket } = this;
     let that = this;
     
     $.getJSON(API + 'system/'+system,function(json) {
-      that._socketSendSystemHandler(json);
+      that._sendSystemHandler(json);
     });
+    socket.on(socketMsg.event, this._eventHandler);
   },
-  _socketSendSystemHandler: function(system) {
+  _sendSystemHandler: function(system) {
     this.refs.map.setCenter(system.longitude, system.latitude, ZOOM);
     this.setState({ 
       system: system.id
     });
   },
-  _socketSendStopsHandler: function(stops) {
+  _sendStopsHandler: function(stops) {
     this.setState({ stops });
     this.refs.map.addStops(stops);
   },
-  _socketSendEdgesHandler: function(edges) {
+  _sendEdgesHandler: function(edges) {
     this.refs.map.addEdges(edges);
   },
-  _socketEventHandler: function(event) {
+  _eventHandler: function(event) {
     if (event.type === socketMsg.showRanks) {
       this.setState({ infoBoxContents: this._orderStopsByRank(event.data) });
       this.refs.map.showRanks(this.state.stops,event.data);
@@ -74,14 +77,15 @@ var GraphRankDisplay = React.createClass({
   handleMapLoad: function() {
     const { system } = this.props;
     const { mode } = this.state;
-    let that = this;
-    $.getJSON(`${API}graph/${system}?type=merged&filter=edges`,function(json) {
-      that._socketSendEdgesHandler(json);
+    
+    $.getJSON(`${API}graph/${system}?type=merged&filter=edges`, (json) => {
+      this._sendEdgesHandler(json);
     });
-    $.getJSON(`${API}graph/${system}?type=merged&filter=stops`,function(json) {
-      that._socketSendStopsHandler(json);
+    $.getJSON(`${API}graph/${system}?type=merged&filter=stops`, (json) => {
+      let stops = getStopList(json);
+      this._sendStopsHandler(stops);
+      this.socket.emit(socketMsg.getMode, system, mode);
     });
-    this.socket.emit(socketMsg.getMode, system, mode);
   },
   handleStopHover: function(stopId) {
     if (typeof stopId === "undefined") {
