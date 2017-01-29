@@ -17,6 +17,8 @@ Algorithm Demo: [https://gtfs-graph.herokuapp.com/demo/](https://gtfs-graph.hero
 
 ## Usage
 
+`gtfs-graph` requires Node.js version 7.2.1.
+
 After cloning the repository, be sure to install the necessary dependencies.
 
 `npm install`
@@ -24,6 +26,12 @@ After cloning the repository, be sure to install the necessary dependencies.
 There is an `npm` command to build the JavaScript bundle and start the Node.js server. These are not joined because the combine sequence takes longer than 60 seconds to complete, with is Heroku's limit on server boot time. See Other for the component commands.
 
 `npm run all`
+
+### Test
+
+A test suite of mostly unit tests is included. To run the tests:
+
+`npm test`
 
 ### Other
 
