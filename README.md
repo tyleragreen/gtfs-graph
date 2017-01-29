@@ -4,14 +4,14 @@ A study of transit system design using graph theory.
 
 <img src="http://www.tyleragreen.com/blog_files/2016-10-gtfs-graph/routing1.png" height="400">
 
-## Two Frontends
+## Frontend
 
 Network Analysis: [https://gtfs-graph.herokuapp.com/](https://gtfs-graph.herokuapp.com/)
 * Page Rank
 * Closeness Centrality
 * Katz Centrality
 * Accessibility
-** from paper "Accessibility in complex networks" by Travencolo and Costa
+  * Reference: "Accessibility in complex networks", B.A.N. Travençolo and L. da Fontoura Costa, *Physics Letters A*, 2008.
 
 Algorithm Demo: [https://gtfs-graph.herokuapp.com/demo/](https://gtfs-graph.herokuapp.com/demo/)
 * Depth-First Search
