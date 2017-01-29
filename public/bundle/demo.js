@@ -1,4 +1,4 @@
-require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({722:[function(require,module,exports){
+require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({628:[function(require,module,exports){
 'use strict';
 
 var _react = require('react');
@@ -753,7 +753,7 @@ var ModeSelector = _react2.default.createClass({
 
 _reactDom2.default.render(_react2.default.createElement(App, null), document.getElementById('content'));
 
-},{"../../lib/constants.js":1,"../../lib/dom/index":2,"../../lib/systems.js":15,"classnames":273,"react":642,"react-addons-update":459,"react-dom":460,"react-onclickoutside":611,"socket.io-client":643}],611:[function(require,module,exports){
+},{"../../lib/constants.js":1,"../../lib/dom/index":2,"../../lib/systems.js":15,"classnames":73,"react":542,"react-addons-update":388,"react-dom":389,"react-onclickoutside":516,"socket.io-client":565}],516:[function(require,module,exports){
 /**
  * A higher-order-component for handling onClickOutside for React components.
  */
@@ -785,6 +785,29 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
   };
 
   /**
+   * Try to find our node in a hierarchy of nodes, returning the document
+   * node as highest noode if our node is not found in the path up.
+   */
+  var findHighest = function(current, componentNode, ignoreClass) {
+    if (current === componentNode) {
+      return true;
+    }
+
+    // If source=local then this event came from 'somewhere'
+    // inside and should be ignored. We could handle this with
+    // a layered approach, too, but that requires going back to
+    // thinking in terms of Dom node nesting, running counter
+    // to React's 'you shouldn't care about the DOM' philosophy.
+    while(current.parentNode) {
+      if (isNodeFound(current, componentNode, ignoreClass)) {
+        return true;
+      }
+      current = current.parentNode;
+    }
+    return current;
+  };
+
+  /**
    * Generate the event handler that checks whether a clicked DOM node
    * is inside of, or lives outside of, our Component's node tree.
    */
@@ -797,24 +820,12 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
         evt.stopPropagation();
       }
       var current = evt.target;
-      var found = false;
-      // If source=local then this event came from 'somewhere'
-      // inside and should be ignored. We could handle this with
-      // a layered approach, too, but that requires going back to
-      // thinking in terms of Dom node nesting, running counter
-      // to React's 'you shouldn't care about the DOM' philosophy.
-      while(current.parentNode) {
-        found = isNodeFound(current, componentNode, ignoreClass);
-        if(found) return;
-        current = current.parentNode;
+      if(findHighest(current, componentNode, ignoreClass) !== document) {
+        return;
       }
-      // If element is in a detached DOM, consider it 'not clicked
-      // outside', as it cannot be known whether it was outside.
-      if(current !== document) return;
       eventHandler(evt);
     };
   };
-
 
   /**
    * This function generates the HOC function that you'll use
@@ -855,8 +866,8 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
          * linked to this component's state.
          */
         componentDidMount: function() {
-          // If we are in an environment without a DOM such 
-          // as shallow rendering or snapshots then we exit 
+          // If we are in an environment without a DOM such
+          // as shallow rendering or snapshots then we exit
           // early to prevent any unhandled errors being thrown.
           if (typeof document === 'undefined' || !document.createElement){
             return;
@@ -882,8 +893,27 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
             throw new Error('Component lacks a handleClickOutside(event) function for processing outside click events.');
           }
 
+          var componentNode = ReactDOM.findDOMNode(instance);
+          if (componentNode === null) {
+            console.warn('Antipattern warning: there was no DOM node associated with the component that is being wrapped by outsideClick.');
+            console.warn([
+              'This is typically caused by having a component that starts life with a render function that',
+              'returns `null` (due to a state or props value), so that the component \'exist\' in the React',
+              'chain of components, but not in the DOM.\n\nInstead, you need to refactor your code so that the',
+              'decision of whether or not to show your component is handled by the parent, in their render()',
+              'function.\n\nIn code, rather than:\n\n  A{render(){return check? <.../> : null;}\n  B{render(){<A check=... />}\n\nmake sure that you',
+              'use:\n\n  A{render(){return <.../>}\n  B{render(){return <...>{ check ? <A/> : null }<...>}}\n\nThat is:',
+              'the parent is always responsible for deciding whether or not to render any of its children.',
+              'It is not the child\'s responsibility to decide whether a render instruction from above should',
+              'get ignored or not by returning `null`.\n\nWhen any component gets its render() function called,',
+              'that is the signal that it should be rendering its part of the UI. It may in turn decide not to',
+              'render all of *its* children, but it should never return `null` for itself. It is not responsible',
+              'for that decision.'
+            ].join(' '));
+          }
+
           var fn = this.__outsideClickHandler = generateOutsideCheck(
-            ReactDOM.findDOMNode(instance),
+            componentNode,
             instance,
             clickOutsideHandler,
             this.props.outsideClickIgnoreClass || IGNORE_CLASS,
@@ -1016,9 +1046,9 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
 
 }(this));
 
-},{"react":642,"react-dom":460}],459:[function(require,module,exports){
+},{"react":542,"react-dom":389}],388:[function(require,module,exports){
 module.exports = require('react/lib/update');
-},{"react/lib/update":636}],636:[function(require,module,exports){
+},{"react/lib/update":541}],541:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -1132,7 +1162,7 @@ function update(value, spec) {
 
 module.exports = update;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":634,"_process":236,"fbjs/lib/invariant":639,"object-assign":641}],15:[function(require,module,exports){
+},{"./reactProdInvariant":539,"_process":375,"fbjs/lib/invariant":156,"object-assign":348}],15:[function(require,module,exports){
 'use strict';
 
 var Systems = {
@@ -1168,4 +1198,4 @@ var Systems = {
 
 module.exports = Systems;
 
-},{}]},{},[722]);
+},{}]},{},[628]);

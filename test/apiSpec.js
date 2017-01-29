@@ -224,13 +224,20 @@ describe('The API graph endpoint', function() {
   });
   
   it('should respond with a graph with ranks', function() {
-    return getUrl(`${API}/graph/${testSys.id}?mode=${Mode.ACCESSIBILITY}`)
+    return getUrl(`${API}/graph/${testSys.id}?type=${GraphType.MERGED}&mode=${Mode.ACCESSIBILITY}`)
       .then(function(data) {
         expect(data.features).to.not.be.empty;
         
         const featuresWithRank = getFeaturesWithRank(data);
         
         expect(featuresWithRank).to.not.be.empty;
+      });
+  });
+  
+  it('should respond with an error for a mode with a graph besides MERGED', function() {
+    return getUrl(`${API}/graph/${testSys.id}?type=${GraphType.PRIMARY}&mode=${Mode.ACCESSIBILITY}`)
+      .then(function(data) {
+        expect(data.error).to.not.be.undefined;
       });
   });
   

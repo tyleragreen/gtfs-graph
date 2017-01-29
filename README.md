@@ -9,6 +9,9 @@ A study of transit system design using graph theory.
 Network Analysis: [https://gtfs-graph.herokuapp.com/](https://gtfs-graph.herokuapp.com/)
 * Page Rank
 * Closeness Centrality
+* Katz Centrality
+* Accessibility
+** from paper "Accessibility in complex networks" by Travencolo and Costa
 
 Algorithm Demo: [https://gtfs-graph.herokuapp.com/demo/](https://gtfs-graph.herokuapp.com/demo/)
 * Depth-First Search
@@ -82,7 +85,7 @@ Command-line options are available for `lib/server/index.js` to customize a run.
 |stops|
 |edges|
 
-|Mode|
+|Mode (only valid if type==merged)|
 |---|
 |accessibility|
 |closeness|
