@@ -10,7 +10,8 @@ var getStopList = require('../../lib/dom/unpack');
 const CITIES = {
   nyc: 'NYC',
   boston: 'Boston',
-  paris: 'Paris'
+  paris: 'Paris',
+  dc: 'DC'
 };
 const API = `https://${window.location.hostname}/api/v0/`;
 const MODAL_ID = 'infoModal';
