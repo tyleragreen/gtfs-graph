@@ -1,4 +1,4 @@
-require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({628:[function(require,module,exports){
+require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({814:[function(require,module,exports){
 'use strict';
 
 var _react = require('react');
@@ -753,7 +753,7 @@ var ModeSelector = _react2.default.createClass({
 
 _reactDom2.default.render(_react2.default.createElement(App, null), document.getElementById('content'));
 
-},{"../../lib/constants.js":1,"../../lib/dom/index":2,"../../lib/systems.js":15,"classnames":73,"react":542,"react-addons-update":388,"react-dom":389,"react-onclickoutside":516,"socket.io-client":565}],516:[function(require,module,exports){
+},{"../../lib/constants.js":1,"../../lib/dom/index":2,"../../lib/systems.js":14,"classnames":341,"react":719,"react-addons-update":518,"react-dom":521,"react-onclickoutside":676,"socket.io-client":720}],676:[function(require,module,exports){
 /**
  * A higher-order-component for handling onClickOutside for React components.
  */
@@ -808,10 +808,17 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
   };
 
   /**
+   * Check if the browser scrollbar was clicked
+   */
+  var clickedScrollbar = function(evt) {
+    return document.documentElement.clientWidth <= evt.clientX || document.documentElement.clientHeight <= evt.clientY;
+  };
+
+  /**
    * Generate the event handler that checks whether a clicked DOM node
    * is inside of, or lives outside of, our Component's node tree.
    */
-  var generateOutsideCheck = function(componentNode, componentInstance, eventHandler, ignoreClass, preventDefault, stopPropagation) {
+  var generateOutsideCheck = function(componentNode, componentInstance, eventHandler, ignoreClass, excludeScrollbar, preventDefault, stopPropagation) {
     return function(evt) {
       if (preventDefault) {
         evt.preventDefault();
@@ -820,7 +827,7 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
         evt.stopPropagation();
       }
       var current = evt.target;
-      if(findHighest(current, componentNode, ignoreClass) !== document) {
+      if((excludeScrollbar && clickedScrollbar(evt)) || (findHighest(current, componentNode, ignoreClass) !== document)) {
         return;
       }
       eventHandler(evt);
@@ -834,11 +841,11 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
    * bootstrapping code to yield an instance of the
    * onClickOutsideHOC function defined inside setupHOC().
    */
-  function setupHOC(root, React, ReactDOM) {
+  function setupHOC(root, React, ReactDOM, createReactClass) {
 
     // The actual Component-wrapping HOC:
     return function onClickOutsideHOC(Component, config) {
-      var wrapComponentWithOnClickOutsideHandling = React.createClass({
+      var wrapComponentWithOnClickOutsideHandling = createReactClass({
         statics: {
           /**
            * Access the wrapped Component's class.
@@ -860,6 +867,12 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
 
         // this is given meaning in componentDidMount
         __outsideClickHandler: function() {},
+
+        getDefaultProps: function() {
+          return {
+            excludeScrollbar: config && config.excludeScrollbar
+          };
+        },
 
         /**
          * Add click listeners to the current document,
@@ -917,6 +930,7 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
             instance,
             clickOutsideHandler,
             this.props.outsideClickIgnoreClass || IGNORE_CLASS,
+            this.props.excludeScrollbar, // fallback not needed, prop always exists because of getDefaultProps
             this.props.preventDefault || false,
             this.props.stopPropagation || false
           );
@@ -998,7 +1012,9 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
           var passedProps = this.props;
           var props = {};
           Object.keys(this.props).forEach(function(key) {
-            props[key] = passedProps[key];
+            if (key !== 'excludeScrollbar') {
+              props[key] = passedProps[key];
+            }
           });
           if (Component.prototype.isReactComponent) {
             props.ref = 'instance';
@@ -1027,17 +1043,19 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
   function setupBinding(root, factory) {
     if (typeof define === 'function' && define.amd) {
       // AMD. Register as an anonymous module.
-      define(['react','react-dom'], function(React, ReactDom) {
-        return factory(root, React, ReactDom);
+      define(['react','react-dom','create-react-class'], function(React, ReactDom, createReactClass) {
+        if (!createReactClass) createReactClass = React.createClass;
+        return factory(root, React, ReactDom, createReactClass);
       });
     } else if (typeof exports === 'object') {
       // Node. Note that this does not work with strict
       // CommonJS, but only CommonJS-like environments
       // that support module.exports
-      module.exports = factory(root, require('react'), require('react-dom'));
+      module.exports = factory(root, require('react'), require('react-dom'), require('create-react-class'));
     } else {
       // Browser globals (root is window)
-      root.onClickOutside = factory(root, React, ReactDOM);
+      var createReactClass = React.createClass ? React.createClass : window.createReactClass;
+      root.onClickOutside = factory(root, React, ReactDOM, createReactClass);
     }
   }
 
@@ -1046,10 +1064,7 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
 
 }(this));
 
-},{"react":542,"react-dom":389}],388:[function(require,module,exports){
-module.exports = require('react/lib/update');
-},{"react/lib/update":541}],541:[function(require,module,exports){
-(function (process){
+},{"create-react-class":678,"react":719,"react-dom":521}],678:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -1060,13 +1075,40 @@ module.exports = require('react/lib/update');
  *
  */
 
-/* global hasOwnProperty:true */
+'use strict';
+
+var React = require('react');
+var factory = require('./factory');
+
+if (typeof React === 'undefined') {
+  throw Error(
+    'create-react-class could not find the React object. If you are using script tags, ' +
+      'make sure that React is being loaded before create-react-class.'
+  );
+}
+
+// Hack to grab NoopUpdateQueue from isomorphic React
+var ReactNoopUpdateQueue = new React.Component().updater;
+
+module.exports = factory(
+  React.Component,
+  React.isValidElement,
+  ReactNoopUpdateQueue
+);
+
+},{"./factory":677,"react":719}],518:[function(require,module,exports){
+/**
+ * Copyright 2013-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
 
 'use strict';
 
-var _prodInvariant = require('./reactProdInvariant'),
-    _assign = require('object-assign');
-
+var _assign = require('object-assign');
 var invariant = require('fbjs/lib/invariant');
 var hasOwnProperty = {}.hasOwnProperty;
 
@@ -1087,18 +1129,36 @@ var COMMAND_SET = '$set';
 var COMMAND_MERGE = '$merge';
 var COMMAND_APPLY = '$apply';
 
-var ALL_COMMANDS_LIST = [COMMAND_PUSH, COMMAND_UNSHIFT, COMMAND_SPLICE, COMMAND_SET, COMMAND_MERGE, COMMAND_APPLY];
+var ALL_COMMANDS_LIST = [
+  COMMAND_PUSH,
+  COMMAND_UNSHIFT,
+  COMMAND_SPLICE,
+  COMMAND_SET,
+  COMMAND_MERGE,
+  COMMAND_APPLY
+];
 
 var ALL_COMMANDS_SET = {};
 
-ALL_COMMANDS_LIST.forEach(function (command) {
+ALL_COMMANDS_LIST.forEach(function(command) {
   ALL_COMMANDS_SET[command] = true;
 });
 
 function invariantArrayCase(value, spec, command) {
-  !Array.isArray(value) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'update(): expected target of %s to be an array; got %s.', command, value) : _prodInvariant('1', command, value) : void 0;
+  invariant(
+    Array.isArray(value),
+    'update(): expected target of %s to be an array; got %s.',
+    command,
+    value
+  );
   var specValue = spec[command];
-  !Array.isArray(specValue) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'update(): expected spec of %s to be an array; got %s. Did you forget to wrap your parameter in an array?', command, specValue) : _prodInvariant('2', command, specValue) : void 0;
+  invariant(
+    Array.isArray(specValue),
+    'update(): expected spec of %s to be an array; got %s. ' +
+      'Did you forget to wrap your parameter in an array?',
+    command,
+    specValue
+  );
 }
 
 /**
@@ -1106,10 +1166,20 @@ function invariantArrayCase(value, spec, command) {
  * See https://facebook.github.io/react/docs/update.html for details.
  */
 function update(value, spec) {
-  !(typeof spec === 'object') ? process.env.NODE_ENV !== 'production' ? invariant(false, 'update(): You provided a key path to update() that did not contain one of %s. Did you forget to include {%s: ...}?', ALL_COMMANDS_LIST.join(', '), COMMAND_SET) : _prodInvariant('3', ALL_COMMANDS_LIST.join(', '), COMMAND_SET) : void 0;
+  invariant(
+    typeof spec === 'object',
+    'update(): You provided a key path to update() that did not contain one ' +
+      'of %s. Did you forget to include {%s: ...}?',
+    ALL_COMMANDS_LIST.join(', '),
+    COMMAND_SET
+  );
 
   if (hasOwnProperty.call(spec, COMMAND_SET)) {
-    !(Object.keys(spec).length === 1) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Cannot have more than one key in an object with %s', COMMAND_SET) : _prodInvariant('4', COMMAND_SET) : void 0;
+    invariant(
+      Object.keys(spec).length === 1,
+      'Cannot have more than one key in an object with %s',
+      COMMAND_SET
+    );
 
     return spec[COMMAND_SET];
   }
@@ -1118,36 +1188,68 @@ function update(value, spec) {
 
   if (hasOwnProperty.call(spec, COMMAND_MERGE)) {
     var mergeObj = spec[COMMAND_MERGE];
-    !(mergeObj && typeof mergeObj === 'object') ? process.env.NODE_ENV !== 'production' ? invariant(false, 'update(): %s expects a spec of type \'object\'; got %s', COMMAND_MERGE, mergeObj) : _prodInvariant('5', COMMAND_MERGE, mergeObj) : void 0;
-    !(nextValue && typeof nextValue === 'object') ? process.env.NODE_ENV !== 'production' ? invariant(false, 'update(): %s expects a target of type \'object\'; got %s', COMMAND_MERGE, nextValue) : _prodInvariant('6', COMMAND_MERGE, nextValue) : void 0;
+    invariant(
+      mergeObj && typeof mergeObj === 'object',
+      "update(): %s expects a spec of type 'object'; got %s",
+      COMMAND_MERGE,
+      mergeObj
+    );
+    invariant(
+      nextValue && typeof nextValue === 'object',
+      "update(): %s expects a target of type 'object'; got %s",
+      COMMAND_MERGE,
+      nextValue
+    );
     _assign(nextValue, spec[COMMAND_MERGE]);
   }
 
   if (hasOwnProperty.call(spec, COMMAND_PUSH)) {
     invariantArrayCase(value, spec, COMMAND_PUSH);
-    spec[COMMAND_PUSH].forEach(function (item) {
+    spec[COMMAND_PUSH].forEach(function(item) {
       nextValue.push(item);
     });
   }
 
   if (hasOwnProperty.call(spec, COMMAND_UNSHIFT)) {
     invariantArrayCase(value, spec, COMMAND_UNSHIFT);
-    spec[COMMAND_UNSHIFT].forEach(function (item) {
+    spec[COMMAND_UNSHIFT].forEach(function(item) {
       nextValue.unshift(item);
     });
   }
 
   if (hasOwnProperty.call(spec, COMMAND_SPLICE)) {
-    !Array.isArray(value) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'Expected %s target to be an array; got %s', COMMAND_SPLICE, value) : _prodInvariant('7', COMMAND_SPLICE, value) : void 0;
-    !Array.isArray(spec[COMMAND_SPLICE]) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'update(): expected spec of %s to be an array of arrays; got %s. Did you forget to wrap your parameters in an array?', COMMAND_SPLICE, spec[COMMAND_SPLICE]) : _prodInvariant('8', COMMAND_SPLICE, spec[COMMAND_SPLICE]) : void 0;
-    spec[COMMAND_SPLICE].forEach(function (args) {
-      !Array.isArray(args) ? process.env.NODE_ENV !== 'production' ? invariant(false, 'update(): expected spec of %s to be an array of arrays; got %s. Did you forget to wrap your parameters in an array?', COMMAND_SPLICE, spec[COMMAND_SPLICE]) : _prodInvariant('8', COMMAND_SPLICE, spec[COMMAND_SPLICE]) : void 0;
+    invariant(
+      Array.isArray(value),
+      'Expected %s target to be an array; got %s',
+      COMMAND_SPLICE,
+      value
+    );
+    invariant(
+      Array.isArray(spec[COMMAND_SPLICE]),
+      'update(): expected spec of %s to be an array of arrays; got %s. ' +
+        'Did you forget to wrap your parameters in an array?',
+      COMMAND_SPLICE,
+      spec[COMMAND_SPLICE]
+    );
+    spec[COMMAND_SPLICE].forEach(function(args) {
+      invariant(
+        Array.isArray(args),
+        'update(): expected spec of %s to be an array of arrays; got %s. ' +
+          'Did you forget to wrap your parameters in an array?',
+        COMMAND_SPLICE,
+        spec[COMMAND_SPLICE]
+      );
       nextValue.splice.apply(nextValue, args);
     });
   }
 
   if (hasOwnProperty.call(spec, COMMAND_APPLY)) {
-    !(typeof spec[COMMAND_APPLY] === 'function') ? process.env.NODE_ENV !== 'production' ? invariant(false, 'update(): expected spec of %s to be a function; got %s.', COMMAND_APPLY, spec[COMMAND_APPLY]) : _prodInvariant('9', COMMAND_APPLY, spec[COMMAND_APPLY]) : void 0;
+    invariant(
+      typeof spec[COMMAND_APPLY] === 'function',
+      'update(): expected spec of %s to be a function; got %s.',
+      COMMAND_APPLY,
+      spec[COMMAND_APPLY]
+    );
     nextValue = spec[COMMAND_APPLY](nextValue);
   }
 
@@ -1161,8 +1263,8 @@ function update(value, spec) {
 }
 
 module.exports = update;
-}).call(this,require('_process'))
-},{"./reactProdInvariant":539,"_process":375,"fbjs/lib/invariant":156,"object-assign":348}],15:[function(require,module,exports){
+
+},{"fbjs/lib/invariant":519,"object-assign":520}],14:[function(require,module,exports){
 'use strict';
 
 var Systems = {
@@ -1193,9 +1295,18 @@ var Systems = {
     stops_view: "SELECT DISTINCT st.stop_id AS id, s.stop_name AS name, s.stop_lat AS latitude, s.stop_lon as longitude FROM stop_times st JOIN trips t ON st.trip_id=t.trip_id JOIN routes r ON t.route_id=r.route_id JOIN stops s ON st.stop_id=s.stop_id WHERE r.route_type=1",
     routes_view: "SELECT DISTINCT st.stop_id AS stop_id, r.route_short_name AS route_id, r.route_color AS route_color FROM stop_times st JOIN trips t ON st.trip_id=t.trip_id JOIN routes r ON t.route_id=r.route_id WHERE r.route_type=1",
     edges_view: "SELECT DISTINCT st1.stop_id AS origin, st2.stop_id AS destination, 'route' AS type, EXTRACT(EPOCH FROM st2.departure_time-st1.departure_time) AS duration FROM stop_times st1 JOIN stop_times st2 ON st1.trip_id = st2.trip_id JOIN trips t ON st1.trip_id=t.trip_id JOIN routes r ON t.route_id=r.route_id WHERE st2.stop_sequence = (st1.stop_sequence+1) AND r.route_type=1 UNION SELECT from_stop_id AS origin, to_stop_id AS destination, 'transfer' AS type, min_transfer_time AS duration FROM transfers WHERE from_stop_id != to_stop_id UNION SELECT s1.id AS origin, s2.id AS destination, 'transfer' AS type, 0 AS duration FROM stops_view s1 JOIN stops_view s2 ON s1.name=s2.name AND s1.latitude=s2.latitude AND s1.longitude=s2.longitude AND s1.id!=s2.id AND s1.id>s2.id"
+  },
+  WMATA: {
+    location: 'DC',
+    latitude: 38.905,
+    longitude: -77.016,
+    connectionString: 'postgres://thebusrider:3ll3board!@wmata-gtfs.cotldmpxktwb.us-west-2.rds.amazonaws.com:5432/wmata_gtfs',
+    stops_view: "SELECT DISTINCT st.stop_id AS id, s.stop_name AS name, s.stop_lat AS latitude, s.stop_lon as longitude FROM stop_times st JOIN trips t ON st.trip_id=t.trip_id JOIN routes r ON t.route_id=r.route_id JOIN stops s ON st.stop_id=s.stop_id WHERE r.route_type=1",
+    routes_view: "SELECT DISTINCT st.stop_id AS stop_id, r.route_short_name AS route_id, r.route_color AS route_color FROM stop_times st JOIN trips t ON st.trip_id=t.trip_id JOIN routes r ON t.route_id=r.route_id WHERE r.route_type=1",
+    edges_view: "SELECT DISTINCT st1.stop_id AS origin, st2.stop_id AS destination, 'route' AS type, EXTRACT(EPOCH FROM st2.departure_time-st1.departure_time) AS duration FROM stop_times st1 JOIN stop_times st2 ON st1.trip_id = st2.trip_id JOIN trips t ON st1.trip_id=t.trip_id JOIN routes r ON t.route_id=r.route_id WHERE st2.stop_sequence = (st1.stop_sequence+1) AND r.route_type=1"
   }
 };
 
 module.exports = Systems;
 
-},{}]},{},[628]);
+},{}]},{},[814]);
