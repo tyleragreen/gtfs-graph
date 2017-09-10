@@ -1,4 +1,4 @@
-require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({667:[function(require,module,exports){
+require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({811:[function(require,module,exports){
 'use strict';
 
 var _react = require('react');
@@ -753,7 +753,7 @@ var ModeSelector = _react2.default.createClass({
 
 _reactDom2.default.render(_react2.default.createElement(App, null), document.getElementById('content'));
 
-},{"../../lib/constants.js":1,"../../lib/dom/index":2,"../../lib/systems.js":12,"classnames":69,"react":547,"react-addons-update":393,"react-dom":394,"react-onclickoutside":521,"socket.io-client":574}],521:[function(require,module,exports){
+},{"../../lib/constants.js":1,"../../lib/dom/index":2,"../../lib/systems.js":12,"classnames":338,"react":718,"react-addons-update":517,"react-dom":520,"react-onclickoutside":675,"socket.io-client":719}],675:[function(require,module,exports){
 /**
  * A higher-order-component for handling onClickOutside for React components.
  */
@@ -1064,7 +1064,39 @@ _reactDom2.default.render(_react2.default.createElement(App, null), document.get
 
 }(this));
 
-},{"create-react-class":81,"react":547,"react-dom":394}],393:[function(require,module,exports){
+},{"create-react-class":677,"react":718,"react-dom":520}],677:[function(require,module,exports){
+/**
+ * Copyright 2013-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ */
+
+'use strict';
+
+var React = require('react');
+var factory = require('./factory');
+
+if (typeof React === 'undefined') {
+  throw Error(
+    'create-react-class could not find the React object. If you are using script tags, ' +
+      'make sure that React is being loaded before create-react-class.'
+  );
+}
+
+// Hack to grab NoopUpdateQueue from isomorphic React
+var ReactNoopUpdateQueue = new React.Component().updater;
+
+module.exports = factory(
+  React.Component,
+  React.isValidElement,
+  ReactNoopUpdateQueue
+);
+
+},{"./factory":676,"react":718}],517:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -1232,39 +1264,7 @@ function update(value, spec) {
 
 module.exports = update;
 
-},{"fbjs/lib/invariant":144,"object-assign":345}],81:[function(require,module,exports){
-/**
- * Copyright 2013-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- */
-
-'use strict';
-
-var React = require('react');
-var factory = require('./factory');
-
-if (typeof React === 'undefined') {
-  throw Error(
-    'create-react-class could not find the React object. If you are using script tags, ' +
-      'make sure that React is being loaded before create-react-class.'
-  );
-}
-
-// Hack to grab NoopUpdateQueue from isomorphic React
-var ReactNoopUpdateQueue = new React.Component().updater;
-
-module.exports = factory(
-  React.Component,
-  React.isValidElement,
-  ReactNoopUpdateQueue
-);
-
-},{"./factory":80,"react":547}],12:[function(require,module,exports){
+},{"fbjs/lib/invariant":518,"object-assign":519}],12:[function(require,module,exports){
 'use strict';
 
 var Systems = {
@@ -1295,9 +1295,18 @@ var Systems = {
     stops_view: "SELECT DISTINCT st.stop_id AS id, s.stop_name AS name, s.stop_lat AS latitude, s.stop_lon as longitude FROM stop_times st JOIN trips t ON st.trip_id=t.trip_id JOIN routes r ON t.route_id=r.route_id JOIN stops s ON st.stop_id=s.stop_id WHERE r.route_type=1",
     routes_view: "SELECT DISTINCT st.stop_id AS stop_id, r.route_short_name AS route_id, r.route_color AS route_color FROM stop_times st JOIN trips t ON st.trip_id=t.trip_id JOIN routes r ON t.route_id=r.route_id WHERE r.route_type=1",
     edges_view: "SELECT DISTINCT st1.stop_id AS origin, st2.stop_id AS destination, 'route' AS type, EXTRACT(EPOCH FROM st2.departure_time-st1.departure_time) AS duration FROM stop_times st1 JOIN stop_times st2 ON st1.trip_id = st2.trip_id JOIN trips t ON st1.trip_id=t.trip_id JOIN routes r ON t.route_id=r.route_id WHERE st2.stop_sequence = (st1.stop_sequence+1) AND r.route_type=1 UNION SELECT from_stop_id AS origin, to_stop_id AS destination, 'transfer' AS type, min_transfer_time AS duration FROM transfers WHERE from_stop_id != to_stop_id UNION SELECT s1.id AS origin, s2.id AS destination, 'transfer' AS type, 0 AS duration FROM stops_view s1 JOIN stops_view s2 ON s1.name=s2.name AND s1.latitude=s2.latitude AND s1.longitude=s2.longitude AND s1.id!=s2.id AND s1.id>s2.id"
+  },
+  WMATA: {
+    location: 'DC',
+    latitude: 38.905,
+    longitude: -77.016,
+    connectionString: 'postgres://thebusrider:3ll3board!@wmata-gtfs.cotldmpxktwb.us-west-2.rds.amazonaws.com:5432/wmata_gtfs',
+    stops_view: "SELECT DISTINCT st.stop_id AS id, s.stop_name AS name, s.stop_lat AS latitude, s.stop_lon as longitude FROM stop_times st JOIN trips t ON st.trip_id=t.trip_id JOIN routes r ON t.route_id=r.route_id JOIN stops s ON st.stop_id=s.stop_id WHERE r.route_type=1",
+    routes_view: "SELECT DISTINCT st.stop_id AS stop_id, r.route_short_name AS route_id, r.route_color AS route_color FROM stop_times st JOIN trips t ON st.trip_id=t.trip_id JOIN routes r ON t.route_id=r.route_id WHERE r.route_type=1",
+    edges_view: "SELECT DISTINCT st1.stop_id AS origin, st2.stop_id AS destination, 'route' AS type, EXTRACT(EPOCH FROM st2.departure_time-st1.departure_time) AS duration FROM stop_times st1 JOIN stop_times st2 ON st1.trip_id = st2.trip_id JOIN trips t ON st1.trip_id=t.trip_id JOIN routes r ON t.route_id=r.route_id WHERE st2.stop_sequence = (st1.stop_sequence+1) AND r.route_type=1"
   }
 };
 
 module.exports = Systems;
 
-},{}]},{},[667]);
+},{}]},{},[811]);
