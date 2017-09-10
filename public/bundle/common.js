@@ -141,7 +141,9 @@ var GraphRankDisplay = _react2.default.createClass({
         infoBoxContents = _state.infoBoxContents;
     var system = this.props.system;
 
-    var showIcons = system !== 'MBTA';
+    // We only have route icons for NYC (MTA) and Paris (RATP)
+
+    var showIcons = system === 'MTA' || system === 'RATP';
     var self = this;
 
     var ranks = infoBoxContents.map(function (stop) {
