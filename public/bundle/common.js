@@ -32,7 +32,8 @@ var CITIES = {
   nyc: 'NYC',
   boston: 'Boston',
   paris: 'Paris',
-  dc: 'DC'
+  dc: 'DC',
+  dcp: 'DCP'
 };
 var API = 'https://' + window.location.hostname + '/api/v0/';
 var MODAL_ID = 'infoModal';

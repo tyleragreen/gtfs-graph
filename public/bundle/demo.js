@@ -1304,6 +1304,11 @@ var Systems = {
     stops_view: "SELECT DISTINCT st.stop_id AS id, s.stop_name AS name, s.stop_lat AS latitude, s.stop_lon as longitude FROM stop_times st JOIN trips t ON st.trip_id=t.trip_id JOIN routes r ON t.route_id=r.route_id JOIN stops s ON st.stop_id=s.stop_id WHERE r.route_type=1",
     routes_view: "SELECT DISTINCT st.stop_id AS stop_id, r.route_short_name AS route_id, r.route_color AS route_color FROM stop_times st JOIN trips t ON st.trip_id=t.trip_id JOIN routes r ON t.route_id=r.route_id WHERE r.route_type=1",
     edges_view: "SELECT DISTINCT st1.stop_id AS origin, st2.stop_id AS destination, 'route' AS type, EXTRACT(EPOCH FROM st2.departure_time-st1.departure_time) AS duration FROM stop_times st1 JOIN stop_times st2 ON st1.trip_id = st2.trip_id JOIN trips t ON st1.trip_id=t.trip_id JOIN routes r ON t.route_id=r.route_id WHERE st2.stop_sequence = (st1.stop_sequence+1) AND r.route_type=1"
+  },
+  WMATAP: {
+    location: 'DC',
+    latitude: 38.905,
+    longitude: -77.016
   }
 };
 

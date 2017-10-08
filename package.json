@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "mocha --timeout 45000",
-    "build-js": "browserify -p [ factor-bundle -o public/bundle/demo.js -o public/bundle/nyc.js -o public/bundle/boston.js -o public/bundle/paris.js -o public/bundle/dc.js ] public/demo/app.js public/rank/nyc/nyc.js public/rank/boston/boston.js public/rank/paris/paris.js public/rank/dc/dc.js > public/bundle/common.js -t [ babelify --presets [ react es2015 ] ]",
+    "build-js": "browserify -p [ factor-bundle -o public/bundle/demo.js -o public/bundle/nyc.js -o public/bundle/boston.js -o public/bundle/paris.js -o public/bundle/dc.js -o public/bundle/dcp.js ] public/demo/app.js public/rank/nyc/nyc.js public/rank/boston/boston.js public/rank/paris/paris.js public/rank/dc/dc.js public/rank/dcp/dcp.js > public/bundle/common.js -t [ babelify --presets [ react es2015 ] ]",
     "start": "node lib/server/index.js",
     "all": "npm run build-js && npm start"
   },

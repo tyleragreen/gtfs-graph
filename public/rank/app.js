@@ -11,7 +11,8 @@ const CITIES = {
   nyc: 'NYC',
   boston: 'Boston',
   paris: 'Paris',
-  dc: 'DC'
+  dc: 'DC',
+  dcp: 'DCP'
 };
 const API = `https://${window.location.hostname}/api/v0/`;
 const MODAL_ID = 'infoModal';
