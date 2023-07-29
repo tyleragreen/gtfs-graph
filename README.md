@@ -2,22 +2,6 @@
 
 A study of transit system design using graph theory.
 
-<img src="http://www.tyleragreen.com/blog_files/2016-10-gtfs-graph/routing1.png" height="400">
-
-## Frontend
-
-Network Analysis: [https://gtfs-graph.herokuapp.com/](https://gtfs-graph.herokuapp.com/)
-* Page Rank
-* Closeness Centrality
-* Katz Centrality
-* Accessibility
-  * Reference: "Accessibility in complex networks", B.A.N. Travençolo and L. da Fontoura Costa, *Physics Letters A*, 2008.
-
-Algorithm Demo: [https://gtfs-graph.herokuapp.com/demo/](https://gtfs-graph.herokuapp.com/demo/)
-* Depth-First Search
-* Breadth-First Search
-* Dijkstra's Algorithm (Shortest Path Search)
-
 ## Usage
 
 `gtfs-graph` requires Node.js version 7.2.1.
@@ -95,7 +79,3 @@ Command-line options are available for `lib/server/index.js` to customize a run.
 ### System
 
 `api/v0/system/[system]`
-
-## Special Thanks
-
-Many thanks to [Jason Park](https://github.com/parkjs814) for the inspiration for this project. Check out his [Algorithm Visualizer](http://algo-visualizer.jasonpark.me/)!
